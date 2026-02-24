@@ -2,28 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/chef/chatbot/bar_ai_chatbot_screen.dart';
-import 'package:genius_ai/view/chef/home/bar_home_screen.dart';
-import 'package:genius_ai/view/chef/profile/bar_profile_screen.dart';
-import 'package:genius_ai/view/chef/supplier/bar_supplier_screen.dart';
-import 'package:genius_ai/view/chef/upload/bar_upload_screen.dart';
+import 'package:genius_ai/view/restaurant/chatbot/restaurant_ai_chatbot_screen.dart';
+import 'package:genius_ai/view/restaurant/home/restaurant_home_screen.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_profile_screen.dart';
+import 'package:genius_ai/view/restaurant/supplier/restaurant_supplier_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/restaurant_upload_screen.dart';
 
-class BarMainNavBarScreen extends StatefulWidget {
-  const BarMainNavBarScreen({super.key});
+class RestaurantMainNavBarScreen extends StatefulWidget {
+  const RestaurantMainNavBarScreen({super.key});
 
   @override
-  State<BarMainNavBarScreen> createState() => _BarMainNavBarScreenState();
+  State<RestaurantMainNavBarScreen> createState() =>
+      _RestaurantMainNavBarScreenState();
 }
 
-class _BarMainNavBarScreenState extends State<BarMainNavBarScreen> {
+class _RestaurantMainNavBarScreenState
+    extends State<RestaurantMainNavBarScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    BarHomeScreen(),
-    BarAiChatbotScreen(),
-    BarUploadScreen(),
-    BarSupplierScreen(),
-    BarProfileScreen(),
+    RestaurantHomeScreen(),
+    RestaurantAiChatbotScreen(),
+    RestaurantUploadScreen(),
+    RestaurantSupplierScreen(),
+    RestaurantProfileScreen(),
   ];
 
   final List<Map<String, String>> _navItems = [

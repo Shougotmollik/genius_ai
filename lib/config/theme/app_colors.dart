@@ -7,5 +7,6 @@ class AppColors {
   static const Color secondaryText = Color(0xFF_FF8F0F);
   static const Color lightText = Color(0xFF_6c6c6c);
   static const Color shadow = Color(0xFF_A9A9A9);
-  static const Color error=Color(0xFF_FF0000);
+  static const Color error = Color(0xFF_FF0000);
+  static const Color border = Color(0xff_E9E9E9);
 }

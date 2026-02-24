@@ -133,7 +133,12 @@ class _RestaurantSigninScreenState extends State<RestaurantSigninScreen> {
                   ),
 
                   SizedBox(height: 60.h),
-                  CustomElevatedButton(btnText: "Sign In", onTap: () {}),
+                  CustomElevatedButton(
+                    btnText: "Sign In",
+                    onTap: () {
+                      Get.toNamed(RouteNames.restaurantMainNavBarScreen);
+                    },
+                  ),
                   SizedBox(height: 24.h),
 
                   Align(
