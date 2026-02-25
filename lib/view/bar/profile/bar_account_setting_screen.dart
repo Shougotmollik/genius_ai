@@ -376,7 +376,7 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
         _buildDivider(),
         _buildInfoRow(
           label: 'Your Password',
-          value: '●●●●●●●●',
+          value: '********',
           onEdit: () => _switchState(AccountSettingState.editPassword),
         ),
         _buildDivider(),

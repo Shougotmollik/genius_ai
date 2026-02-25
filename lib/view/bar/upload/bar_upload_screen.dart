@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
+import 'package:genius_ai/view/bar/upload/menu/bar_menu_screen.dart';
+import 'package:genius_ai/view/bar/upload/recipe/bar_recipe_screen.dart';
 import 'package:genius_ai/view/widgets/upload_card.dart';
 import 'package:get/get.dart';
 
@@ -58,7 +60,9 @@ class _BarUploadScreenState extends State<BarUploadScreen> {
                 outlineImage: "assets/icons/recipe_outline.svg",
                 title: "Recipe",
                 color: const Color(0xff_D53DD8),
-                onTap: () {},
+                onTap: () {
+                  Get.to(BarRecipeScreen());
+                },
               ),
               SizedBox(height: 18.h),
               UploadCard(
@@ -67,7 +71,9 @@ class _BarUploadScreenState extends State<BarUploadScreen> {
                 outlineImage: "assets/icons/menu_outline.svg",
                 title: "Menu",
                 color: const Color(0xff_FF8F0F),
-                onTap: () {},
+                onTap: () {
+                  Get.to(BarMenuScreen());
+                },
               ),
             ],
           ),

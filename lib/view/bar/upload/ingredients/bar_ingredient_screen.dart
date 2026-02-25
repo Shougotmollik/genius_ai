@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/view/bar/upload/ingredients/add_ingredient_dialog.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/ingredient_info_card.dart';
+import 'package:genius_ai/view/bar/upload/ingredients/ingredient_my_request_screen.dart';
+import 'package:get/get.dart';
 
 class BarIngredientScreen extends StatefulWidget {
   const BarIngredientScreen({super.key});
@@ -188,55 +191,69 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
       spacing: 24.w,
       children: [
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Color(0xff_E6F4FF),
-              borderRadius: BorderRadius.circular(50.r),
-            ),
-            child: Center(
-              child: Row(
-                spacing: 8.w,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add, color: AppColors.primary),
-                  Text(
-                    "Add Ingredients",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
+          child: GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const AddIngredientDialog(),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Color(0xff_E6F4FF),
+                borderRadius: BorderRadius.circular(50.r),
+              ),
+              child: Center(
+                child: Row(
+                  spacing: 8.w,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add, color: AppColors.primary),
+                    Text(
+                      "Add Ingredients",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50.r),
-              border: Border.all(color: Color(0xff_E9E9E9), width: 1.w),
-            ),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 8.w,
-                children: [
-                  Icon(Icons.shopping_cart, color: AppColors.primary),
-                  Text(
-                    "My Requests",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(IngredientMyRequestScreen());
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50.r),
+                border: Border.all(color: Color(0xff_E9E9E9), width: 1.w),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8.w,
+                  children: [
+                    Icon(Icons.shopping_cart, color: AppColors.primary),
+                    Text(
+                      "My Requests",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

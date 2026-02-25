@@ -2,56 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/add_ingredient_purechase_dialog.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/edit_ingredient_dialog.dart';
+import 'package:genius_ai/view/bar/upload/menu/bar_edit_menu_dialog.dart';
+import 'package:genius_ai/view/bar/upload/recipe/bar_edit_recipe_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 
-class IngredientsInfoCard extends StatefulWidget {
-  const IngredientsInfoCard({super.key});
+class MenuInfoCard extends StatefulWidget {
+  const MenuInfoCard({super.key});
 
   @override
-  State<IngredientsInfoCard> createState() => _IngredientsInfoCardState();
+  State<MenuInfoCard> createState() => _MenuInfoCardState();
 }
 
-class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
-  String _selectedStatusType = 'Good';
-  final List<String> _leaveTypes = ["Good", "Low", "None"];
-
-  // Status → Color
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Good':
-        return Colors.green;
-      case 'Low':
-        return Colors.orange;
-      case 'None':
-        return Colors.red;
-      default:
-        return AppColors.border;
-    }
-  }
-
-  // Status Badge
-  Widget _statusBadge(String status) {
-    final color = _getStatusColor(status);
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w500,
-          color: color,
-        ),
-      ),
-    );
-  }
-
+class _MenuInfoCardState extends State<MenuInfoCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -79,7 +41,7 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => const EditIngredientDialog(),
+                    builder: (context) => const BarEditMenuDialog(),
                   );
                 },
                 child: _iconButton(
@@ -95,7 +57,7 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
                     barrierDismissible: false,
                     builder: (context) {
                       return DeleteDialogWidget(
-                        title: "Are you sure you want to delete it ?",
+                        title: "Are you sure you want to delete it?",
                       );
                     },
                   );
@@ -110,31 +72,12 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
 
           SizedBox(height: 12.h),
 
-          //Mark Missing + Status Dropdown
-          Row(
-            children: [
-              Expanded(child: _outlineChip("Mark Missing")),
-              SizedBox(width: 80.w),
-              Expanded(child: _statusDropdown()),
-            ],
-          ),
-
-          SizedBox(height: 12.h),
-
           //Ingredient name & price
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Sugar Syrup",
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.text,
-                ),
-              ),
-              Text(
-                "\$100/kg",
+                "Summer Special Menu",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -149,30 +92,10 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
           //DETAILS
           Column(
             children: [
-              IngredientDetailRow(title: "Current Stock", value: "20 kg"),
-              IngredientDetailRow(title: "Minimum Stock", value: "2 kg"),
-              IngredientDetailRow(title: "Category", value: "Others"),
-
-              // STATUS ROW WITH BADGE
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 2.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Status",
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.text,
-                      ),
-                    ),
-                    _statusBadge(_selectedStatusType),
-                  ],
-                ),
-              ),
-
-              IngredientDetailRow(title: "Price", value: "\$100/kg"),
+              IngredientDetailRow(title: "Items", value: "7"),
+              IngredientDetailRow(title: "Cost", value: "\$25"),
+              IngredientDetailRow(title: "Type", value: "Lunch"),
+              SizedBox(height: 8.h),
               Row(
                 spacing: 18.w,
                 children: [
@@ -243,45 +166,6 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
               ),
             ],
           ),
-
-          // SizedBox(height: 18.h),
-
-          // ! Add to Purchase
-          if (_selectedStatusType == 'None') ...[
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const AddIngredientPurchaseDialog(),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(50.r),
-                ),
-                child: Center(
-                  child: Row(
-                    spacing: 5.w,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add, color: AppColors.primary, size: 24.w),
-                      Text(
-                        "Add to Purchase",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -306,35 +190,6 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
         child: Text(
           text,
           style: TextStyle(fontSize: 12.sp, color: AppColors.lightText),
-        ),
-      ),
-    );
-  }
-
-  Widget _statusDropdown() {
-    return Container(
-      height: 32.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedStatusType,
-          isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
-          items: _leaveTypes
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e, style: TextStyle(fontSize: 12.sp)),
-                ),
-              )
-              .toList(),
-          onChanged: (val) {
-            setState(() => _selectedStatusType = val!);
-          },
         ),
       ),
     );
@@ -370,7 +225,7 @@ class IngredientDetailRow extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w600,
               color: AppColors.text,
             ),
           ),
