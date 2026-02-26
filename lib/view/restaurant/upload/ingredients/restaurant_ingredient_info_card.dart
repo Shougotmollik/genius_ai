@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/add_ingredient_purechase_dialog.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/edit_ingredient_dialog.dart';
+import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_purechase_dialog.dart';
+import 'package:genius_ai/view/bar/upload/ingredients/bar_edit_ingredient_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 
-class IngredientsInfoCard extends StatefulWidget {
-  const IngredientsInfoCard({super.key});
+class RestaurantIngredientsInfoCard extends StatefulWidget {
+  const RestaurantIngredientsInfoCard({super.key});
 
   @override
-  State<IngredientsInfoCard> createState() => _IngredientsInfoCardState();
+  State<RestaurantIngredientsInfoCard> createState() => _RestaurantIngredientsInfoCardState();
 }
 
-class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
+class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInfoCard> {
   String _selectedStatusType = 'Good';
   final List<String> _leaveTypes = ["Good", "Low", "None"];
 
@@ -79,7 +79,7 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => const EditIngredientDialog(),
+                    builder: (context) => const BarEditIngredientDialog(),
                   );
                 },
                 child: _iconButton(
@@ -253,7 +253,7 @@ class _IngredientsInfoCardState extends State<IngredientsInfoCard> {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) => const AddIngredientPurchaseDialog(),
+                  builder: (context) => const BarAddIngredientPurchaseDialog(),
                 );
               },
               child: Container(

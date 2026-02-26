@@ -4,15 +4,16 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/model/inventory_item.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 
-class IngredientMyRequestScreen extends StatefulWidget {
-  const IngredientMyRequestScreen({super.key});
+class BarIngredientMyRequestScreen extends StatefulWidget {
+  const BarIngredientMyRequestScreen({super.key});
 
   @override
-  State<IngredientMyRequestScreen> createState() =>
-      _IngredientMyRequestScreenState();
+  State<BarIngredientMyRequestScreen> createState() =>
+      _BarIngredientMyRequestScreenState();
 }
 
-class _IngredientMyRequestScreenState extends State<IngredientMyRequestScreen> {
+class _BarIngredientMyRequestScreenState
+    extends State<BarIngredientMyRequestScreen> {
   int selectedIndex = 0;
 
   // Data List

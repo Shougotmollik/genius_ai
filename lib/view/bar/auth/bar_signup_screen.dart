@@ -118,7 +118,9 @@ class _BarSignupScreenState extends State<BarSignupScreen> {
                   ),
 
                   SizedBox(height: 60.h),
-                  CustomElevatedButton(btnText: "Sign Up", onTap: () {}),
+                  CustomElevatedButton(btnText: "Sign Up", onTap: () {
+                    Get.toNamed(RouteNames.barSignIn);
+                  }),
                   SizedBox(height: 24.h),
 
                   Align(

@@ -5,11 +5,14 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/view/bar/supplier/bar_add_supplier_dialog.dart';
 import 'package:genius_ai/view/bar/supplier/bar_comparison_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_details_card.dart';
+import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.dart';
 import 'package:genius_ai/view/bar/supplier/suplier_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_alert_card.dart';
 import 'package:genius_ai/view/bar/supplier/supplier_history_card.dart';
+import 'package:genius_ai/view/bar/supplier/supplier_request_screen.dart';
 import 'package:genius_ai/view/bar/supplier/surface_chart.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
+import 'package:get/get.dart';
 
 class BarSupplierScreen extends StatefulWidget {
   const BarSupplierScreen({super.key});
@@ -60,7 +63,9 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
               _buildActionButtonSection(),
               SizedBox(height: 24.h),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Get.to(BarProductSupplierScreen());
+                },
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   width: double.infinity,
@@ -439,7 +444,7 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              // Get.to(IngredientMyRequestScreen());
+              Get.to(BarSupplierRequestScreen());
             },
             child: Container(
               padding: const EdgeInsets.all(12),

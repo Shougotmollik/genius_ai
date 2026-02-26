@@ -4,10 +4,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/view/restaurant/home/restaurant_recipe_card.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
-import 'package:genius_ai/view/bar/home/bar_recipe_card.dart';
 
 class RestaurantHomeScreen extends StatefulWidget {
-  const RestaurantHomeScreen({super.key});
+  const RestaurantHomeScreen({super.key, required this.onProfileTap});
+  final VoidCallback onProfileTap;
 
   @override
   State<RestaurantHomeScreen> createState() => _RestaurantHomeScreenState();
@@ -72,7 +72,10 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     spacing: 18.w,
-                    children: List.generate(3, (index) => RestaurantRecipeCard()),
+                    children: List.generate(
+                      3,
+                      (index) => RestaurantRecipeCard(),
+                    ),
                   ),
                 ),
                 SizedBox(height: 18.h),
@@ -166,13 +169,16 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
         ),
         SizedBox(width: 10.w),
 
-        ClipRRect(
-          borderRadius: BorderRadius.circular(100.r),
-          child: Image.asset(
-            "assets/image/profile.jpg",
-            height: 40.w,
-            width: 40.w,
-            fit: BoxFit.cover,
+        GestureDetector(
+          onTap: widget.onProfileTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(100.r),
+            child: Image.asset(
+              "assets/image/profile.jpg",
+              height: 40.w,
+              width: 40.w,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ],

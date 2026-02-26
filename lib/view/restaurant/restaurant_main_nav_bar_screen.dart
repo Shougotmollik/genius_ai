@@ -19,14 +19,11 @@ class RestaurantMainNavBarScreen extends StatefulWidget {
 class _RestaurantMainNavBarScreenState
     extends State<RestaurantMainNavBarScreen> {
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    RestaurantHomeScreen(),
-    RestaurantAiChatbotScreen(),
-    RestaurantUploadScreen(),
-    RestaurantSupplierScreen(),
-    RestaurantProfileScreen(),
-  ];
+  void changeTab(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   final List<Map<String, String>> _navItems = [
     {'icon': 'assets/icons/home.svg', 'label': 'Home'},
@@ -38,6 +35,14 @@ class _RestaurantMainNavBarScreenState
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _screens = [
+      RestaurantHomeScreen(onProfileTap: () => changeTab(4)),
+      RestaurantAiChatbotScreen(),
+      RestaurantUploadScreen(),
+      RestaurantSupplierScreen(),
+      RestaurantProfileScreen(),
+    ];
+
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: Theme(

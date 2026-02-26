@@ -7,14 +7,14 @@ import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_info_card.d
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:get/get.dart';
 
-class BarIngredientScreen extends StatefulWidget {
-  const BarIngredientScreen({super.key});
+class RestaurantIngredientScreen extends StatefulWidget {
+  const RestaurantIngredientScreen({super.key});
 
   @override
-  State<BarIngredientScreen> createState() => _BarIngredientScreenState();
+  State<RestaurantIngredientScreen> createState() => _RestaurantIngredientScreenState();
 }
 
-class _BarIngredientScreenState extends State<BarIngredientScreen> {
+class _RestaurantIngredientScreenState extends State<RestaurantIngredientScreen> {
   bool isSelected = true;
   int selectedIndex = 0;
   @override

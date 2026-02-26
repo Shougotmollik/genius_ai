@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genius_ai/view/bar/supplier/bar_edit_supplier_dialog.dart';
+import 'package:get/get.dart';
 
 class SupplierDetailCard extends StatelessWidget {
   const SupplierDetailCard({super.key});
@@ -142,7 +144,15 @@ class SupplierDetailCard extends StatelessWidget {
                       child: SizedBox(
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) =>
+                                  const BarEditSupplierDialog(),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0091FF),
                             shape: RoundedRectangleBorder(

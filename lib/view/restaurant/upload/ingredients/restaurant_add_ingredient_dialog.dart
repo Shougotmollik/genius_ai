@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
 
-class AddIngredientDialog extends StatefulWidget {
-  const AddIngredientDialog({super.key});
+class RestaurantAddIngredientDialog extends StatefulWidget {
+  const RestaurantAddIngredientDialog({super.key});
 
   @override
-  State<AddIngredientDialog> createState() => _AddIngredientDialogState();
+  State<RestaurantAddIngredientDialog> createState() => _RestaurantAddIngredientDialogState();
 }
 
-class _AddIngredientDialogState extends State<AddIngredientDialog> {
+class _RestaurantAddIngredientDialogState extends State<RestaurantAddIngredientDialog> {
   String selectedCategory = "Other";
   String selectedStatus = "Good";
 

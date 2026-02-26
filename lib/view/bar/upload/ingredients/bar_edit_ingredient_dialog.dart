@@ -4,16 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
 
-class AddIngredientPurchaseDialog extends StatefulWidget {
-  const AddIngredientPurchaseDialog({super.key});
+class BarEditIngredientDialog extends StatefulWidget {
+  const BarEditIngredientDialog({super.key});
 
   @override
-  State<AddIngredientPurchaseDialog> createState() =>
-      _AddIngredientPurchaseDialogState();
+  State<BarEditIngredientDialog> createState() =>
+      _BarEditIngredientDialogState();
 }
 
-class _AddIngredientPurchaseDialogState
-    extends State<AddIngredientPurchaseDialog> {
+class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
   String selectedCategory = "Other";
   String selectedStatus = "Good";
 
@@ -33,7 +32,6 @@ class _AddIngredientPurchaseDialogState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //
               //Close Button
               Align(
                 alignment: Alignment.topRight,
@@ -43,7 +41,7 @@ class _AddIngredientPurchaseDialogState
                 ),
               ),
 
-              _label("Purchase Request"),
+              _label("Edit Ingredient"),
               _textField("Sugar Syrup"),
 
               SizedBox(height: 12.h),
@@ -197,21 +195,17 @@ class _AddIngredientPurchaseDialogState
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(50.r),
                       ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, color: AppColors.surface),
-                            Text(
-                              "Add",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.surface,
-                              ),
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).maybePop(),
+                        child: Center(
+                          child: Text(
+                            "Save",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.surface,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/menu/restaurant_menu_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_recipe_screen.dart';
 import 'package:genius_ai/view/widgets/upload_card.dart';
+import 'package:get/get.dart';
 
 class RestaurantUploadScreen extends StatefulWidget {
   const RestaurantUploadScreen({super.key});
@@ -45,7 +49,9 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 outlineImage: "assets/icons/ingredients_outline.svg",
                 title: "Ingredients",
                 color: const Color(0xff_43A047),
-                onTap: () {},
+                onTap: () {
+                  Get.to(RestaurantIngredientScreen());
+                },
               ),
               SizedBox(height: 18.h),
               UploadCard(
@@ -54,7 +60,9 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 outlineImage: "assets/icons/recipe_outline.svg",
                 title: "Recipe",
                 color: const Color(0xff_D53DD8),
-                onTap: () {},
+                onTap: () {
+                  Get.to(RestaurantRecipeScreen());
+                },
               ),
               SizedBox(height: 18.h),
               UploadCard(
@@ -63,7 +71,9 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 outlineImage: "assets/icons/menu_outline.svg",
                 title: "Menu",
                 color: const Color(0xff_FF8F0F),
-                onTap: () {},
+                onTap: () {
+                  Get.to(RestaurantMenuScreen());
+                },
               ),
             ],
           ),

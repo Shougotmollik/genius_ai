@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
 
-class EditIngredientDialog extends StatefulWidget {
-  const EditIngredientDialog({super.key});
+class BarAddIngredientDialog extends StatefulWidget {
+  const BarAddIngredientDialog({super.key});
 
   @override
-  State<EditIngredientDialog> createState() => _EditIngredientDialogState();
+  State<BarAddIngredientDialog> createState() => _BarAddIngredientDialogState();
 }
 
-class _EditIngredientDialogState extends State<EditIngredientDialog> {
+class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
   String selectedCategory = "Other";
   String selectedStatus = "Good";
 
@@ -31,6 +31,7 @@ class _EditIngredientDialogState extends State<EditIngredientDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //
               //Close Button
               Align(
                 alignment: Alignment.topRight,
@@ -40,7 +41,7 @@ class _EditIngredientDialogState extends State<EditIngredientDialog> {
                 ),
               ),
 
-              _label("Edit Ingredient"),
+              _label("Ingredient Name"),
               _textField("Sugar Syrup"),
 
               SizedBox(height: 12.h),
@@ -194,17 +195,21 @@ class _EditIngredientDialogState extends State<EditIngredientDialog> {
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(50.r),
                       ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: Center(
-                          child: Text(
-                            "Save",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.surface,
+                      child: Center(
+                        child: Row(
+                          spacing: 5.w,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add, color: AppColors.surface),
+                            Text(
+                              "Add",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.surface,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
