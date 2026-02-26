@@ -70,8 +70,8 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
 
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.zero,
                   child: Row(
-                    spacing: 18.w,
                     children: List.generate(
                       3,
                       (index) => RestaurantRecipeCard(),

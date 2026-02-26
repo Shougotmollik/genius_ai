@@ -16,6 +16,7 @@ class BarIngredientsInfoCard extends StatefulWidget {
 class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
   String _selectedStatusType = 'Good';
   final List<String> _leaveTypes = ["Good", "Low", "None"];
+  bool isMissing = false;
 
   // Status → Color
   Color _getStatusColor(String status) {
@@ -296,16 +297,37 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
   }
 
   Widget _outlineChip(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 12.sp, color: AppColors.lightText),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isMissing = !isMissing;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isMissing ? Colors.red : AppColors.border,
+            width: 1.w,
+          ),
+          borderRadius: BorderRadius.circular(50.r),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 4.w,
+            children: [
+              if (isMissing)
+                Icon(Icons.check_rounded, color: Colors.red, size: 18.w),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: isMissing ? Colors.red : AppColors.lightText,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

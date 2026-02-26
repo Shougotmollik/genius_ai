@@ -73,11 +73,9 @@ class _BarHomeScreenState extends State<BarHomeScreen> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    spacing: 18.w,
                     children: List.generate(3, (index) => BarRecipeCard()),
                   ),
                 ),
-                SizedBox(height: 18.h),
               ],
             ),
           ),

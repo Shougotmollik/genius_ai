@@ -16,6 +16,7 @@ class RestaurantRecipeCard extends StatelessWidget {
       child: Container(
         height: 235.h,
         width: 195.w,
+        margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: AppColors.surface,

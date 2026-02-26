@@ -9,7 +9,8 @@ class RestaurantAiChatbotScreen extends StatefulWidget {
   const RestaurantAiChatbotScreen({super.key});
 
   @override
-  State<RestaurantAiChatbotScreen> createState() => _RestaurantAiChatbotScreenState();
+  State<RestaurantAiChatbotScreen> createState() =>
+      _RestaurantAiChatbotScreenState();
 }
 
 class _RestaurantAiChatbotScreenState extends State<RestaurantAiChatbotScreen> {
@@ -21,7 +22,17 @@ class _RestaurantAiChatbotScreenState extends State<RestaurantAiChatbotScreen> {
   Future<void> _pickExcelFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xls'],
+      allowedExtensions: [
+        'xlsx',
+        'xls',
+        'csv',
+        "pdf",
+        "doc",
+        "docx",
+        "jpg",
+        "png",
+        "jpeg",
+      ],
     );
 
     if (result != null) {

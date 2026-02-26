@@ -71,7 +71,9 @@ class BarAddPurchaseDialog extends StatelessWidget {
               SizedBox(height: 8.h),
               // Upload Box
               GestureDetector(
-                onTap: () {},
+                onTap: () async{
+                  
+                },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: DottedBorder(
