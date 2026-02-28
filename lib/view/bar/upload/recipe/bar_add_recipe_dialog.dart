@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:excel/excel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -26,6 +29,66 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
     super.initState();
     // Initialize with one empty row for the user to start with
     _addIngredientRow();
+  }
+
+  Future<void> _pickAndParseExcel() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      var bytes = result.files.single.bytes;
+      if (bytes == null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        bytes = await file.readAsBytes();
+      }
+
+      if (bytes != null) {
+        var excel = Excel.decodeBytes(bytes);
+        List<IngredientRow> importedRows = [];
+
+        for (var table in excel.tables.keys) {
+          var sheet = excel.tables[table];
+          if (sheet == null) continue;
+
+          // Skip header row (i = 0), start at i = 1
+          for (int i = 1; i < sheet.maxRows; i++) {
+            var row = sheet.rows[i];
+            if (row.isEmpty) continue;
+
+            // value extractor
+            String val(int index) {
+              if (index >= row.length || row[index] == null) return "";
+              var cV = row[index]!.value;
+              // This handles the "TextCellValue" wrapper specifically
+              return cV != null ? cV.toString() : "";
+            }
+
+            importedRows.add(
+              IngredientRow(
+                name: TextEditingController(text: val(0)),
+                qty: TextEditingController(text: val(1)),
+                unit: TextEditingController(text: val(2)),
+                cost: TextEditingController(text: val(3)),
+              ),
+            );
+          }
+        }
+
+        if (importedRows.isNotEmpty) {
+          setState(() {
+            _ingredients.clear();
+            _ingredients.addAll(importedRows);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Excel Parsing Error: $e");
+    }
   }
 
   void _addIngredientRow() {
@@ -236,7 +299,9 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
 
               // Upload Box
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  _pickAndParseExcel();
+                },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: DottedBorder(
