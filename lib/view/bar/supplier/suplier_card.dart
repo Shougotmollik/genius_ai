@@ -33,7 +33,7 @@ class BarSupplierCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1A2138), // Dark navy
+                color: Color(0xFF1A2138),
               ),
             ),
             const SizedBox(height: 24),

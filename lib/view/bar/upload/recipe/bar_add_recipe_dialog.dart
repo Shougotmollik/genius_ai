@@ -64,7 +64,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
             String val(int index) {
               if (index >= row.length || row[index] == null) return "";
               var cV = row[index]!.value;
-              // This handles the "TextCellValue" wrapper specifically
+              // handle to string into filed
               return cV != null ? cV.toString() : "";
             }
 
@@ -209,13 +209,13 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                     Expanded(flex: 2, child: _buildTableHeader('Qty')),
                     Expanded(flex: 2, child: _buildTableHeader('Unit')),
                     Expanded(flex: 2, child: _buildTableHeader('Cost')),
-                    SizedBox(width: 30.w), // Space for delete icon
+                    SizedBox(width: 30.w),
                   ],
                 ),
               ),
-              const Divider(),
+              Divider(color: AppColors.text, thickness: 1.w),
 
-              // Dynamic List of Ingredients
+              //  Ingredients
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -256,7 +256,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                         IconButton(
                           icon: Icon(
                             Icons.remove_circle_outline,
-                            color: Colors.red.shade300,
+                            color: Colors.red.shade400,
                             size: 20.sp,
                           ),
                           onPressed: () => _removeIngredientRow(index),
@@ -268,7 +268,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
               ),
 
               const SizedBox(height: 16),
-              Divider(color: Colors.grey.shade300, thickness: 1),
+              Divider(color: AppColors.text, thickness: 1.w),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -283,7 +283,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                     '\$${_calculateTotal().toStringAsFixed(2)}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18.sp,
+                      fontSize: 14.sp,
                       color: AppColors.primary,
                     ),
                   ),
@@ -371,9 +371,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Handle Logic to save recipe
-                      },
+                      onPressed: () {},
                       icon: const Icon(Icons.add, color: Colors.white),
                       label: const Text(
                         "Add",
@@ -429,13 +427,16 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13.sp),
+        hintStyle: TextStyle(color: AppColors.lightText, fontSize: 13.sp),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         isDense: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.r),
+          borderSide: BorderSide(color: AppColors.border, width: 1.w),
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: AppColors.border, width: 1.w),
         ),
       ),
     );
@@ -454,7 +455,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
       style: TextStyle(fontSize: 13.sp),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade300, fontSize: 12.sp),
+        hintStyle: TextStyle(color: AppColors.lightText, fontSize: 12.sp),
         contentPadding: EdgeInsets.symmetric(vertical: 8.h),
         isDense: true,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),

@@ -22,7 +22,7 @@ class AppRoute {
     GetPage(name: RouteNames.splash, page: () => SplashScreen()),
     GetPage(name: RouteNames.onBoarding, page: () => OnboardingScreen()),
 
-    // Bar
+    //! Bar
     GetPage(name: RouteNames.barSignIn, page: () => BarSigninScreen()),
     GetPage(name: RouteNames.barSignUp, page: () => BarSignupScreen()),
     GetPage(
@@ -46,7 +46,7 @@ class AppRoute {
       page: () => BarMainNavBarScreen(),
     ),
 
-    // Restaurant
+    //! Restaurant
     GetPage(
       name: RouteNames.restaurantSignIn,
       page: () => RestaurantSigninScreen(),
