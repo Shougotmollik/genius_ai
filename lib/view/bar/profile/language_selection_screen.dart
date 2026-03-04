@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -10,8 +11,26 @@ class LanguageSelectionScreen extends StatefulWidget {
 }
 
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
-  // Tracks the selected language
+  //  selected language
   String _selectedLanguage = 'English';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _saveLanguage(String language) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_language', language);
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedLanguage = prefs.getString('user_language') ?? 'English';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +93,13 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  await _saveLanguage(_selectedLanguage);
+
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+
                   print('Language changed to: $_selectedLanguage');
                 },
                 style: ElevatedButton.styleFrom(
@@ -104,6 +129,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         title,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
+      groupValue: _selectedLanguage,
+      onChanged: (value) {
+        setState(() {
+          _selectedLanguage = value!;
+        });
+      },
       value: title,
       activeColor: AppColors.primary,
       controlAffinity: ListTileControlAffinity.leading,
