@@ -13,6 +13,7 @@ class AuthTextFormField extends StatefulWidget {
     this.textInputAction,
     this.isPassword = false,
     this.prefixIconPath,
+    this.onFieldSubmitted,
   });
 
   final String hintText;
@@ -22,6 +23,7 @@ class AuthTextFormField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final bool isPassword;
   final String? prefixIconPath;
+  final void Function(String)? onFieldSubmitted;
 
   @override
   State<AuthTextFormField> createState() => _AuthTextFormFieldState();
@@ -40,73 +42,94 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: AppColors.lightText, width: 1.w),
-      ),
-      child: Row(
-        children: [
-          if (widget.prefixIconPath != null)
-            Padding(
-              padding: EdgeInsets.only(left: 12.w),
-              child: SvgPicture.asset(
-                widget.prefixIconPath!,
-                height: 20.h,
-                width: 20.w,
-                colorFilter: ColorFilter.mode(
-                  AppColors.lightText,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-
-          Expanded(
-            child: TextFormField(
-              controller: widget.controller,
-              validator: widget.validator,
-              keyboardType: widget.keyboardType,
-              textInputAction: widget.textInputAction,
-              obscureText: _obscureText,
-              autocorrect: !widget.isPassword,
-              enableSuggestions: !widget.isPassword,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              style: textTheme.bodyMedium?.copyWith(
-                fontSize: 14.sp,
-                color: AppColors.text,
-              ),
-              decoration: InputDecoration(
-                hintText: widget.hintText,
-                hintStyle: textTheme.bodyMedium?.copyWith(
-                  fontSize: 14.sp,
-                  color: AppColors.lightText,
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 14.h,
-                  horizontal: 12.w,
-                ),
-                border: InputBorder.none,
-                suffixIcon: widget.isPassword
-                    ? IconButton(
-                        splashRadius: 20,
-                        icon: Icon(
-                          _obscureText
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: AppColors.text,
-                        ),
-                        onPressed: () {
-                          setState(() => _obscureText = !_obscureText);
-                        },
-                      )
-                    : null,
-                errorStyle: TextStyle(fontSize: 11.sp, color: AppColors.error),
-              ),
-            ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: TextFormField(
+        controller: widget.controller,
+        validator: widget.validator,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        obscureText: _obscureText,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        autocorrect: !widget.isPassword,
+        enableSuggestions: !widget.isPassword,
+        onFieldSubmitted: widget.onFieldSubmitted,
+        style: textTheme.bodyMedium?.copyWith(
+          fontSize: 14.sp,
+          color: AppColors.text,
+        ),
+        decoration: InputDecoration(
+          hintText: widget.hintText,
+          hintStyle: textTheme.bodyMedium?.copyWith(
+            fontSize: 14.sp,
+            color: AppColors.lightText,
           ),
-        ],
+
+          filled: true,
+          fillColor: AppColors.surface,
+
+          contentPadding: EdgeInsets.symmetric(
+            vertical: 14.h,
+            horizontal: 12.w,
+          ),
+
+          // Prefix Icon
+          prefixIcon: widget.prefixIconPath != null
+              ? Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: SvgPicture.asset(
+                    widget.prefixIconPath!,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.lightText,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                )
+              : null,
+
+          // Password Toggle
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  splashRadius: 20,
+                  icon: Icon(
+                    _obscureText
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.text,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
+              : null,
+
+          // Borders
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: BorderSide(color: AppColors.lightText, width: 1.w),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: BorderSide(color: AppColors.lightText, width: 1.w),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: BorderSide(color: AppColors.text, width: 1.2.w),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: BorderSide(color: AppColors.error, width: 1.2.w),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: BorderSide(color: AppColors.error, width: 1.2.w),
+          ),
+
+          //  Error text outside border
+          errorStyle: TextStyle(fontSize: 11.sp, color: AppColors.error),
+        ),
       ),
     );
   }

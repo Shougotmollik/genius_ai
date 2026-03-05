@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/app_route.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/light_theme.dart';
+import 'package:genius_ai/controller_binding.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         theme: lightTheme,
         initialRoute: RouteNames.splash,
         scaffoldMessengerKey: rootScaffoldMessengerKey,
+        initialBinding: ControllerBinding(),
       ),
     );
   }

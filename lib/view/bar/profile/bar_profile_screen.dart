@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/common/auth_controller.dart';
 import 'package:genius_ai/view/bar/profile/bar_account_setting_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/profile/language_selection_screen.dart';
 import 'package:genius_ai/view/bar/profile/log_out_dialog.dart';
-import 'package:genius_ai/view/onboarding/onboarding_screen.dart';
 import 'package:get/get.dart';
 
 class BarProfileScreen extends StatelessWidget {
@@ -14,6 +15,7 @@ class BarProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AuthController authController = Get.find<AuthController>();
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -160,8 +162,15 @@ class BarProfileScreen extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) => LogoutDialog(
-                            onLogout: () {
-                              Get.offAll(() => const OnboardingScreen());
+                            onLogout: () async {
+                              // Get.offAll(() => const OnboardingScreen());
+
+                              final bool success = await authController
+                                  .logout();
+
+                              if (success) {
+                                Get.offAllNamed(RouteNames.onBoarding);
+                              }
                             },
                           ),
                         );

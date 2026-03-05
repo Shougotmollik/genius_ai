@@ -5,6 +5,7 @@ class RouteNames {
   static const String barSignIn = '/bar-signin';
   static const String barSignUp = '/bar-signup';
   static const String barForgetPassword = '/bar-forget-password';
+  static const String barSignupOtpVerification = '/bar-signup-otp-verification';
   static const String barOtpVerification = '/bar-otp-verification';
   static const String barCreateNewPassword = '/bar-create-new-password';
   static const String barNewPassSuccess = "/bar-new-pass-success";

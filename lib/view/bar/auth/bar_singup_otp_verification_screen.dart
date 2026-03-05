@@ -9,26 +9,26 @@ import 'package:genius_ai/view/widgets/primary_button.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 
-class BarOtpVerificationScreen extends StatefulWidget {
-  const BarOtpVerificationScreen({super.key});
+class BarSignupOtpVerificationScreen extends StatefulWidget {
+  const BarSignupOtpVerificationScreen({super.key});
 
   @override
-  State<BarOtpVerificationScreen> createState() =>
-      _BarOtpVerificationScreenState();
+  State<BarSignupOtpVerificationScreen> createState() =>
+      _BarSignupOtpVerificationScreenState();
 }
 
-class _BarOtpVerificationScreenState extends State<BarOtpVerificationScreen> {
+class _BarSignupOtpVerificationScreenState
+    extends State<BarSignupOtpVerificationScreen> {
   int _secondsRemaining = 60;
   Timer? _timer;
   bool _canResend = false;
 
   final TextEditingController otpTEController = TextEditingController();
-
   final AuthController _barAuthController = Get.find<AuthController>();
+
   final data = Get.arguments;
   late String userId;
   late String emailAddress;
-
   @override
   void initState() {
     super.initState();
@@ -40,7 +40,7 @@ class _BarOtpVerificationScreenState extends State<BarOtpVerificationScreen> {
   void _startTimer() {
     setState(() {
       _canResend = false;
-      _secondsRemaining = 60;
+      _secondsRemaining = 300;
     });
 
     _timer?.cancel();
@@ -58,6 +58,15 @@ class _BarOtpVerificationScreenState extends State<BarOtpVerificationScreen> {
     });
   }
 
+  String _formatTime(int seconds) {
+    final int minutes = seconds ~/ 60;
+    final int remainingSeconds = seconds % 60;
+    final String minutesStr = minutes.toString().padLeft(2, '0');
+    final String secondsStr = remainingSeconds.toString().padLeft(2, '0');
+
+    return "$minutesStr:$secondsStr";
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -66,6 +75,7 @@ class _BarOtpVerificationScreenState extends State<BarOtpVerificationScreen> {
 
   void _onResendPressed() async {
     await _barAuthController.otpResent(userId: userId);
+
     debugPrint("Resend Code clicked");
     _startTimer();
   }
@@ -174,7 +184,7 @@ class _BarOtpVerificationScreenState extends State<BarOtpVerificationScreen> {
                                   ),
                             ),
                             Text(
-                              '$_secondsRemaining s',
+                              _formatTime(_secondsRemaining),
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 14.sp,
@@ -193,20 +203,14 @@ class _BarOtpVerificationScreenState extends State<BarOtpVerificationScreen> {
                   btnText: 'Verify',
                   isLoading: _barAuthController.isLoading.value,
                   onTap: () async {
-                    // Get.toNamed(RouteNames.barCreateNewPassword);
-                    final isVerified = await _barAuthController.otpVerification(
-                      userId: userId,
-                      otp: otpTEController.text,
-                    );
+                    final isVerified = await _barAuthController
+                        .signupOtpVerification(
+                          userId: userId,
+                          otp: otpTEController.text,
+                        );
 
-                    if (isVerified != null) {
-                      Get.toNamed(
-                        RouteNames.barCreateNewPassword,
-                        arguments: {
-                          "user_id": userId,
-                          "secret_key": isVerified,
-                        },
-                      );
+                    if (isVerified) {
+                      Get.toNamed(RouteNames.barSignIn);
                     }
                   },
                 ),

@@ -11,6 +11,10 @@ class LocalStorage {
   static _localStorageRole role = _localStorageRole();
   static _localStorageUserId user_id = _localStorageUserId();
   static _localStorageCookie cookie = _localStorageCookie();
+  static Future<bool> clear() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    return localStorage.clear();
+  }
 }
 
 class _localStorageCookie {
@@ -40,7 +44,6 @@ class _localStorageAccessToken {
     return localStorage.getString(_localStorageAccessToken.key);
   }
 }
-
 
 class _localStorageAccessTokenValidTill {
   static const String key = 'access_token_valid_till';
