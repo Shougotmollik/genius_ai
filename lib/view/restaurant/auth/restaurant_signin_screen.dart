@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/common/auth_controller.dart';
+import 'package:genius_ai/utils/form_validator.dart';
 import 'package:genius_ai/view/widgets/auth_text_form_fileld.dart';
 import 'package:genius_ai/view/widgets/primary_button.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,11 @@ class RestaurantSigninScreen extends StatefulWidget {
 
 class _RestaurantSigninScreenState extends State<RestaurantSigninScreen> {
   bool isChecked = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  final AuthController _barAuthController = Get.find<AuthController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,42 +56,47 @@ class _RestaurantSigninScreenState extends State<RestaurantSigninScreen> {
                   ),
                   SizedBox(height: 54.h),
 
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    spacing: 8.h,
-                    children: [
-                      Text(
-                        "Email",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.text,
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      spacing: 8.h,
+                      children: [
+                        Text(
+                          "Email",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text,
+                          ),
                         ),
-                      ),
 
-                      AuthTextFormField(
-                        hintText: "Enter you email",
-                        controller: TextEditingController(),
-                        isPassword: false,
-                        prefixIconPath: "assets/icons/email.svg",
-                      ),
-                      Text(
-                        "Password",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.text,
+                        AuthTextFormField(
+                          hintText: "Enter you email",
+                          controller: _emailController,
+                          isPassword: false,
+                          prefixIconPath: "assets/icons/email.svg",
+                          validator: FormValidator.validateEmail,
                         ),
-                      ),
+                        Text(
+                          "Password",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text,
+                          ),
+                        ),
 
-                      AuthTextFormField(
-                        hintText: "Enter you password",
-                        controller: TextEditingController(),
-                        isPassword: true,
-                        prefixIconPath: "assets/icons/password.svg",
-                      ),
-                    ],
+                        AuthTextFormField(
+                          hintText: "Enter you password",
+                          controller: _passwordController,
+                          isPassword: true,
+                          prefixIconPath: "assets/icons/password.svg",
+                          validator: FormValidator.validatePassword,
+                        ),
+                      ],
+                    ),
                   ),
 
                   Row(
@@ -133,11 +145,12 @@ class _RestaurantSigninScreenState extends State<RestaurantSigninScreen> {
                   ),
 
                   SizedBox(height: 60.h),
-                  CustomElevatedButton(
-                    btnText: "Sign In",
-                    onTap: () {
-                      Get.toNamed(RouteNames.restaurantMainNavBarScreen);
-                    },
+                  Obx(
+                    () => CustomElevatedButton(
+                      btnText: "Sign In",
+                      isLoading: _barAuthController.isLoading.value,
+                      onTap: _signIn,
+                    ),
                   ),
                   SizedBox(height: 24.h),
 
@@ -176,5 +189,26 @@ class _RestaurantSigninScreenState extends State<RestaurantSigninScreen> {
         ),
       ),
     );
+  }
+
+  void _signIn() {
+    FormValidator.validateAndProceed(_formKey, () async {
+      final bool isVerified = await _barAuthController.login(
+        emailAddress: _emailController.text,
+        password: _passwordController.text,
+        mode: "restaurant_chef",
+      );
+
+      if (isVerified) {
+        Get.offAllNamed(RouteNames.restaurantMainNavBarScreen);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

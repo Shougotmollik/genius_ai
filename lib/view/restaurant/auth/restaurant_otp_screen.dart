@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/common/auth_controller.dart';
 import 'package:genius_ai/view/widgets/primary_button.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
@@ -23,9 +24,15 @@ class _RestaurantOtpVerificationScreenState
   bool _canResend = false;
 
   final TextEditingController otpTEController = TextEditingController();
+  final AuthController _authController = Get.find<AuthController>();
+  final data = Get.arguments;
+  late String userId;
+  late String emailAddress;
   @override
   void initState() {
     super.initState();
+    userId = data['user_id'];
+    emailAddress = data['email_address'];
     _startTimer();
   }
 
@@ -56,7 +63,8 @@ class _RestaurantOtpVerificationScreenState
     super.dispose();
   }
 
-  void _onResendPressed() {
+  void _onResendPressed() async {
+    await _authController.otpResent(userId: userId);
     debugPrint("Resend Code clicked");
     _startTimer();
   }
@@ -94,7 +102,7 @@ class _RestaurantOtpVerificationScreenState
                   ),
                   children: [
                     TextSpan(
-                      text: 'example@gmail.com',
+                      text: emailAddress,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -179,11 +187,23 @@ class _RestaurantOtpVerificationScreenState
 
               SizedBox(height: 42.h),
 
-              CustomElevatedButton(
-                btnText: 'Verify',
-                onTap: () {
-                  Get.toNamed(RouteNames.restaurantCreateNewPassword);
-                },
+              Obx(
+                () => CustomElevatedButton(
+                  btnText: 'Verify',
+                  isLoading: _authController.isLoading.value,
+                  onTap: () async {
+                    final isVerified = await _authController.otpVerification(
+                      userId: userId,
+                      otp: otpTEController.text,
+                    );
+                    if (isVerified != null) {
+                      Get.toNamed(
+                        RouteNames.restaurantCreateNewPassword,
+                        arguments: {"userId": userId, "secretKey": isVerified},
+                      );
+                    }
+                  },
+                ),
               ),
 
               SizedBox(height: 42.h),

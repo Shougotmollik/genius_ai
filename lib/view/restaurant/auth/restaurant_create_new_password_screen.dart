@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/common/auth_controller.dart';
+import 'package:genius_ai/utils/form_validator.dart';
 import 'package:genius_ai/view/widgets/auth_text_form_fileld.dart';
 import 'package:genius_ai/view/widgets/primary_button.dart';
+import 'package:get/get.dart';
 import 'package:get/route_manager.dart';
 
 class RestaurantCreateNewPasswordScreen extends StatefulWidget {
@@ -16,6 +19,24 @@ class RestaurantCreateNewPasswordScreen extends StatefulWidget {
 
 class _RestaurantCreateNewPasswordScreenState
     extends State<RestaurantCreateNewPasswordScreen> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final AuthController _authController = Get.find<AuthController>();
+
+  late String userId;
+  late String secretKey;
+
+  final data = Get.arguments as Map<String, dynamic>;
+
+  @override
+  void initState() {
+    userId = data["userId"];
+    secretKey = data["secretKey"];
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,65 +66,84 @@ class _RestaurantCreateNewPasswordScreenState
                 ),
               ),
               SizedBox(height: 60.h),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                spacing: 12.h,
-                children: [
-                  Text(
-                    "Current Password",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.text,
-                    ),
-                  ),
+              Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  spacing: 12.h,
+                  children: [
+                    // Text(
+                    //   "Current Password",
+                    //   style: TextStyle(
+                    //     fontSize: 14.sp,
+                    //     fontWeight: FontWeight.w500,
+                    //     color: AppColors.text,
+                    //   ),
+                    // ),
 
-                  AuthTextFormField(
-                    hintText: "Enter you password",
-                    controller: TextEditingController(),
-                    isPassword: true,
-                    prefixIconPath: "assets/icons/password.svg",
-                  ),
-                  Text(
-                    "New Password",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.text,
+                    // AuthTextFormField(
+                    //   hintText: "Enter you password",
+                    //   controller: _newPasswordController,
+                    //   isPassword: true,
+                    //   prefixIconPath: "assets/icons/password.svg",
+                    //   validator: FormValidator.validatePassword,
+                    // ),
+                    Text(
+                      "New Password",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.text,
+                      ),
                     ),
-                  ),
 
-                  AuthTextFormField(
-                    hintText: "Enter you password",
-                    controller: TextEditingController(),
-                    isPassword: true,
-                    prefixIconPath: "assets/icons/password.svg",
-                  ),
-                  Text(
-                    "Re-type Password",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.text,
+                    AuthTextFormField(
+                      hintText: "Enter you password",
+                      controller: _newPasswordController,
+                      isPassword: true,
+                      prefixIconPath: "assets/icons/password.svg",
+                      validator: FormValidator.validatePassword,
                     ),
-                  ),
+                    Text(
+                      "Re-type Password",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.text,
+                      ),
+                    ),
 
-                  AuthTextFormField(
-                    hintText: "Enter you password",
-                    controller: TextEditingController(),
-                    isPassword: true,
-                    prefixIconPath: "assets/icons/password.svg",
-                  ),
-                ],
+                    AuthTextFormField(
+                      hintText: "Enter you password",
+                      controller: _confirmPasswordController,
+                      isPassword: true,
+                      prefixIconPath: "assets/icons/password.svg",
+                      validator: FormValidator.validatePassword,
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 24),
 
-              CustomElevatedButton(
-                btnText: 'Reset Password',
-                onTap: () {
-                  Get.toNamed(RouteNames.restaurantNewPassSuccess);
-                },
+              Obx(
+                () => CustomElevatedButton(
+                  btnText: 'Reset Password',
+                  isLoading: _authController.isLoading.value,
+                  onTap: () {
+                    FormValidator.validateAndProceed(formKey, () async {
+                      final success = await _authController.changePassword(
+                        userId: userId,
+                        secretKey: secretKey,
+                        newPassword: _newPasswordController.text,
+                        confirmPassword: _confirmPasswordController.text,
+                      );
+                      if (success) {
+                        Get.toNamed(RouteNames.restaurantNewPassSuccess);
+                      }
+                    });
+                  },
+                ),
               ),
             ],
           ),

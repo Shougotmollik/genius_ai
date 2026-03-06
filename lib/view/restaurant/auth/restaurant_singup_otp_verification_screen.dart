@@ -9,22 +9,22 @@ import 'package:genius_ai/view/widgets/primary_button.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 
-class BarSignupOtpVerificationScreen extends StatefulWidget {
-  const BarSignupOtpVerificationScreen({super.key});
+class RestaurantSignupOtpVerificationScreen extends StatefulWidget {
+  const RestaurantSignupOtpVerificationScreen({super.key});
 
   @override
-  State<BarSignupOtpVerificationScreen> createState() =>
-      _BarSignupOtpVerificationScreenState();
+  State<RestaurantSignupOtpVerificationScreen> createState() =>
+      _RestaurantSignupOtpVerificationScreenState();
 }
 
-class _BarSignupOtpVerificationScreenState
-    extends State<BarSignupOtpVerificationScreen> {
+class _RestaurantSignupOtpVerificationScreenState
+    extends State<RestaurantSignupOtpVerificationScreen> {
   int _secondsRemaining = 60;
   Timer? _timer;
   bool _canResend = false;
 
   final TextEditingController otpTEController = TextEditingController();
-  final AuthController _barAuthController = Get.find<AuthController>();
+  final AuthController _authController = Get.find<AuthController>();
 
   final data = Get.arguments;
   late String userId;
@@ -74,7 +74,7 @@ class _BarSignupOtpVerificationScreenState
   }
 
   void _onResendPressed() async {
-    await _barAuthController.otpResent(userId: userId);
+    await _authController.otpResent(userId: userId);
 
     debugPrint("Resend Code clicked");
     _startTimer();
@@ -201,16 +201,16 @@ class _BarSignupOtpVerificationScreenState
               Obx(
                 () => CustomElevatedButton(
                   btnText: 'Verify',
-                  isLoading: _barAuthController.isLoading.value,
+                  isLoading: _authController.isLoading.value,
                   onTap: () async {
-                    final isVerified = await _barAuthController
+                    final isVerified = await _authController
                         .signupOtpVerification(
                           userId: userId,
                           otp: otpTEController.text,
                         );
 
                     if (isVerified) {
-                      Get.toNamed(RouteNames.barSignIn);
+                      Get.toNamed(RouteNames.restaurantSignIn);
                     }
                   },
                 ),

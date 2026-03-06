@@ -17,7 +17,6 @@ class AuthController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
-
       final response = await CustomHttp.post(
         show_floating_error: false,
         endpoint: ApiConstant.signup,

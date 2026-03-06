@@ -7,7 +7,6 @@ import 'package:genius_ai/utils/form_validator.dart';
 import 'package:genius_ai/view/widgets/auth_text_form_fileld.dart';
 import 'package:genius_ai/view/widgets/primary_button.dart';
 import 'package:get/get.dart';
-import 'package:get/route_manager.dart';
 
 class BarCreateNewPasswordScreen extends StatefulWidget {
   const BarCreateNewPasswordScreen({super.key});
