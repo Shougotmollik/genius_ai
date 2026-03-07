@@ -8,10 +8,12 @@ class RestaurantAddIngredientDialog extends StatefulWidget {
   const RestaurantAddIngredientDialog({super.key});
 
   @override
-  State<RestaurantAddIngredientDialog> createState() => _RestaurantAddIngredientDialogState();
+  State<RestaurantAddIngredientDialog> createState() =>
+      _RestaurantAddIngredientDialogState();
 }
 
-class _RestaurantAddIngredientDialogState extends State<RestaurantAddIngredientDialog> {
+class _RestaurantAddIngredientDialogState
+    extends State<RestaurantAddIngredientDialog> {
   String selectedCategory = "Other";
   String selectedStatus = "Good";
 
@@ -132,7 +134,7 @@ class _RestaurantAddIngredientDialogState extends State<RestaurantAddIngredientD
                       child: Column(
                         children: [
                           SvgPicture.asset(
-                            'assets/icons/image-upload.svg',
+                            'assets/icons/excel.svg',
                             width: 32.w,
                             height: 32.w,
                           ),

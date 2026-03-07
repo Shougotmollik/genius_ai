@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
 import 'package:genius_ai/view/bar/upload/menu/bar_menu_screen.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_recipe_screen.dart';
 import 'package:genius_ai/view/widgets/upload_card.dart';
@@ -50,7 +50,7 @@ class _BarUploadScreenState extends State<BarUploadScreen> {
                 title: "Ingredients",
                 color: const Color(0xff_43A047),
                 onTap: () {
-                  Get.to(BarIngredientScreen());
+                  Get.toNamed(RouteNames.barIngredientScreen);
                 },
               ),
               SizedBox(height: 18.h),

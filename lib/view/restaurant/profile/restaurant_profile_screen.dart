@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/common/auth_controller.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_account_setting_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_leave_request_screen.dart';
+import 'package:genius_ai/view/widgets/log_out_dialog.dart';
 import 'package:get/get.dart';
 
 class RestaurantProfileScreen extends StatefulWidget {
@@ -15,6 +18,7 @@ class RestaurantProfileScreen extends StatefulWidget {
 }
 
 class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
+  final AuthController _authController = Get.find<AuthController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,7 +161,23 @@ class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
                     _SettingsTile(
                       icon: 'assets/icons/setting.svg',
                       label: 'Logout',
-                      onTap: () {},
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => LogoutDialog(
+                            onLogout: () async {
+                              // Get.offAll(() => const OnboardingScreen());
+
+                              final bool success = await _authController
+                                  .logout();
+
+                              if (success) {
+                                Get.offAllNamed(RouteNames.onBoarding);
+                              }
+                            },
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

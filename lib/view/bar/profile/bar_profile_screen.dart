@@ -7,7 +7,7 @@ import 'package:genius_ai/controller/common/auth_controller.dart';
 import 'package:genius_ai/view/bar/profile/bar_account_setting_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/profile/language_selection_screen.dart';
-import 'package:genius_ai/view/bar/profile/log_out_dialog.dart';
+import 'package:genius_ai/view/widgets/log_out_dialog.dart';
 import 'package:get/get.dart';
 
 class BarProfileScreen extends StatelessWidget {

@@ -10,6 +10,9 @@ class RouteNames {
   static const String barCreateNewPassword = '/bar-create-new-password';
   static const String barNewPassSuccess = "/bar-new-pass-success";
   static const String barMainNavBarScreen = '/bar-main-nav-bar-screen';
+  static const String barIngredientScreen = "/bar-ingredient-screen";
+  static const String barIngredientRequestScreen =
+      "/bar-ingredient-request-screen";
 
   // Restaurant
   static const String restaurantSignIn = '/restaurant-signin';

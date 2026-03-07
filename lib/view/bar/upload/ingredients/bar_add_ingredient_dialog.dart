@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
+import 'package:genius_ai/controller/bar/ingredient_controller.dart';
+import 'package:genius_ai/model/ingredient_catergory.dart';
+import 'package:genius_ai/utils/app_snackbar.dart';
+import 'package:get/get.dart';
 
 class BarAddIngredientDialog extends StatefulWidget {
   const BarAddIngredientDialog({super.key});
@@ -12,8 +16,15 @@ class BarAddIngredientDialog extends StatefulWidget {
 }
 
 class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
-  String selectedCategory = "Other";
+  // String selectedCategory = "Other";
   String selectedStatus = "Good";
+  final IngredientController controller = Get.find<IngredientController>();
+  IngredientCategory? selectedCategory;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController unitController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController currentStockController = TextEditingController();
+  final TextEditingController minStockController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +42,6 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //
               //Close Button
               Align(
                 alignment: Alignment.topRight,
@@ -42,7 +52,7 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
               ),
 
               _label("Ingredient Name"),
-              _textField("Sugar Syrup"),
+              _textField(hint: "Type Ingredient Name", ctr: nameController),
 
               SizedBox(height: 12.h),
 
@@ -52,14 +62,20 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_label("Unit"), _textField("Kg")],
+                      children: [
+                        _label("Unit"),
+                        _textField(hint: "Type Unit", ctr: unitController),
+                      ],
                     ),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_label("Price / Unit"), _textField("30\$")],
+                      children: [
+                        _label("Price / Unit"),
+                        _textField(hint: "Type Price", ctr: priceController),
+                      ],
                     ),
                   ),
                 ],
@@ -68,35 +84,69 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
               SizedBox(height: 12.h),
 
               _label("Current Stock"),
-              _textField("30kg"),
+              _textField(
+                hint: "Enter Current Stock",
+                ctr: currentStockController,
+              ),
 
               SizedBox(height: 12.h),
 
               _label("Minimum Stock"),
-              _textField("30kg"),
+              _textField(hint: "Type Minimum Stock", ctr: minStockController),
 
               SizedBox(height: 12.h),
 
               /// Category Dropdown
               _label("Category"),
-              _dropdown(
-                value: selectedCategory,
-                items: ["Other", "Liquid", "Powder", "Solid"],
-                onChanged: (value) {
-                  setState(() => selectedCategory = value!);
-                },
+              Obx(
+                () => DropdownButtonFormField<IngredientCategory>(
+                  value: selectedCategory,
+                  hint: const Text("Select Category"),
+                  items: controller.categoryList.map((cat) {
+                    return DropdownMenuItem(value: cat, child: Text(cat.name));
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => selectedCategory = value),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 12.h,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                ),
               ),
 
-              SizedBox(height: 12.h),
+              // SizedBox(height: 12.h),
 
-              /// Status Dropdown
-              _label("Status"),
-              _dropdown(
-                value: selectedStatus,
-                items: ["Good", "Low ", "None"],
-                onChanged: (value) {
-                  setState(() => selectedStatus = value!);
-                },
+              // /// Status Dropdown
+              // _label("Status"),
+              // _dropdown(
+              //   value: selectedStatus,
+              //   items: ["Good", "Low ", "None"],
+              //   onChanged: (value) {
+              //     setState(() => selectedStatus = value!);
+              //   },
+              // ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: controller.isSpecial.value,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onChanged: (value) {
+                      setState(() {
+                        controller.isSpecial.value = value ?? false;
+                      });
+                    },
+                  ),
+                  Text(
+                    "Is it special?",
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.text),
+                  ),
+                ],
               ),
               SizedBox(height: 12.h),
               Align(
@@ -132,7 +182,7 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                       child: Column(
                         children: [
                           SvgPicture.asset(
-                            'assets/icons/image-upload.svg',
+                            'assets/icons/excel.svg',
                             width: 32.w,
                             height: 32.w,
                           ),
@@ -189,27 +239,61 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, color: AppColors.surface),
-                            Text(
-                              "Add",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.surface,
-                              ),
-                            ),
-                          ],
+                    child: GestureDetector(
+                      onTap: () async {
+                        // 1. Validation
+                        if (selectedCategory == null) {
+                          AppSnackbar.show(
+                            message: "Select a category",
+                            type: SnackType.error,
+                          );
+                          return;
+                        }
+
+                        // 2. Call the controller with parsed values
+                        bool success = await controller.postIngredient(
+                          name: nameController.text.trim(),
+                          categoryId: selectedCategory!.id,
+                          unit: unitController.text.trim(),
+                          price: priceController.text.trim(),
+                          currentStock:
+                              int.tryParse(currentStockController.text) ?? 0,
+                          minStock: int.tryParse(minStockController.text) ?? 0,
+                          isSpecial: controller.isSpecial.value,
+                        );
+
+                        if (success) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Obx(
+                        () => Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                          child: Center(
+                            child: controller.isLoading.value
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : Row(
+                                    spacing: 5.w,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add, color: AppColors.surface),
+                                      Text(
+                                        "Add",
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.surface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
                       ),
                     ),
@@ -240,10 +324,11 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
   }
 
   /// TextField
-  Widget _textField(String value) {
+  Widget _textField({required String hint, TextEditingController? ctr}) {
     return TextFormField(
-      initialValue: value,
+      controller: ctr,
       decoration: InputDecoration(
+        hintText: hint,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         border: OutlineInputBorder(

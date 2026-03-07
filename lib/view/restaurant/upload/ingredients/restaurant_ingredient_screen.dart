@@ -5,16 +5,19 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_dialog.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_info_card.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_info_card.dart';
 import 'package:get/get.dart';
 
 class RestaurantIngredientScreen extends StatefulWidget {
   const RestaurantIngredientScreen({super.key});
 
   @override
-  State<RestaurantIngredientScreen> createState() => _RestaurantIngredientScreenState();
+  State<RestaurantIngredientScreen> createState() =>
+      _RestaurantIngredientScreenState();
 }
 
-class _RestaurantIngredientScreenState extends State<RestaurantIngredientScreen> {
+class _RestaurantIngredientScreenState
+    extends State<RestaurantIngredientScreen> {
   bool isSelected = true;
   int selectedIndex = 0;
   @override
@@ -103,11 +106,17 @@ class _RestaurantIngredientScreenState extends State<RestaurantIngredientScreen>
     switch (selectedIndex) {
       case 0:
         return Column(
-          children: List.generate(3, (index) => BarIngredientsInfoCard()),
+          children: List.generate(
+            3,
+            (index) => RestaurantIngredientsInfoCard(),
+          ),
         );
       case 1:
         return Column(
-          children: List.generate(1, (index) => BarIngredientsInfoCard()),
+          children: List.generate(
+            1,
+            (index) => RestaurantIngredientsInfoCard(),
+          ),
         );
       default:
         return SizedBox();

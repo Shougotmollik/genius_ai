@@ -1,9 +1,11 @@
+import 'package:genius_ai/controller/bar/ingredient_controller.dart';
 import 'package:genius_ai/controller/common/auth_controller.dart';
 import 'package:get/get.dart';
 
 class ControllerBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => AuthController());
+    Get.put(AuthController());
+    Get.lazyPut<IngredientController>(() => IngredientController());
   }
 }

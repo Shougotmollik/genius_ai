@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/model/ingredient.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_purechase_dialog.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_edit_ingredient_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
+import 'package:get/get_utils/get_utils.dart';
 
 class BarIngredientsInfoCard extends StatefulWidget {
-  const BarIngredientsInfoCard({super.key});
+  const BarIngredientsInfoCard({super.key, required this.ingredient});
+
+  final Ingredient ingredient;
 
   @override
   State<BarIngredientsInfoCard> createState() => _BarIngredientsInfoCardState();
@@ -28,7 +32,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
       case 'None':
         return Colors.red;
       default:
-        return AppColors.border;
+        return AppColors.lightText;
     }
   }
 
@@ -109,17 +113,16 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
             ],
           ),
 
-          SizedBox(height: 12.h),
+          // SizedBox(height: 12.h),
 
-          //Mark Missing + Status Dropdown
-          Row(
-            children: [
-              Expanded(child: _outlineChip("Mark Missing")),
-              SizedBox(width: 80.w),
-              Expanded(child: _statusDropdown()),
-            ],
-          ),
-
+          // //Mark Missing + Status Dropdown
+          // Row(
+          //   children: [
+          //     Expanded(child: _outlineChip("Mark Missing")),
+          //     SizedBox(width: 200.w),
+          //     // Expanded(child: _statusDropdown()),
+          //   ],
+          // ),
           SizedBox(height: 12.h),
 
           //Ingredient name & price
@@ -127,7 +130,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Sugar Syrup",
+                widget.ingredient.name!.capitalize??"",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -135,7 +138,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
                 ),
               ),
               Text(
-                "\$100/kg",
+                "\$${widget.ingredient.pricePerUnit}/${widget.ingredient.unit}",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -150,9 +153,20 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
           //DETAILS
           Column(
             children: [
-              IngredientDetailRow(title: "Current Stock", value: "20 kg"),
-              IngredientDetailRow(title: "Minimum Stock", value: "2 kg"),
-              IngredientDetailRow(title: "Category", value: "Others"),
+              IngredientDetailRow(
+                title: "Current Stock",
+                value:
+                    "${widget.ingredient.currentStock} ${widget.ingredient.unit}",
+              ),
+              IngredientDetailRow(
+                title: "Minimum Stock",
+                value:
+                    "${widget.ingredient.minimumStock} ${widget.ingredient.unit}",
+              ),
+              IngredientDetailRow(
+                title: "Category",
+                value: widget.ingredient.categoryName!,
+              ),
 
               // STATUS ROW WITH BADGE
               Padding(
@@ -168,12 +182,18 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
                         color: AppColors.text,
                       ),
                     ),
-                    _statusBadge(_selectedStatusType),
+                    _statusBadge(
+                      widget.ingredient.status?.capitalizeFirst ?? "None",
+                    ),
                   ],
                 ),
               ),
 
-              IngredientDetailRow(title: "Price", value: "\$100/kg"),
+              IngredientDetailRow(
+                title: "Price",
+                value:
+                    "\$${widget.ingredient.pricePerUnit}/${widget.ingredient.unit}",
+              ),
               Row(
                 spacing: 18.w,
                 children: [
@@ -248,7 +268,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
           SizedBox(height: 18.h),
 
           // ! Add to Purchase
-          if (_selectedStatusType == 'None') ...[
+          if (widget.ingredient.status?.capitalizeFirst == 'None') ...[
             GestureDetector(
               onTap: () {
                 showDialog(

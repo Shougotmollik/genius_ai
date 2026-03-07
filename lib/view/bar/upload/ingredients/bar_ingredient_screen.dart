@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/bar/ingredient_controller.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_dialog.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_info_card.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class BarIngredientScreen extends StatefulWidget {
   const BarIngredientScreen({super.key});
@@ -17,6 +20,7 @@ class BarIngredientScreen extends StatefulWidget {
 class _BarIngredientScreenState extends State<BarIngredientScreen> {
   bool isSelected = true;
   int selectedIndex = 0;
+  final IngredientController controller = Get.find<IngredientController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,18 +77,16 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
                       title: "All",
                       isSelected: selectedIndex == 0,
                       onTap: () {
-                        setState(() {
-                          selectedIndex = 0;
-                        });
+                        setState(() => selectedIndex = 0);
+                        controller.isSpecialTab.value = false;
                       },
                     ),
                     buildTab(
-                      title: "Popular",
+                      title: "Other",
                       isSelected: selectedIndex == 1,
                       onTap: () {
-                        setState(() {
-                          selectedIndex = 1;
-                        });
+                        setState(() => selectedIndex = 1);
+                        controller.isSpecialTab.value = true;
                       },
                     ),
                   ],
@@ -99,19 +101,72 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
     );
   }
 
+  // Widget buildTabContent() {
+  //   switch (selectedIndex) {
+  //     case 0:
+  //       return Obx(() {
+  //         return Column(
+  //           children: controller.ingredientList
+  //               .map(
+  //                 (ingredient) => Skeletonizer(
+  //                   enabled: controller.isLoading.value,
+  //                   child: BarIngredientsInfoCard(ingredient: ingredient),
+  //                 ),
+  //               )
+  //               .toList(),
+  //         );
+  //       });
+  //     case 1:
+  //       return Column(
+  //         children: controller.ingredientList
+  //             .map(
+  //               (ingredient) => Skeletonizer(
+  //                 enabled: controller.isLoading.value,
+  //                 child: BarIngredientsInfoCard(ingredient: ingredient),
+  //               ),
+  //             )
+  //             .toList(),
+  //       );
+  //     default:
+  //       return SizedBox();
+  //   }
+  // }
+
   Widget buildTabContent() {
-    switch (selectedIndex) {
-      case 0:
+    return Obx(() {
+      // Show loading skeleton while fetching
+      if (controller.isLoading.value && controller.ingredientList.isEmpty) {
         return Column(
-          children: List.generate(3, (index) => BarIngredientsInfoCard()),
+          children: List.generate(
+            3,
+            (index) => const Skeletonizer(
+              enabled: true,
+              child: Card(child: ListTile(title: Text("Loading..."))),
+            ),
+          ),
         );
-      case 1:
-        return Column(
-          children: List.generate(1, (index) => BarIngredientsInfoCard()),
+      }
+
+      // Show empty state if no data
+      if (controller.ingredientList.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: 40.h),
+            child: Text(
+              "No ingredients found.",
+              style: TextStyle(color: AppColors.lightText),
+            ),
+          ),
         );
-      default:
-        return SizedBox();
-    }
+      }
+
+      // Show actual cards
+      return Column(
+        children: controller.ingredientList
+            .map((ingredient) => BarIngredientsInfoCard(ingredient: ingredient))
+            .toList(),
+      );
+    });
   }
 
   Widget buildTab({
@@ -169,6 +224,7 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
+              onChanged: (value) => controller.searchQuery.value = value,
               decoration: InputDecoration(
                 hintText: "Search Ingredients",
                 hintStyle: TextStyle(
@@ -180,6 +236,17 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
               ),
               style: TextStyle(fontSize: 14.sp, color: AppColors.text),
             ),
+          ),
+
+          Obx(
+            () => controller.searchQuery.value.isNotEmpty
+                ? GestureDetector(
+                    onTap: () {
+                      controller.searchQuery.value = '';
+                    },
+                    child: Icon(Icons.close),
+                  )
+                : SizedBox(),
           ),
         ],
       ),
@@ -229,7 +296,7 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(BarIngredientMyRequestScreen());
+              Get.toNamed(RouteNames.barIngredientRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),

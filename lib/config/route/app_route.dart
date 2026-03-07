@@ -8,6 +8,8 @@ import 'package:genius_ai/view/bar/auth/bar_signin_screen.dart';
 import 'package:genius_ai/view/bar/auth/bar_signup_screen.dart';
 import 'package:genius_ai/view/bar/auth/bar_singup_otp_verification_screen.dart';
 import 'package:genius_ai/view/bar/bar_main_nav_bar_screen.dart';
+import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
+import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
 import 'package:genius_ai/view/onboarding/onboarding_screen.dart';
 import 'package:genius_ai/view/onboarding/splash_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_create_new_password_screen.dart';
@@ -63,6 +65,18 @@ class AppRoute {
     GetPage(
       name: RouteNames.barMainNavBarScreen,
       page: () => BarMainNavBarScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
+      name: RouteNames.barIngredientScreen,
+      page: () => BarIngredientScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
+      name: RouteNames.barIngredientRequestScreen,
+      page: () => BarIngredientMyRequestScreen(),
       binding: ControllerBinding(),
     ),
 
