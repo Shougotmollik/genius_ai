@@ -1,163 +1,164 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/model/inventory_item.dart';
-import 'package:genius_ai/model/recipe_inventory_item.dart';
+import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/model/recipe_request.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
+import 'package:get/get.dart';
 
-class RecipeMyRequestScreen extends StatefulWidget {
-  const RecipeMyRequestScreen({super.key});
+class BarRecipeMyRequestScreen extends StatefulWidget {
+  const BarRecipeMyRequestScreen({super.key});
 
   @override
-  State<RecipeMyRequestScreen> createState() => _RecipeMyRequestScreenState();
+  State<BarRecipeMyRequestScreen> createState() =>
+      _BarRecipeMyRequestScreenState();
 }
 
-class _RecipeMyRequestScreenState extends State<RecipeMyRequestScreen> {
+class _BarRecipeMyRequestScreenState extends State<BarRecipeMyRequestScreen> {
+  final RecipeController controller = Get.find<RecipeController>();
   int selectedIndex = 0;
 
-  // Data List
-  final List<RecipeInventoryItem> allItems = [
-    RecipeInventoryItem(
-      title: "Margarita",
-      status: "Approved",
-      cookingTime: "20",
-      cost: "30",
-    ),
-    RecipeInventoryItem(
-      title: "Margarita",
-      status: "Pending",
-      cookingTime: "20",
-      cost: "30",
-    ),
-    RecipeInventoryItem(
-      title: "Margarita",
-      status: "Approved",
-      cookingTime: "20",
-      cost: "30",
-    ),
-    RecipeInventoryItem(
-      title: "Margarita",
-      status: "Pending",
-      cookingTime: "20",
-      cost: "30",
-    ),
-  ];
-
-  // filter based on tab selection
-  List<RecipeInventoryItem> get filteredItems {
-    if (selectedIndex == 1) {
-      return allItems.where((i) => i.status == "Approved").toList();
-    }
-    if (selectedIndex == 2) {
-      return allItems.where((i) => i.status == "Pending").toList();
-    }
-    return allItems;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchMyRecipeRequests();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                // Back Button
-                GestureDetector(
-                  onTap: () => Navigator.maybePop(context),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      size: 18,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 24.h),
-                Text(
-                  "My Request",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.text,
-                  ),
-                ),
-                Text(
-                  "See all your requests",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.lightText,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
-                  spacing: 18.w,
+        child: Obx(
+          () => RefreshIndicator(
+            onRefresh: () => controller.fetchMyRecipeRequests(
+              status: selectedIndex == 1
+                  ? "approved"
+                  : selectedIndex == 2
+                  ? "pending"
+                  : "",
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: InfoHighlighterCard(
-                        title: "Approved",
-                        value: 02,
-                        color: const Color(0xff_43A047),
-                        iconPath: "assets/icons/approve.svg",
-                      ),
-                    ),
-                    Expanded(
-                      child: InfoHighlighterCard(
-                        title: "Pending",
-                        value: 02,
-                        color: Color(0xff_FF8F0F),
-                        iconPath: "assets/icons/pending.svg",
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Tabs Row
-                Row(
-                  children: [
-                    buildTab(
-                      title: "All",
-                      isSelected: selectedIndex == 0,
-                      onTap: () => setState(() => selectedIndex = 0),
-                    ),
-                    buildTab(
-                      title: "Approved",
-                      isSelected: selectedIndex == 1,
-                      onTap: () => setState(() => selectedIndex = 1),
-                    ),
-                    buildTab(
-                      title: "Pending",
-                      isSelected: selectedIndex == 2,
-                      onTap: () => setState(() => selectedIndex = 2),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 18.h),
-
-                // 3. Dynamic Content List using your exact UI
-                Column(
-                  children: filteredItems
-                      .map(
-                        (item) => Padding(
-                          padding: EdgeInsets.only(bottom: 18.h),
-                          child: InventoryCard(item: item),
+                    const SizedBox(height: 10),
+                    // Back Button
+                    GestureDetector(
+                      onTap: () => Navigator.maybePop(context),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade300),
                         ),
-                      )
-                      .toList(),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          size: 18,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 24.h),
+                    Text(
+                      "My Request",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    Text(
+                      "See all your requests",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.lightText,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Row(
+                      spacing: 18.w,
+                      children: [
+                        Expanded(
+                          child: InfoHighlighterCard(
+                            title: "Approved",
+                            value:
+                                controller.requestSummary.value?.approved ?? 0,
+                            color: const Color(0xff_43A047),
+                            iconPath: "assets/icons/approve.svg",
+                          ),
+                        ),
+                        Expanded(
+                          child: InfoHighlighterCard(
+                            title: "Pending",
+                            value:
+                                controller.requestSummary.value?.pending ?? 0,
+                            color: Color(0xff_FF8F0F),
+                            iconPath: "assets/icons/pending.svg",
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Tabs Row
+                    Row(
+                      children: [
+                        buildTab(
+                          title: "All",
+                          isSelected: selectedIndex == 0,
+                          onTap: () {
+                            setState(() => selectedIndex = 0);
+                            controller.fetchMyRecipeRequests(status: "");
+                          },
+                        ),
+                        buildTab(
+                          title: "Approved",
+                          isSelected: selectedIndex == 1,
+                          onTap: () {
+                            setState(() => selectedIndex = 1);
+                            controller.fetchMyRecipeRequests(
+                              status: "approved",
+                            );
+                          },
+                        ),
+                        buildTab(
+                          title: "Pending",
+                          isSelected: selectedIndex == 2,
+                          onTap: () {
+                            setState(() => selectedIndex = 2);
+                            controller.fetchMyRecipeRequests(status: "pending");
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 18.h),
+
+                    // Content List
+                    if (controller.isLoading.value)
+                      const Center(child: CircularProgressIndicator())
+                    else if (controller.myRequests.isEmpty)
+                      const Center(child: Text("No requests found"))
+                    else
+                      Column(
+                        children: controller.myRequests
+                            .map(
+                              (request) => Padding(
+                                padding: EdgeInsets.only(bottom: 18.h),
+                                child: InventoryCard(request: request),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    SizedBox(height: 20.h),
+                  ],
                 ),
-                SizedBox(height: 20.h),
-              ],
+              ),
             ),
           ),
         ),
@@ -199,15 +200,15 @@ class _RecipeMyRequestScreenState extends State<RecipeMyRequestScreen> {
   }
 }
 
-// --- YOUR ORIGINAL UI DESIGN WITH DYNAMIC LOGIC ---
 class InventoryCard extends StatelessWidget {
-  final RecipeInventoryItem item;
-  const InventoryCard({super.key, required this.item});
+  final RecipeRequest request;
+  const InventoryCard({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
+    final String status = request.approvalStatus ?? 'pending';
     // Logic for conditional colors
-    final bool isApproved = item.status.toLowerCase() == 'approved';
+    final bool isApproved = status.toLowerCase() == 'approved';
     final Color statusColor = isApproved
         ? const Color(0xFF4CAF50)
         : const Color(0xFFFF8F0F);
@@ -219,7 +220,7 @@ class InventoryCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r), // Kept your 12.r
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow.withValues(alpha: 0.25),
@@ -246,7 +247,7 @@ class InventoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  item.status,
+                  request.approvalStatus ?? "Pending",
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.w500,
@@ -275,40 +276,21 @@ class InventoryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                item.title,
+                request.name ?? "unknown",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2D2D2D),
                 ),
               ),
-              // RichText(
-              //   text: TextSpan(
-              //     style: const TextStyle(color: Colors.black, fontSize: 18),
-              //     children: [
-              //       TextSpan(
-              //         text: '\$${item.cost}',
-              //         style: const TextStyle(fontWeight: FontWeight.bold),
-              //       ),
-              //       const TextSpan(
-              //         text: '/kg',
-              //         style: TextStyle(
-              //           color: Colors.grey,
-              //           fontWeight: FontWeight.normal,
-              //           fontSize: 14,
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
             ],
           ),
           const SizedBox(height: 12),
 
           // Data Rows
-          _buildDataRow('Cooking Time', "${item.cookingTime} min"),
+          _buildDataRow('Cooking Time', "${request.avgTime} min"),
           const SizedBox(height: 8),
-          _buildDataRow('Cost', "\$${item.cost} "),
+          _buildDataRow('Cost', "\$${request.totalCost} "),
         ],
       ),
     );

@@ -3,37 +3,52 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/model/recipe.dart';
+import 'package:get/get.dart';
 
 class BarEditRecipeDialog extends StatefulWidget {
-  const BarEditRecipeDialog({super.key});
+  const BarEditRecipeDialog({super.key, required this.recipe});
+  final Recipe recipe;
 
   @override
   State<BarEditRecipeDialog> createState() => _BarEditRecipeDialogState();
 }
 
 class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
-  // Main Form Controllers
-  final TextEditingController _nameController = TextEditingController(
-    text: 'Grilled Salmon Fillet',
-  );
-  final TextEditingController _timeController = TextEditingController(
-    text: '30min',
-  );
-  final TextEditingController _costController = TextEditingController(
-    text: '\$30',
-  );
-  final TextEditingController _instructionController = TextEditingController(
-    text: '1. Season the salmon fillet with salt an...',
-  );
-
-  // Ingredients List
+  late TextEditingController _nameController;
+  late TextEditingController _timeController;
+  late TextEditingController _costController;
+  late TextEditingController _instructionController;
   List<IngredientRow> _ingredients = [];
+
+  final RecipeController controller = Get.find<RecipeController>();
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill with one initial row as seen in the image
-    _addIngredientRow(name: 'Tomato', qty: '100', unit: 'gm', cost: '10');
+    // Pre-fill controllers with existing data
+    _nameController = TextEditingController(text: widget.recipe.name);
+    _timeController = TextEditingController(
+      text: widget.recipe.avgTime?.toString(),
+    );
+    _costController = TextEditingController(text: widget.recipe.sellingCost);
+    _instructionController = TextEditingController(
+      text: widget.recipe.instruction,
+    );
+
+    // Pre-fill ingredients list from the model
+    if (widget.recipe.ingredients != null) {
+      _ingredients = widget.recipe.ingredients!.map((ing) {
+        return IngredientRow(
+          name: TextEditingController(text: ing.ingredient),
+          qty: TextEditingController(text: ing.quantity),
+          unit: TextEditingController(text: ing.unit),
+          cost: TextEditingController(text: ing.cost),
+          onChanged: () => setState(() {}),
+        );
+      }).toList();
+    }
   }
 
   void _addIngredientRow({
@@ -296,27 +311,47 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, color: AppColors.surface),
-                            Text(
-                              "Add",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.surface,
-                              ),
+                    child: GestureDetector(
+                      onTap: () async {
+                        List<Map<String, dynamic>> ingredientMaps = _ingredients
+                            .map((item) {
+                              return {
+                                "ingredient": item.name.text,
+                                "quantity": item.qty.text,
+                                "unit": item.unit.text,
+                                "cost": item.cost.text
+                                    .replaceAll('\$', '')
+                                    .trim(),
+                              };
+                            })
+                            .toList();
+                        bool success = await controller.updateRecipe(
+                          id: widget.recipe.id!,
+                          name: _nameController.text,
+                          avgTime: _timeController.text,
+                          instruction: _instructionController.text,
+                          sellingCost: _costController.text,
+                          ingredients: ingredientMaps,
+                        );
+                        if (success) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Update",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.surface,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

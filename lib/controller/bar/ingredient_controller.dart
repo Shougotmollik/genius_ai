@@ -107,13 +107,11 @@ class IngredientController extends GetxController {
     required bool isSpecial,
   }) async {
     isLoading(true);
-
-    // Matching your JSON payload exactly
     final Map<String, dynamic> body = {
       "name": name,
       "category_id": categoryId,
       "unit": unit,
-      "price_per_unit": price, // Updated key name
+      "price_per_unit": price,
       "current_stock": currentStock,
       "minimum_stock": minStock,
       "is_special": isSpecial,
@@ -129,11 +127,54 @@ class IngredientController extends GetxController {
 
     if (response.ok) {
       AppSnackbar.show(message: "Ingredient added!", type: SnackType.success);
-      getIngredient(); // Refresh the list
+      getIngredient();
       return true;
     } else {
       AppSnackbar.show(
         message: response.error ?? "Error",
+        type: SnackType.error,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> updateIngredient({
+    required int id, // Needed to identify which record to update
+    required String name,
+    required int categoryId,
+    required String unit,
+    required String price,
+    required int currentStock,
+    required int minStock,
+  }) async {
+    isLoading(true);
+
+    final Map<String, dynamic> body = {
+      "name": name,
+      "category_id": categoryId,
+      "unit": unit,
+      "price_per_unit": price,
+      "current_stock": currentStock,
+      "minimum_stock": minStock,
+    };
+    final response = await CustomHttp.patch(
+      endpoint: "${ApiConstant.ingredients}/$id",
+      body: body,
+      need_auth: true,
+    );
+
+    isLoading(false);
+
+    if (response.ok) {
+      AppSnackbar.show(
+        message: "Ingredient updated successfully!",
+        type: SnackType.success,
+      );
+      getIngredient();
+      return true;
+    } else {
+      AppSnackbar.show(
+        message: response.error ?? "Update failed",
         type: SnackType.error,
       );
       return false;

@@ -79,7 +79,9 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => const BarEditIngredientDialog(),
+                    builder: (context) => const BarEditIngredientDialog(
+                      id: "1",
+                    ),
                   );
                 },
                 child: _iconButton(

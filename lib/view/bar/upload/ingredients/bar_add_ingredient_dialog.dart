@@ -241,7 +241,7 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
-                        // 1. Validation
+                        //  Validation
                         if (selectedCategory == null) {
                           AppSnackbar.show(
                             message: "Select a category",
@@ -250,7 +250,6 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                           return;
                         }
 
-                        // 2. Call the controller with parsed values
                         bool success = await controller.postIngredient(
                           name: nameController.text.trim(),
                           categoryId: selectedCategory!.id,

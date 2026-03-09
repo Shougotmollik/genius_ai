@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/model/recipe.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_add_recipe_dialog.dart';
 import 'package:genius_ai/view/bar/upload/recipe/recipe_info_card.dart';
-import 'package:genius_ai/view/bar/upload/recipe/recipe_my_request_screen.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class BarRecipeScreen extends StatefulWidget {
   const BarRecipeScreen({super.key});
@@ -15,6 +18,7 @@ class BarRecipeScreen extends StatefulWidget {
 }
 
 class _BarRecipeScreenState extends State<BarRecipeScreen> {
+  final RecipeController controller = Get.put(RecipeController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +69,41 @@ class _BarRecipeScreenState extends State<BarRecipeScreen> {
               _buildSearchBar(),
               SizedBox(height: 12.h),
 
-              Column(children: List.generate(3, (index) => RecipeInfoCard())),
+              Obx(() {
+                if (controller.isLoading.value &&
+                    controller.recipeList.isEmpty) {
+                  return Column(
+                    children: List.generate(
+                      3,
+                      (index) => Skeletonizer(
+                        enabled: true,
+                        child: RecipeInfoCard(
+                          recipe: Recipe(id: 1, name: "Loading...", avgTime: 0),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                if (!controller.isLoading.value &&
+                    controller.recipeList.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 50.h),
+                      child: const Text("No Recipes Found"),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: controller.recipeList.map((recipe) {
+                    return Skeletonizer(
+                      enabled: controller.isLoading.value,
+                      child: RecipeInfoCard(recipe: recipe),
+                    );
+                  }).toList(),
+                );
+              }),
             ],
           ),
         ),
@@ -116,7 +154,7 @@ class _BarRecipeScreenState extends State<BarRecipeScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(RecipeMyRequestScreen());
+              Get.toNamed(RouteNames.barRecipeRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),
@@ -171,6 +209,10 @@ class _BarRecipeScreenState extends State<BarRecipeScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
+              onChanged: (value) {
+                controller.searchQuery.value = value;
+                controller.getRecipe();
+              },
               decoration: InputDecoration(
                 hintText: "Search Recipes",
                 hintStyle: TextStyle(

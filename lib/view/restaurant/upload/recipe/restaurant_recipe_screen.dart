@@ -65,7 +65,7 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
               _buildSearchBar(),
               SizedBox(height: 12.h),
 
-              Column(children: List.generate(3, (index) => RecipeInfoCard())),
+              // Column(children: List.generate(3, (index) => RecipeInfoCard())),
             ],
           ),
         ),
@@ -116,7 +116,7 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(RecipeMyRequestScreen());
+              Get.to(BarRecipeMyRequestScreen());
             },
             child: Container(
               padding: const EdgeInsets.all(12),

@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/utils/app_snackbar.dart';
+import 'package:get/get.dart';
 
 class BarAddRecipeDialog extends StatefulWidget {
   const BarAddRecipeDialog({super.key});
@@ -20,6 +23,8 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
   final TextEditingController _instructionController = TextEditingController();
+
+  final RecipeController controller = Get.find<RecipeController>();
 
   // Ingredients List
   final List<IngredientRow> _ingredients = [];
@@ -368,19 +373,75 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 48.w),
+
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      label: const Text(
-                        "Add",
-                        style: TextStyle(color: Colors.white),
+                      onPressed: () async {
+                        if (_nameController.text.isEmpty ||
+                            _costController.text.isEmpty) {
+                          AppSnackbar.show(
+                            message: "Please fill in recipe name and cost",
+                            type: SnackType.warning,
+                          );
+                          return;
+                        }
+                    
+                        // Ingredients List
+                        List<Map<String, dynamic>> ingredientData = _ingredients
+                            .where((i) => i.name.text.isNotEmpty)
+                            .map((i) {
+                              return {
+                                "ingredient": i.name.text,
+                                "quantity": double.tryParse(i.qty.text) ?? 0.0,
+                                "unit": i.unit.text,
+                                "cost":
+                                    double.tryParse(
+                                      i.cost.text.replaceAll('\$', ''),
+                                    ) ??
+                                    0.0,
+                              };
+                            })
+                            .toList();
+                    
+                        if (ingredientData.isEmpty) {
+                          AppSnackbar.show(
+                            message: "Please add at least one ingredient",
+                            type: SnackType.warning,
+                          );
+                          return;
+                        }
+                    
+                        bool success = await controller.postRecipe(
+                          name: _nameController.text,
+                          avgTime: _timeController.text,
+                          instruction: _instructionController.text,
+                          sellingCost: _costController.text,
+                          ingredients: ingredientData,
+                        );
+                    
+                        if (success) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: controller.isLoading.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.add, color: Colors.white),
+                      label: Text(
+                        controller.isLoading.value ? "Adding..." : "Add",
+                        style: const TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         padding: EdgeInsets.symmetric(vertical: 12.h),
-                        shape: StadiumBorder(),
+                        shape: const StadiumBorder(),
                       ),
                     ),
                   ),

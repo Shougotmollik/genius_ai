@@ -84,7 +84,9 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => const BarEditIngredientDialog(),
+                    builder: (context) => BarEditIngredientDialog(
+                      id: widget.ingredient.id.toString(),
+                    ),
                   );
                 },
                 child: _iconButton(
@@ -130,7 +132,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.ingredient.name!.capitalize??"",
+                widget.ingredient.name!.capitalize ?? "",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,

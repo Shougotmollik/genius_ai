@@ -14,6 +14,11 @@ class RouteNames {
   static const String barIngredientRequestScreen =
       "/bar-ingredient-request-screen";
 
+  static const String barRecipeScreen = '/bar-recipe-screen';
+  static const String barRecipeDetailsScreen = '/bar-recipe-details-screen';
+  static const String barRecipeRequestScreen = '/bar-recipe-request-screen';
+
+
   // Restaurant
   static const String restaurantSignIn = '/restaurant-signin';
   static const String restaurantSignUp = '/restaurant-signup';
