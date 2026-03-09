@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/model/recipe.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_edit_recipe_dialog.dart';
+import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_edit_recipe_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 
 class RestaurantRecipeInfoCard extends StatefulWidget {
@@ -44,7 +45,7 @@ class _RestaurantRecipeInfoCardState extends State<RestaurantRecipeInfoCard> {
                     context: context,
                     barrierDismissible: false,
                     builder: (context) =>
-                        BarEditRecipeDialog(recipe: widget.recipe),
+                        RestaurantEditRecipeDialog(recipe: widget.recipe),
                   );
                 },
                 child: _iconButton(

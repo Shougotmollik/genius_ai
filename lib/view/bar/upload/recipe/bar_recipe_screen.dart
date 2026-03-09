@@ -77,7 +77,7 @@ class _BarRecipeScreenState extends State<BarRecipeScreen> {
                       3,
                       (index) => Skeletonizer(
                         enabled: true,
-                        child: RecipeInfoCard(
+                        child: RestaurantRecipeInfoCard(
                           recipe: Recipe(id: 1, name: "Loading...", avgTime: 0),
                         ),
                       ),
@@ -99,7 +99,7 @@ class _BarRecipeScreenState extends State<BarRecipeScreen> {
                   children: controller.recipeList.map((recipe) {
                     return Skeletonizer(
                       enabled: controller.isLoading.value,
-                      child: RecipeInfoCard(recipe: recipe),
+                      child: RestaurantRecipeInfoCard(recipe: recipe),
                     );
                   }).toList(),
                 );

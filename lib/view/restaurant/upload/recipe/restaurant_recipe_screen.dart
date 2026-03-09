@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/bar/upload/recipe/bar_add_recipe_dialog.dart';
-import 'package:genius_ai/view/bar/upload/recipe/recipe_my_request_screen.dart';
+import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/model/recipe.dart';
+import 'package:genius_ai/view/bar/upload/recipe/recipe_info_card.dart';
+import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_add_recipe_dialog.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class RestaurantRecipeScreen extends StatefulWidget {
   const RestaurantRecipeScreen({super.key});
@@ -14,6 +18,9 @@ class RestaurantRecipeScreen extends StatefulWidget {
 }
 
 class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
+  // Integrate the RecipeController
+  final RecipeController controller = Get.put(RecipeController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,8 +34,8 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
               GestureDetector(
                 onTap: () => Navigator.maybePop(context),
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 36.w,
+                  height: 36.w,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.grey.shade300),
@@ -64,7 +71,42 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
               _buildSearchBar(),
               SizedBox(height: 12.h),
 
-              // Column(children: List.generate(3, (index) => RecipeInfoCard())),
+              // Reactive Recipe List
+              Obx(() {
+                if (controller.isLoading.value &&
+                    controller.recipeList.isEmpty) {
+                  return Column(
+                    children: List.generate(
+                      3,
+                      (index) => Skeletonizer(
+                        enabled: true,
+                        child: RestaurantRecipeInfoCard(
+                          recipe: Recipe(id: 0, name: "Loading...", avgTime: 0),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                if (!controller.isLoading.value &&
+                    controller.recipeList.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 50.h),
+                      child: const Text("No Recipes Found"),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: controller.recipeList.map((recipe) {
+                    return Skeletonizer(
+                      enabled: controller.isLoading.value,
+                      child: RestaurantRecipeInfoCard(recipe: recipe),
+                    );
+                  }).toList(),
+                );
+              }),
             ],
           ),
         ),
@@ -82,14 +124,13 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const BarAddRecipeDialog(),
+                builder: (context) => const RestaurantAddRecipeDialog(),
               );
             },
             child: Container(
               padding: const EdgeInsets.all(12),
-              width: double.infinity,
               decoration: BoxDecoration(
-                color: Color(0xff_E6F4FF),
+                color: const Color(0xffE6F4FF),
                 borderRadius: BorderRadius.circular(50.r),
               ),
               child: Center(
@@ -115,14 +156,14 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(BarRecipeMyRequestScreen());
+              // Using named route for consistency
+              Get.toNamed(RouteNames.restaurantRecipeRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),
-              width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50.r),
-                border: Border.all(color: Color(0xff_E9E9E9), width: 1.w),
+                border: Border.all(color: const Color(0xffE9E9E9), width: 1.w),
               ),
               child: Center(
                 child: Row(
@@ -170,6 +211,10 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
+              onChanged: (value) {
+                controller.searchQuery.value = value;
+                controller.getRecipe();
+              },
               decoration: InputDecoration(
                 hintText: "Search Recipes",
                 hintStyle: TextStyle(

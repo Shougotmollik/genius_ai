@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/menu/restaurant_menu_screen.dart';
-import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_recipe_screen.dart';
 import 'package:genius_ai/view/widgets/upload_card.dart';
 import 'package:get/get.dart';
 
@@ -62,7 +60,7 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 title: "Recipe",
                 color: const Color(0xff_D53DD8),
                 onTap: () {
-                  Get.to(RestaurantRecipeScreen());
+                  Get.toNamed(RouteNames.restaurantRecipeScreen);
                 },
               ),
               SizedBox(height: 18.h),
