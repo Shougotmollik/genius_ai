@@ -2,22 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/model/ingredient.dart'; // Ensure this model is imported
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_purechase_dialog.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_edit_ingredient_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
+import 'package:get/get_utils/get_utils.dart';
 
 class RestaurantIngredientsInfoCard extends StatefulWidget {
-  const RestaurantIngredientsInfoCard({super.key});
+  const RestaurantIngredientsInfoCard({super.key, required this.ingredient});
+
+  final Ingredient ingredient; // Added dynamic ingredient parameter
 
   @override
-  State<RestaurantIngredientsInfoCard> createState() => _RestaurantIngredientsInfoCardState();
+  State<RestaurantIngredientsInfoCard> createState() =>
+      _RestaurantIngredientsInfoCardState();
 }
 
-class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInfoCard> {
-  String _selectedStatusType = 'Good';
-  final List<String> _leaveTypes = ["Good", "Low", "None"];
+class _RestaurantIngredientsInfoCardState
+    extends State<RestaurantIngredientsInfoCard> {
+  bool isMissing = false;
 
-  // Status → Color
+  // Status → Color mapping
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Good':
@@ -27,11 +32,11 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
       case 'None':
         return Colors.red;
       default:
-        return AppColors.border;
+        return AppColors.lightText;
     }
   }
 
-  // Status Badge
+  // Status Badge Widget
   Widget _statusBadge(String status) {
     final color = _getStatusColor(status);
 
@@ -70,7 +75,7 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
       ),
       child: Column(
         children: [
-          // Edit / Delete
+          // Edit / Delete Row
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -79,8 +84,8 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => const BarEditIngredientDialog(
-                      id: "1",
+                    builder: (context) => BarEditIngredientDialog(
+                      id: widget.ingredient.id.toString(), // Dynamic ID
                     ),
                   );
                 },
@@ -97,7 +102,7 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
                     barrierDismissible: false,
                     builder: (context) {
                       return DeleteDialogWidget(
-                        title: "Are you sure you want to delete it ?",
+                        title: "Are you sure you want to delete it?",
                       );
                     },
                   );
@@ -112,23 +117,12 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
 
           SizedBox(height: 12.h),
 
-          //Mark Missing + Status Dropdown
-          Row(
-            children: [
-              Expanded(child: _outlineChip("Mark Missing")),
-              SizedBox(width: 80.w),
-              Expanded(child: _statusDropdown()),
-            ],
-          ),
-
-          SizedBox(height: 12.h),
-
-          //Ingredient name & price
+          // Ingredient Name & Price
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Sugar Syrup",
+                widget.ingredient.name?.capitalize ?? "Unknown",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -136,7 +130,7 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
                 ),
               ),
               Text(
-                "\$100/kg",
+                "\$${widget.ingredient.pricePerUnit}/${widget.ingredient.unit}",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -148,14 +142,25 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
 
           SizedBox(height: 8.h),
 
-          //DETAILS
+          // Details List
           Column(
             children: [
-              IngredientDetailRow(title: "Current Stock", value: "20 kg"),
-              IngredientDetailRow(title: "Minimum Stock", value: "2 kg"),
-              IngredientDetailRow(title: "Category", value: "Others"),
+              IngredientDetailRow(
+                title: "Current Stock",
+                value:
+                    "${widget.ingredient.currentStock} ${widget.ingredient.unit}",
+              ),
+              IngredientDetailRow(
+                title: "Minimum Stock",
+                value:
+                    "${widget.ingredient.minimumStock} ${widget.ingredient.unit}",
+              ),
+              IngredientDetailRow(
+                title: "Category",
+                value: widget.ingredient.categoryName ?? "N/A",
+              ),
 
-              // STATUS ROW WITH BADGE
+              // Status Badge Row
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 2.h),
                 child: Row(
@@ -169,76 +174,37 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
                         color: AppColors.text,
                       ),
                     ),
-                    _statusBadge(_selectedStatusType),
+                    _statusBadge(
+                      widget.ingredient.status?.capitalizeFirst ?? "None",
+                    ),
                   ],
                 ),
               ),
 
-              IngredientDetailRow(title: "Price", value: "\$100/kg"),
+              IngredientDetailRow(
+                title: "Price",
+                value:
+                    "\$${widget.ingredient.pricePerUnit}/${widget.ingredient.unit}",
+              ),
+
+              SizedBox(height: 12.h),
+
+              // Export / Import Buttons
               Row(
                 spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              "assets/icons/export.svg",
-                              height: 24.w,
-                              width: 24.w,
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "Export",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.lightText,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _actionButton(
+                      title: "Export",
+                      icon: "assets/icons/export.svg",
+                      isPrimary: false,
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              "assets/icons/download.svg",
-                              height: 24.w,
-                              width: 24.w,
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "Import",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _actionButton(
+                      title: "Import",
+                      icon: "assets/icons/download.svg",
+                      isPrimary: true,
                     ),
                   ),
                 ],
@@ -246,10 +212,9 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
             ],
           ),
 
-          // SizedBox(height: 18.h),
-
-          // ! Add to Purchase
-          if (_selectedStatusType == 'None') ...[
+          // Add to Purchase Button (Only shows if status is 'None')
+          if (widget.ingredient.status?.capitalizeFirst == 'None') ...[
+            SizedBox(height: 18.h),
             GestureDetector(
               onTap: () {
                 showDialog(
@@ -259,17 +224,17 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
                 );
               },
               child: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50.r),
                 ),
                 child: Center(
                   child: Row(
-                    spacing: 5.w,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add, color: AppColors.primary, size: 24.w),
+                      Icon(Icons.add, color: AppColors.primary, size: 22.w),
+                      SizedBox(width: 5.w),
                       Text(
                         "Add to Purchase",
                         style: TextStyle(
@@ -289,56 +254,48 @@ class _RestaurantIngredientsInfoCardState extends State<RestaurantIngredientsInf
     );
   }
 
+  // Helper for Export/Import style buttons
+  Widget _actionButton({
+    required String title,
+    required String icon,
+    required bool isPrimary,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: isPrimary
+            ? AppColors.primary.withValues(alpha: 0.15)
+            : AppColors.surface,
+        border: isPrimary
+            ? null
+            : Border.all(color: AppColors.border, width: 1.w),
+        borderRadius: BorderRadius.circular(50.r),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(icon, height: 20.w, width: 20.w),
+            SizedBox(width: 5.w),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: isPrimary ? AppColors.primary : AppColors.lightText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _iconButton({required Color bgColor, required String icon}) {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: SvgPicture.asset(icon, height: 18.h, width: 18.w),
-    );
-  }
-
-  Widget _outlineChip(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 12.sp, color: AppColors.lightText),
-        ),
-      ),
-    );
-  }
-
-  Widget _statusDropdown() {
-    return Container(
-      height: 32.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedStatusType,
-          isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
-          items: _leaveTypes
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e, style: TextStyle(fontSize: 12.sp)),
-                ),
-              )
-              .toList(),
-          onChanged: (val) {
-            setState(() => _selectedStatusType = val!);
-          },
-        ),
-      ),
     );
   }
 }

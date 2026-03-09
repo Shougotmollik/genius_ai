@@ -10,6 +10,7 @@ class RouteNames {
   static const String barCreateNewPassword = '/bar-create-new-password';
   static const String barNewPassSuccess = "/bar-new-pass-success";
   static const String barMainNavBarScreen = '/bar-main-nav-bar-screen';
+
   static const String barIngredientScreen = "/bar-ingredient-screen";
   static const String barIngredientRequestScreen =
       "/bar-ingredient-request-screen";
@@ -17,7 +18,6 @@ class RouteNames {
   static const String barRecipeScreen = '/bar-recipe-screen';
   static const String barRecipeDetailsScreen = '/bar-recipe-details-screen';
   static const String barRecipeRequestScreen = '/bar-recipe-request-screen';
-
 
   // Restaurant
   static const String restaurantSignIn = '/restaurant-signin';
@@ -30,4 +30,15 @@ class RouteNames {
   static const String restaurantNewPassSuccess = "/restaurant-new-pass-success";
   static const String restaurantMainNavBarScreen =
       '/restaurant-main-nav-bar-screen';
+
+  static const String restaurantIngredientScreen =
+      "/restaurant-ingredient-screen";
+  static const String restaurantIngredientRequestScreen =
+      "/restaurant-ingredient-request-screen";
+
+  static const String restaurantRecipeScreen = '/restaurant-recipe-screen';
+  static const String restaurantRecipeDetailsScreen =
+      '/restaurant-recipe-details-screen';
+  static const String restaurantRecipeRequestScreen =
+      '/restaurant-recipe-request-screen';
 }

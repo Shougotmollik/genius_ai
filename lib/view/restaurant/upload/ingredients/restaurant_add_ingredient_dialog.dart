@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
+import 'package:genius_ai/controller/bar/ingredient_controller.dart';
+import 'package:genius_ai/model/ingredient_catergory.dart';
+import 'package:genius_ai/utils/app_snackbar.dart';
+import 'package:get/get.dart';
 
 class RestaurantAddIngredientDialog extends StatefulWidget {
   const RestaurantAddIngredientDialog({super.key});
@@ -14,8 +18,15 @@ class RestaurantAddIngredientDialog extends StatefulWidget {
 
 class _RestaurantAddIngredientDialogState
     extends State<RestaurantAddIngredientDialog> {
-  String selectedCategory = "Other";
-  String selectedStatus = "Good";
+  final IngredientController controller = Get.find<IngredientController>();
+
+  // Controllers for form data
+  IngredientCategory? selectedCategory;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController unitController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController currentStockController = TextEditingController();
+  final TextEditingController minStockController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +44,7 @@ class _RestaurantAddIngredientDialogState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //
-              //Close Button
+              // Close Button
               Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
@@ -44,7 +54,7 @@ class _RestaurantAddIngredientDialogState
               ),
 
               _label("Ingredient Name"),
-              _textField("Sugar Syrup"),
+              _textField(hint: "Type Ingredient Name", ctr: nameController),
 
               SizedBox(height: 12.h),
 
@@ -54,14 +64,24 @@ class _RestaurantAddIngredientDialogState
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_label("Unit"), _textField("Kg")],
+                      children: [
+                        _label("Unit"),
+                        _textField(hint: "e.g. Kg", ctr: unitController),
+                      ],
                     ),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_label("Price / Unit"), _textField("30\$")],
+                      children: [
+                        _label("Price / Unit"),
+                        _textField(
+                          hint: "Price",
+                          ctr: priceController,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -70,36 +90,68 @@ class _RestaurantAddIngredientDialogState
               SizedBox(height: 12.h),
 
               _label("Current Stock"),
-              _textField("30kg"),
+              _textField(
+                hint: "Enter Current Stock",
+                ctr: currentStockController,
+                keyboardType: TextInputType.number,
+              ),
 
               SizedBox(height: 12.h),
 
               _label("Minimum Stock"),
-              _textField("30kg"),
+              _textField(
+                hint: "Type Minimum Stock",
+                ctr: minStockController,
+                keyboardType: TextInputType.number,
+              ),
 
               SizedBox(height: 12.h),
 
               /// Category Dropdown
               _label("Category"),
-              _dropdown(
-                value: selectedCategory,
-                items: ["Other", "Liquid", "Powder", "Solid"],
-                onChanged: (value) {
-                  setState(() => selectedCategory = value!);
-                },
+              Obx(
+                () => DropdownButtonFormField<IngredientCategory>(
+                  value: selectedCategory,
+                  hint: const Text("Select Category"),
+                  items: controller.categoryList.map((cat) {
+                    return DropdownMenuItem(value: cat, child: Text(cat.name));
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => selectedCategory = value),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 12.h,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                ),
               ),
 
               SizedBox(height: 12.h),
 
-              /// Status Dropdown
-              _label("Status"),
-              _dropdown(
-                value: selectedStatus,
-                items: ["Good", "Low ", "None"],
-                onChanged: (value) {
-                  setState(() => selectedStatus = value!);
-                },
+              // Special Checkbox
+              Row(
+                children: [
+                  Obx(
+                    () => Checkbox(
+                      value: controller.isSpecial.value,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (value) {
+                        controller.isSpecial.value = value ?? false;
+                      },
+                    ),
+                  ),
+                  Text(
+                    "Is it special?",
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.text),
+                  ),
+                ],
               ),
+
               SizedBox(height: 12.h),
               Align(
                 alignment: Alignment.center,
@@ -113,9 +165,11 @@ class _RestaurantAddIngredientDialogState
                 ),
               ),
 
-              // Upload Box
+              // Excel Upload Box
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  // Logic for file picker would go here
+                },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: DottedBorder(
@@ -164,19 +218,24 @@ class _RestaurantAddIngredientDialogState
               ),
 
               SizedBox(height: 24.h),
+
+              // Action Buttons
               Row(
                 spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          border: Border.all(
+                            color: AppColors.border,
+                            width: 1.w,
+                          ),
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
                         child: Center(
                           child: Text(
                             "Cancel",
@@ -191,27 +250,70 @@ class _RestaurantAddIngredientDialogState
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, color: AppColors.surface),
-                            Text(
-                              "Add",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.surface,
-                              ),
-                            ),
-                          ],
+                    child: GestureDetector(
+                      onTap: () async {
+                        // Validation logic
+                        if (nameController.text.isEmpty ||
+                            selectedCategory == null) {
+                          AppSnackbar.show(
+                            message: "Please fill required fields",
+                            type: SnackType.error,
+                          );
+                          return;
+                        }
+
+                        bool success = await controller.postIngredient(
+                          name: nameController.text.trim(),
+                          categoryId: selectedCategory!.id,
+                          unit: unitController.text.trim(),
+                          price: priceController.text.trim(),
+                          currentStock:
+                              int.tryParse(currentStockController.text) ?? 0,
+                          minStock: int.tryParse(minStockController.text) ?? 0,
+                          isSpecial: controller.isSpecial.value,
+                        );
+
+                        if (success) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Obx(
+                        () => Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                          child: Center(
+                            child: controller.isLoading.value
+                                ? SizedBox(
+                                    height: 20.w,
+                                    width: 20.w,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add,
+                                        color: AppColors.surface,
+                                        size: 20.w,
+                                      ),
+                                      SizedBox(width: 5.w),
+                                      Text(
+                                        "Add",
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.surface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
                       ),
                     ),
@@ -226,7 +328,6 @@ class _RestaurantAddIngredientDialogState
     );
   }
 
-  /// Label
   Widget _label(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
@@ -241,37 +342,22 @@ class _RestaurantAddIngredientDialogState
     );
   }
 
-  /// TextField
-  Widget _textField(String value) {
+  Widget _textField({
+    required String hint,
+    TextEditingController? ctr,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return TextFormField(
-      initialValue: value,
+      controller: ctr,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
+        hintText: hint,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
           borderSide: BorderSide(color: AppColors.border),
         ),
-      ),
-    );
-  }
-
-  /// Dropdown Field
-  Widget _dropdown({
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
       ),
     );
   }

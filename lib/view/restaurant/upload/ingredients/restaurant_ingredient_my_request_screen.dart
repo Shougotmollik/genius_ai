@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/model/inventory_item.dart';
+import 'package:genius_ai/controller/bar/ingredient_controller.dart';
+import 'package:genius_ai/model/ingredient.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
+import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class RestaurantIngredientMyRequestScreen extends StatefulWidget {
   const RestaurantIngredientMyRequestScreen({super.key});
@@ -16,149 +19,144 @@ class _RestaurantIngredientMyRequestScreenState
     extends State<RestaurantIngredientMyRequestScreen> {
   int selectedIndex = 0;
 
-  // Data List
-  final List<InventoryItem> allItems = [
-    InventoryItem(
-      title: "Vanilla Syrup",
-      status: "Approved",
-      price: "100",
-      category: "Low",
-      currentStock: "20 kg",
-      minStock: "2 kg",
-    ),
-    InventoryItem(
-      title: "Chocolate Sauce",
-      status: "Pending",
-      price: "85",
-      category: "Medium",
-      currentStock: "10 kg",
-      minStock: "5 kg",
-    ),
-    InventoryItem(
-      title: "Caramel Topping",
-      status: "Approved",
-      price: "120",
-      category: "High",
-      currentStock: "50 kg",
-      minStock: "10 kg",
-    ),
-  ];
+  // Use the shared controller
+  final IngredientController controller = Get.find<IngredientController>();
 
-  // filter based on tab selection
-  List<InventoryItem> get filteredItems {
-    if (selectedIndex == 1) {
-      return allItems.where((i) => i.status == "Approved").toList();
-    }
-    if (selectedIndex == 2) {
-      return allItems.where((i) => i.status == "Pending").toList();
-    }
-    return allItems;
+  @override
+  void initState() {
+    super.initState();
+    // Initial fetch for "All" status
+    controller.fetchRequests(status: "");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                // Back Button
-                GestureDetector(
-                  onTap: () => Navigator.maybePop(context),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      size: 18,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 24.h),
-                Text(
-                  "My Request",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.text,
-                  ),
-                ),
-                Text(
-                  "See all your requests",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.lightText,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
-                  spacing: 18.w,
-                  children: [
-                    Expanded(
-                      child: InfoHighlighterCard(
-                        title: "Approved",
-                        value: 02,
-                        color: const Color(0xff_43A047),
-                        iconPath: "assets/icons/approve.svg",
+        child: Obx(
+          () => SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  // Back Button
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: Container(
+                      width: 36.w,
+                      height: 36.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        size: 18,
+                        color: Colors.black87,
                       ),
                     ),
-                    Expanded(
-                      child: InfoHighlighterCard(
-                        title: "Pending",
-                        value: 02,
-                        color: Color(0xff_FF8F0F),
-                        iconPath: "assets/icons/pending.svg",
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
 
-                // Tabs Row
-                Row(
-                  children: [
-                    buildTab(
-                      title: "All",
-                      isSelected: selectedIndex == 0,
-                      onTap: () => setState(() => selectedIndex = 0),
+                  SizedBox(height: 24.h),
+                  Text(
+                    "My Request",
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.text,
                     ),
-                    buildTab(
-                      title: "Approved",
-                      isSelected: selectedIndex == 1,
-                      onTap: () => setState(() => selectedIndex = 1),
+                  ),
+                  Text(
+                    "See all your requests",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.lightText,
                     ),
-                    buildTab(
-                      title: "Pending",
-                      isSelected: selectedIndex == 2,
-                      onTap: () => setState(() => selectedIndex = 2),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 18.h),
+                  ),
+                  SizedBox(height: 24.h),
 
-                // 3. Dynamic Content List using your exact UI
-                Column(
-                  children: filteredItems
-                      .map(
-                        (item) => Padding(
-                          padding: EdgeInsets.only(bottom: 18.h),
-                          child: InventoryCard(item: item),
+                  // Summary Cards
+                  Row(
+                    spacing: 18.w,
+                    children: [
+                      Expanded(
+                        child: InfoHighlighterCard(
+                          title: "Approved",
+                          value: controller.summary.value?.approved ?? 0,
+                          color: const Color(0xff43A047),
+                          iconPath: "assets/icons/approve.svg",
                         ),
-                      )
-                      .toList(),
-                ),
-                SizedBox(height: 20.h),
-              ],
+                      ),
+                      Expanded(
+                        child: InfoHighlighterCard(
+                          title: "Pending",
+                          value: controller.summary.value?.pending ?? 0,
+                          color: const Color(0xffFF8F0F),
+                          iconPath: "assets/icons/pending.svg",
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Tabs Row
+                  Row(
+                    children: [
+                      buildTab(
+                        title: "All",
+                        isSelected: selectedIndex == 0,
+                        onTap: () {
+                          setState(() => selectedIndex = 0);
+                          controller.fetchRequests(status: "");
+                        },
+                      ),
+                      buildTab(
+                        title: "Approved",
+                        isSelected: selectedIndex == 1,
+                        onTap: () {
+                          setState(() => selectedIndex = 1);
+                          controller.fetchRequests(status: "approved");
+                        },
+                      ),
+                      buildTab(
+                        title: "Pending",
+                        isSelected: selectedIndex == 2,
+                        onTap: () {
+                          setState(() => selectedIndex = 2);
+                          controller.fetchRequests(status: "pending");
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 18.h),
+
+                  // Content List with Loading Shimmer
+                  Skeletonizer(
+                    enabled: controller.isLoading.value,
+                    child:
+                        controller.requestList.isEmpty &&
+                            !controller.isLoading.value
+                        ? Container(
+                            height: 200.h,
+                            alignment: Alignment.center,
+                            child: const Text("No requests found"),
+                          )
+                        : Column(
+                            children: controller.requestList
+                                .map(
+                                  (item) => Padding(
+                                    padding: EdgeInsets.only(bottom: 16.h),
+                                    child: InventoryCard(item: item),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                  ),
+                  SizedBox(height: 20.h),
+                ],
+              ),
             ),
           ),
         ),
@@ -200,15 +198,13 @@ class _RestaurantIngredientMyRequestScreenState
   }
 }
 
-// --- YOUR ORIGINAL UI DESIGN WITH DYNAMIC LOGIC ---
 class InventoryCard extends StatelessWidget {
-  final InventoryItem item;
+  final Ingredient item; // Updated to use Ingredient model
   const InventoryCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
-    // Logic for conditional colors
-    final bool isApproved = item.status.toLowerCase() == 'approved';
+    final bool isApproved = item.status?.toLowerCase() == 'approved';
     final Color statusColor = isApproved
         ? const Color(0xFF4CAF50)
         : const Color(0xFFFF8F0F);
@@ -220,7 +216,7 @@ class InventoryCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r), // Kept your 12.r
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow.withValues(alpha: 0.25),
@@ -233,7 +229,7 @@ class InventoryCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Badge and Download Icon
+          // Badge Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -247,19 +243,20 @@ class InventoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  item.status,
+                  item.status?.capitalizeFirst ?? "",
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),
+              // Download Icon (Placeholder)
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE3F2FD),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: const Icon(
                   Icons.file_download_outlined,
@@ -271,32 +268,32 @@ class InventoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Title and Price Row
+          // Name and Price
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                item.title,
-                style: const TextStyle(
-                  fontSize: 18,
+                item.name?.capitalize ?? "Name",
+                style: TextStyle(
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D2D2D),
+                  color: const Color(0xFF2D2D2D),
                 ),
               ),
               RichText(
                 text: TextSpan(
-                  style: const TextStyle(color: Colors.black, fontSize: 18),
+                  style: TextStyle(color: Colors.black, fontSize: 18.sp),
                   children: [
                     TextSpan(
-                      text: '\$${item.price}',
+                      text: '\$${item.pricePerUnit}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    const TextSpan(
-                      text: '/kg',
+                    TextSpan(
+                      text: '/${item.unit}',
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.normal,
-                        fontSize: 14,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],
@@ -306,12 +303,12 @@ class InventoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Data Rows
-          _buildDataRow('Category', item.category),
+          // Detail Rows
+          _buildDataRow('Category', item.categoryName ?? 'Other'),
           const SizedBox(height: 8),
-          _buildDataRow('Current Stock', item.currentStock),
+          _buildDataRow('Current Stock', "${item.currentStock} ${item.unit}"),
           const SizedBox(height: 8),
-          _buildDataRow('Minimun Stock', item.minStock),
+          _buildDataRow('Minimum Stock', "${item.minimumStock} ${item.unit}"),
         ],
       ),
     );
@@ -321,13 +318,16 @@ class InventoryCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 15)),
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey, fontSize: 15.sp),
+        ),
         Text(
           value,
-          style: const TextStyle(
-            color: Color(0xFF2D2D2D),
+          style: TextStyle(
+            color: const Color(0xFF2D2D2D),
             fontWeight: FontWeight.w600,
-            fontSize: 15,
+            fontSize: 15.sp,
           ),
         ),
       ],

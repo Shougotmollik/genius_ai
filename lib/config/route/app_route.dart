@@ -21,6 +21,9 @@ import 'package:genius_ai/view/restaurant/auth/restaurant_otp_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_signin_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_signup_screen.dart';
 import 'package:genius_ai/view/restaurant/restaurant_main_nav_bar_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_my_request_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_recipe_screen.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 
 class AppRoute {
@@ -129,6 +132,29 @@ class AppRoute {
     GetPage(
       name: RouteNames.restaurantMainNavBarScreen,
       page: () => RestaurantMainNavBarScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantIngredientScreen,
+      page: () => RestaurantIngredientScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
+      name: RouteNames.restaurantIngredientRequestScreen,
+      page: () => RestaurantIngredientMyRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
+      name: RouteNames.restaurantRecipeScreen,
+      page: () => RestaurantRecipeScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
+      name: RouteNames.restaurantRecipeRequestScreen,
+      page: () => RestaurantIngredientMyRequestScreen(),
       binding: ControllerBinding(),
     ),
   ];

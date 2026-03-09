@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/menu/restaurant_menu_screen.dart';
@@ -50,7 +51,7 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 title: "Ingredients",
                 color: const Color(0xff_43A047),
                 onTap: () {
-                  Get.to(RestaurantIngredientScreen());
+                Get.toNamed(RouteNames.restaurantIngredientScreen);
                 },
               ),
               SizedBox(height: 18.h),

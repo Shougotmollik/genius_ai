@@ -100,37 +100,6 @@ class _BarIngredientScreenState extends State<BarIngredientScreen> {
     );
   }
 
-  // Widget buildTabContent() {
-  //   switch (selectedIndex) {
-  //     case 0:
-  //       return Obx(() {
-  //         return Column(
-  //           children: controller.ingredientList
-  //               .map(
-  //                 (ingredient) => Skeletonizer(
-  //                   enabled: controller.isLoading.value,
-  //                   child: BarIngredientsInfoCard(ingredient: ingredient),
-  //                 ),
-  //               )
-  //               .toList(),
-  //         );
-  //       });
-  //     case 1:
-  //       return Column(
-  //         children: controller.ingredientList
-  //             .map(
-  //               (ingredient) => Skeletonizer(
-  //                 enabled: controller.isLoading.value,
-  //                 child: BarIngredientsInfoCard(ingredient: ingredient),
-  //               ),
-  //             )
-  //             .toList(),
-  //       );
-  //     default:
-  //       return SizedBox();
-  //   }
-  // }
-
   Widget buildTabContent() {
     return Obx(() {
       // Show loading skeleton while fetching

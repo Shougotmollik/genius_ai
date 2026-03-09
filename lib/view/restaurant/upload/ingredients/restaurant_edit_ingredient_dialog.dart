@@ -3,18 +3,65 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
+import 'package:genius_ai/controller/bar/ingredient_controller.dart';
+import 'package:genius_ai/model/ingredient_catergory.dart';
+import 'package:genius_ai/utils/app_snackbar.dart';
+import 'package:get/get.dart';
 
 class RestaurantEditIngredientDialog extends StatefulWidget {
-  const RestaurantEditIngredientDialog({super.key});
+  const RestaurantEditIngredientDialog({super.key, required this.id});
+  final String id; // Required ID to identify which ingredient to edit
 
   @override
   State<RestaurantEditIngredientDialog> createState() =>
       _RestaurantEditIngredientDialogState();
 }
 
-class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredientDialog> {
-  String selectedCategory = "Other";
-  String selectedStatus = "Good";
+class _RestaurantEditIngredientDialogState
+    extends State<RestaurantEditIngredientDialog> {
+  final IngredientController controller = Get.find<IngredientController>();
+
+  late TextEditingController nameController;
+  late TextEditingController unitController;
+  late TextEditingController priceController;
+  late TextEditingController currentStockController;
+  late TextEditingController minStockController;
+  IngredientCategory? selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    // 1. Find existing data from the controller's list
+    final ingredient = controller.ingredientList.firstWhere(
+      (element) => element.id.toString() == widget.id,
+    );
+
+    // 2. Initialize controllers with current values
+    nameController = TextEditingController(text: ingredient.name);
+    unitController = TextEditingController(text: ingredient.unit);
+    priceController = TextEditingController(text: ingredient.pricePerUnit);
+    currentStockController = TextEditingController(
+      text: ingredient.currentStock.toString(),
+    );
+    minStockController = TextEditingController(
+      text: ingredient.minimumStock.toString(),
+    );
+
+    // 3. Set the initial category match
+    selectedCategory = controller.categoryList.firstWhereOrNull(
+      (cat) => cat.name == ingredient.categoryName,
+    );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    unitController.dispose();
+    priceController.dispose();
+    currentStockController.dispose();
+    minStockController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +79,7 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Close Button
+              // Close Button
               Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
@@ -42,24 +89,29 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
               ),
 
               _label("Edit Ingredient"),
-              _textField("Sugar Syrup"),
+              _textField(ctr: nameController),
 
               SizedBox(height: 12.h),
 
-              /// Unit & Price
               Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_label("Unit"), _textField("Kg")],
+                      children: [
+                        _label("Unit"),
+                        _textField(ctr: unitController),
+                      ],
                     ),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_label("Price / Unit"), _textField("30\$")],
+                      children: [
+                        _label("Price / Unit"),
+                        _textField(ctr: priceController),
+                      ],
                     ),
                   ),
                 ],
@@ -68,36 +120,32 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
               SizedBox(height: 12.h),
 
               _label("Current Stock"),
-              _textField("30kg"),
+              _textField(ctr: currentStockController),
 
               SizedBox(height: 12.h),
 
               _label("Minimum Stock"),
-              _textField("30kg"),
+              _textField(ctr: minStockController),
 
               SizedBox(height: 12.h),
 
-              /// Category Dropdown
+              /// Dynamic Category Dropdown
               _label("Category"),
-              _dropdown(
-                value: selectedCategory,
-                items: ["Other", "Liquid", "Powder", "Solid"],
-                onChanged: (value) {
-                  setState(() => selectedCategory = value!);
-                },
+              Obx(
+                () => _dropdown<IngredientCategory>(
+                  value: selectedCategory,
+                  items: controller.categoryList.map((category) {
+                    return DropdownMenuItem<IngredientCategory>(
+                      value: category,
+                      child: Text(category.name),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() => selectedCategory = newValue);
+                  },
+                ),
               ),
 
-              SizedBox(height: 12.h),
-
-              /// Status Dropdown
-              _label("Status"),
-              _dropdown(
-                value: selectedStatus,
-                items: ["Good", "Low ", "None"],
-                onChanged: (value) {
-                  setState(() => selectedStatus = value!);
-                },
-              ),
               SizedBox(height: 12.h),
               Align(
                 alignment: Alignment.center,
@@ -111,7 +159,7 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
                 ),
               ),
 
-              // Upload Box
+              // Upload Box (Placeholder)
               GestureDetector(
                 onTap: () {},
                 child: ClipRRect(
@@ -166,15 +214,18 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
                 spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          border: Border.all(
+                            color: AppColors.border,
+                            width: 1.w,
+                          ),
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
                         child: Center(
                           child: Text(
                             "Cancel",
@@ -189,22 +240,52 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: Center(
-                          child: Text(
-                            "Save",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.surface,
-                            ),
+                    child: GestureDetector(
+                      onTap: () async {
+                        if (selectedCategory == null) {
+                          AppSnackbar.show(
+                            message: "Please select a category",
+                            type: SnackType.error,
+                          );
+                          return;
+                        }
+
+                        bool success = await controller.updateIngredient(
+                          id: int.parse(widget.id),
+                          name: nameController.text.trim(),
+                          categoryId: selectedCategory!.id,
+                          unit: unitController.text.trim(),
+                          price: priceController.text.trim(),
+                          currentStock:
+                              int.tryParse(currentStockController.text) ?? 0,
+                          minStock: int.tryParse(minStockController.text) ?? 0,
+                        );
+
+                        if (success) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Obx(
+                        () => Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                          child: Center(
+                            child: controller.isLoading.value
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  )
+                                : Text(
+                                    "Save",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.surface,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -220,7 +301,6 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
     );
   }
 
-  /// Label
   Widget _label(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
@@ -235,10 +315,9 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
     );
   }
 
-  /// TextField
-  Widget _textField(String value) {
+  Widget _textField({required TextEditingController ctr}) {
     return TextFormField(
-      initialValue: value,
+      controller: ctr,
       decoration: InputDecoration(
         isDense: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
@@ -250,17 +329,14 @@ class _RestaurantEditIngredientDialogState extends State<RestaurantEditIngredien
     );
   }
 
-  /// Dropdown Field
-  Widget _dropdown({
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
+  Widget _dropdown<T>({
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
   }) {
-    return DropdownButtonFormField<String>(
+    return DropdownButtonFormField<T>(
       value: value,
-      items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
+      items: items,
       onChanged: onChanged,
       decoration: InputDecoration(
         isDense: true,

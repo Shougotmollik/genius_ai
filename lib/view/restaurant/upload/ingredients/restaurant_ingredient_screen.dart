@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/bar/ingredient_controller.dart'; // Ensure this exists or create a Restaurant version
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_dialog.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_info_card.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_info_card.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class RestaurantIngredientScreen extends StatefulWidget {
   const RestaurantIngredientScreen({super.key});
@@ -18,8 +19,11 @@ class RestaurantIngredientScreen extends StatefulWidget {
 
 class _RestaurantIngredientScreenState
     extends State<RestaurantIngredientScreen> {
-  bool isSelected = true;
   int selectedIndex = 0;
+
+  // Initialize your controller
+  final IngredientController controller = Get.find<IngredientController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,18 +80,16 @@ class _RestaurantIngredientScreenState
                       title: "All",
                       isSelected: selectedIndex == 0,
                       onTap: () {
-                        setState(() {
-                          selectedIndex = 0;
-                        });
+                        setState(() => selectedIndex = 0);
+                        controller.isSpecialTab.value = false;
                       },
                     ),
                     buildTab(
                       title: "Popular",
                       isSelected: selectedIndex == 1,
                       onTap: () {
-                        setState(() {
-                          selectedIndex = 1;
-                        });
+                        setState(() => selectedIndex = 1);
+                        controller.isSpecialTab.value = true;
                       },
                     ),
                   ],
@@ -103,24 +105,45 @@ class _RestaurantIngredientScreenState
   }
 
   Widget buildTabContent() {
-    switch (selectedIndex) {
-      case 0:
+    return Obx(() {
+      // 1. Loading State
+      if (controller.isLoading.value && controller.ingredientList.isEmpty) {
         return Column(
           children: List.generate(
             3,
-            (index) => RestaurantIngredientsInfoCard(),
+            (index) => const Skeletonizer(
+              enabled: true,
+              child: Card(
+                child: ListTile(title: Text("Loading Ingredient Data...")),
+              ),
+            ),
           ),
         );
-      case 1:
-        return Column(
-          children: List.generate(
-            1,
-            (index) => RestaurantIngredientsInfoCard(),
+      }
+
+      // 2. Empty State
+      if (controller.ingredientList.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: 40.h),
+            child: Text(
+              "No ingredients found.",
+              style: TextStyle(color: AppColors.lightText),
+            ),
           ),
         );
-      default:
-        return SizedBox();
-    }
+      }
+
+      // 3. Data State
+      return Column(
+        children: controller.ingredientList
+            .map(
+              (ingredient) =>
+                  RestaurantIngredientsInfoCard(ingredient: ingredient),
+            )
+            .toList(),
+      );
+    });
   }
 
   Widget buildTab({
@@ -157,6 +180,8 @@ class _RestaurantIngredientScreenState
   }
 
   Widget _buildSearchBar() {
+    final TextEditingController searchController = TextEditingController();
+
     return Container(
       height: 48.h,
       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -178,6 +203,7 @@ class _RestaurantIngredientScreenState
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
+              onChanged: (value) => controller.searchQuery.value = value,
               decoration: InputDecoration(
                 hintText: "Search Ingredients",
                 hintStyle: TextStyle(
@@ -189,6 +215,17 @@ class _RestaurantIngredientScreenState
               ),
               style: TextStyle(fontSize: 14.sp, color: AppColors.text),
             ),
+          ),
+          Obx(
+            () => controller.searchQuery.value.isNotEmpty
+                ? GestureDetector(
+                    onTap: () {
+                      controller.searchQuery.value = '';
+                      // Note: To clear the text visually, you'd need a TextEditingController
+                    },
+                    child: const Icon(Icons.close, size: 20),
+                  )
+                : const SizedBox(),
           ),
         ],
       ),
@@ -210,17 +247,16 @@ class _RestaurantIngredientScreenState
             },
             child: Container(
               padding: const EdgeInsets.all(12),
-              width: double.infinity,
               decoration: BoxDecoration(
-                color: Color(0xff_E6F4FF),
+                color: const Color(0xffE6F4FF),
                 borderRadius: BorderRadius.circular(50.r),
               ),
               child: Center(
                 child: Row(
-                  spacing: 8.w,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.add, color: AppColors.primary),
+                    SizedBox(width: 8.w),
                     Text(
                       "Add Ingredients",
                       style: TextStyle(
@@ -238,21 +274,20 @@ class _RestaurantIngredientScreenState
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(BarIngredientMyRequestScreen());
+              Get.toNamed(RouteNames.barIngredientRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),
-              width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50.r),
-                border: Border.all(color: Color(0xff_E9E9E9), width: 1.w),
+                border: Border.all(color: const Color(0xffE9E9E9), width: 1.w),
               ),
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8.w,
                   children: [
                     Icon(Icons.shopping_cart, color: AppColors.primary),
+                    SizedBox(width: 8.w),
                     Text(
                       "My Requests",
                       style: TextStyle(
