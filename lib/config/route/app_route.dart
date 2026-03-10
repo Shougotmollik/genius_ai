@@ -25,6 +25,11 @@ import 'package:genius_ai/view/restaurant/auth/restaurant_new_password_success_s
 import 'package:genius_ai/view/restaurant/auth/restaurant_otp_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_signin_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_signup_screen.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_account_setting_screen.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_edit_leave_request_screen.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_language_selection_screen.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_leave_history_screen.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_leave_request_screen.dart';
 import 'package:genius_ai/view/restaurant/restaurant_main_nav_bar_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
@@ -184,6 +189,31 @@ class AppRoute {
     GetPage(
       name: RouteNames.restaurantRecipeRequestScreen,
       page: () => RestaurantRecipeMyRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantAccountSettings,
+      page: () => RestaurantAccountSettingScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantLanguageSettings,
+      page: () => RestaurantLanguageSelectionScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantLeaveRequest,
+      page: () => RestaurantLeaveRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantLeaveHistory,
+      page: () => RestaurantLeaveHistoryScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantEditLeaveRequest,
+      page: () => RestaurantEditLeaveRequestScreen(),
       binding: ControllerBinding(),
     ),
   ];

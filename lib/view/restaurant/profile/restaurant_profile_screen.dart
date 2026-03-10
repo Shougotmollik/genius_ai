@@ -142,27 +142,29 @@ class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
                       icon: 'assets/icons/setting.svg',
                       label: 'Account Settings',
                       onTap: () {
-                        Get.to(RestaurantAccountSettingScreen());
+                        Get.toNamed(RouteNames.restaurantAccountSettings);
                       },
                     ),
                     _SettingsTile(
                       icon: 'assets/icons/language.svg',
                       label: 'Language',
-                      onTap: () {},
+                      onTap: () {
+                        Get.toNamed(RouteNames.restaurantLanguageSettings);
+                      },
                     ),
 
                     _SettingsTile(
                       icon: 'assets/icons/request.svg',
                       label: 'Leave Request',
                       onTap: () {
-                        Get.to(RestaurantLeaveRequestScreen());
+                        Get.toNamed(RouteNames.restaurantLeaveRequest);
                       },
                     ),
                     _SettingsTile(
                       icon: 'assets/icons/document.svg',
                       label: 'Leave History',
                       onTap: () {
-                        Get.to(RestaurantLeaveHistoryScreen());
+                        Get.toNamed(RouteNames.restaurantLeaveHistory);
                       },
                     ),
 

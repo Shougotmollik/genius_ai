@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/config/route/route_names.dart';
+import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
+import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class RestaurantLeaveHistoryScreen extends StatefulWidget {
   const RestaurantLeaveHistoryScreen({super.key});
 
   @override
-  State<RestaurantLeaveHistoryScreen> createState() => _RestaurantLeaveHistoryScreenState();
+  State<RestaurantLeaveHistoryScreen> createState() =>
+      _RestaurantLeaveHistoryScreenState();
 }
 
-class _RestaurantLeaveHistoryScreenState extends State<RestaurantLeaveHistoryScreen> {
+class _RestaurantLeaveHistoryScreenState
+    extends State<RestaurantLeaveHistoryScreen> {
   int selectedIndex = 0;
+  final UserController controller = Get.find<UserController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch data when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.getLeaveRequest();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,33 +44,85 @@ class _RestaurantLeaveHistoryScreenState extends State<RestaurantLeaveHistoryScr
               Row(
                 children: [
                   _buildTab("All", 0),
-                  _buildTab("Upcoming", 1),
-                  _buildTab("Finished", 2),
+                  _buildTab("Pending", 1),
+                  _buildTab("Approved", 2),
                 ],
               ),
               SizedBox(height: 20.h),
-              // Content List
+
+              // Content List - Expanded must be a direct child of Column
               Expanded(
-                child: ListView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.only(bottom: 20.h),
-                  children: const [
-                    LeaveRequestCard(
-                      status: "Pending",
-                      statusColor: Color(0xFFFEF3D7),
-                      statusTextColor: Color(0xFFF59E0B),
-                      type: "Sick Leave",
-                      dateRange: "20 Dec, 2025 - 20 Dec, 2025",
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return Skeletonizer(
+                      enabled: true,
+                      child: ListView.builder(
+                        itemCount: 5,
+                        itemBuilder: (context, index) => LeaveRequestCard(
+                          status: "Pending",
+                          type: "Loading Type",
+                          startDate: '01/01/2026',
+                          endDate: '01/01/2026',
+                          reason: 'Loading reason text here...',
+                          onEdit: () {},
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Filter the leave list
+                  final filteredList = controller.leaveList.where((leave) {
+                    if (selectedIndex == 0) return true;
+                    if (selectedIndex == 1) {
+                      return leave.status?.toUpperCase() == "PENDING";
+                    }
+                    if (selectedIndex == 2) {
+                      return leave.status?.toUpperCase() == "APPROVED";
+                    }
+                    return true;
+                  }).toList();
+
+                  if (filteredList.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "No leave requests found.",
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () => controller.getLeaveRequest(),
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      padding: EdgeInsets.only(bottom: 20.h),
+                      itemCount: filteredList.length,
+                      itemBuilder: (context, index) {
+                        final leave = filteredList[index];
+                        return LeaveRequestCard(
+                          status:
+                              leave.statusDisplay ?? leave.status ?? "Pending",
+                          type:
+                              leave.leaveTypeDisplay ??
+                              leave.leaveType ??
+                              "Leave",
+                          startDate: leave.startDate ?? '',
+                          endDate: leave.endDate ?? '',
+                          reason: leave.reason ?? '',
+                          onEdit: () {
+                            Get.toNamed(
+                              RouteNames.barEditLeaveRequest,
+                              arguments: leave,
+                            );
+                          },
+                        );
+                      },
                     ),
-                    LeaveRequestCard(
-                      status: "Approved",
-                      statusColor: Color(0xFFE6F4EA),
-                      statusTextColor: Color(0xFF34A853),
-                      type: "Sick Leave",
-                      dateRange: "20 Dec, 2025 - 20 Dec, 2025",
-                    ),
-                  ],
-                ),
+                  );
+                }),
               ),
             ],
           ),
@@ -69,6 +136,7 @@ class _RestaurantLeaveHistoryScreenState extends State<RestaurantLeaveHistoryScr
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => selectedIndex = index),
+
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
@@ -84,7 +152,7 @@ class _RestaurantLeaveHistoryScreenState extends State<RestaurantLeaveHistoryScr
               title,
               style: TextStyle(
                 fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? Colors.blue : Colors.grey.shade600,
               ),
             ),
@@ -99,29 +167,24 @@ class _RestaurantLeaveHistoryScreenState extends State<RestaurantLeaveHistoryScr
       padding: EdgeInsets.only(top: 10.h),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
-            child: Container(
-              width: 40.w,
-              height: 40.w,
+          IconButton(
+            onPressed: () => Navigator.maybePop(context),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              child: const Icon(
-                Icons.arrow_back,
-                size: 20,
-                color: Colors.black87,
-              ),
+              child: const Icon(Icons.arrow_back, size: 20),
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 8.w),
           Text(
             "My Leave Requests",
             style: TextStyle(
-              fontSize: 20.sp,
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: AppColors.text,
+              color: Colors.black,
             ),
           ),
         ],
@@ -132,22 +195,40 @@ class _RestaurantLeaveHistoryScreenState extends State<RestaurantLeaveHistoryScr
 
 class LeaveRequestCard extends StatelessWidget {
   final String status;
-  final Color statusColor;
-  final Color statusTextColor;
   final String type;
-  final String dateRange;
+  final String startDate;
+  final String endDate;
+  final String reason;
+  final VoidCallback onEdit;
 
   const LeaveRequestCard({
     super.key,
     required this.status,
-    required this.statusColor,
-    required this.statusTextColor,
     required this.type,
-    required this.dateRange,
+    required this.startDate,
+    required this.endDate,
+    required this.reason,
+    required this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Dynamic status colors
+    final bool isPending = status.toLowerCase() == "pending";
+    final bool isApproved = status.toLowerCase() == "approved";
+
+    final Color statusBg = isPending
+        ? const Color(0xFFFEF3D7)
+        : isApproved
+        ? const Color(0xFFE6F4EA)
+        : const Color(0xFFFAE9E9);
+
+    final Color statusText = isPending
+        ? const Color(0xFFF59E0B)
+        : isApproved
+        ? const Color(0xFF34A853)
+        : const Color(0xFFD93025);
+
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.w),
@@ -156,8 +237,8 @@ class LeaveRequestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.25),
-            blurRadius: 16.r,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
@@ -171,51 +252,37 @@ class LeaveRequestCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: statusColor,
+                  color: statusBg,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   status,
                   style: TextStyle(
-                    color: statusTextColor,
+                    color: statusText,
                     fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      // showDialog(
-                      //   context: context,
-                      //   barrierDismissible: false,
-                      //   builder: (context) => const BarEditMenuDialog(),
-                      // );
-                    },
-                    child: _iconButton(
-                      bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
-                      icon: "assets/icons/pen_edit.svg",
-                    ),
+                  _actionButton(
+                    onTap: onEdit,
+                    bgColor: const Color(0xffF0B100).withOpacity(0.1),
+                    icon: "assets/icons/pen_edit.svg",
                   ),
-                  SizedBox(width: 12.w),
-                  GestureDetector(
+                  SizedBox(width: 10.w),
+                  _actionButton(
                     onTap: () {
                       showDialog(
                         context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return DeleteDialogWidget(
-                            title: "Are you sure you want to delete it?",
-                          );
-                        },
+                        builder: (context) => DeleteDialogWidget(
+                          title: "Are you sure you want to delete this?",
+                        ),
                       );
                     },
-                    child: _iconButton(
-                      bgColor: const Color(0xffFAE9E9),
-                      icon: "assets/icons/delete.svg",
-                    ),
+                    bgColor: const Color(0xffFAE9E9),
+                    icon: "assets/icons/delete.svg",
                   ),
                 ],
               ),
@@ -224,20 +291,16 @@ class LeaveRequestCard extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             type,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4.h),
           Text(
-            dateRange,
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+            "$startDate - $endDate",
+            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
           ),
           SizedBox(height: 8.h),
           Text(
-            "Lorem ipsum dolor sit amet consectetur. Faucibus quisque dolor imperdiet pellentesque malesuada cursus volutpat tincidunt.",
+            reason,
             style: TextStyle(
               fontSize: 13.sp,
               color: Colors.grey.shade500,
@@ -249,11 +312,18 @@ class LeaveRequestCard extends StatelessWidget {
     );
   }
 
-  Widget _iconButton({required Color bgColor, required String icon}) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-      child: SvgPicture.asset(icon, height: 18.h, width: 18.w),
+  Widget _actionButton({
+    required VoidCallback onTap,
+    required Color bgColor,
+    required String icon,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+        child: SvgPicture.asset(icon, height: 16.h, width: 16.w),
+      ),
     );
   }
 }

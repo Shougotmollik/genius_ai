@@ -5,14 +5,16 @@ import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
-class RestaurantLeaveRequestScreen extends StatefulWidget {
-  const RestaurantLeaveRequestScreen({super.key});
+class RestaurantEditLeaveRequestScreen extends StatefulWidget {
+  const RestaurantEditLeaveRequestScreen({super.key});
 
   @override
-  State<RestaurantLeaveRequestScreen> createState() => _RestaurantLeaveRequestScreenState();
+  State<RestaurantEditLeaveRequestScreen> createState() =>
+      _RestaurantEditLeaveRequestScreenState();
 }
 
-class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScreen> {
+class _RestaurantEditLeaveRequestScreenState
+    extends State<RestaurantEditLeaveRequestScreen> {
   String? _selectedLeaveType = 'Casual';
   DateTime? _startDate;
   DateTime? _endDate;
@@ -27,6 +29,34 @@ class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScr
     'Paternity',
     'Unpaid',
   ];
+
+  int? _requestId;
+  void _initializeData() {
+    // Get the LeaveRequest object passed from the previous screen
+    final leave = Get.arguments;
+
+    if (leave != null) {
+      _requestId = leave.id;
+      _selectedLeaveType = leave.leaveTypeDisplay ?? 'Casual';
+      _reasonController.text = leave.reason ?? '';
+      _startDate = _parseApiDate(leave.startDate);
+      _endDate = _parseApiDate(leave.endDate);
+    }
+  }
+
+  DateTime? _parseApiDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      final parts = dateStr.split('/');
+      return DateTime(
+        int.parse(parts[2]), // Year
+        int.parse(parts[1]), // Month
+        int.parse(parts[0]), // Day
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   final _dateFormat = 'mm/dd/yyyy';
 
@@ -101,7 +131,8 @@ class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScr
       );
       return;
     }
-    final bool isSuccess = await controller.sendLeaveRequest(
+    final bool isSuccess = await controller.editLeaveRequest(
+      leaveId: _requestId.toString(),
       leaveType: _selectedLeaveType.toString(),
       startDate: _formatDate(_startDate),
       endDate: _formatDate(_endDate),
@@ -110,6 +141,12 @@ class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScr
     if (isSuccess) {
       Get.back();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
   }
 
   @override
@@ -394,7 +431,7 @@ class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScr
                                       ),
                                     )
                                   : const Text(
-                                      'Apply',
+                                      'Update',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15,
