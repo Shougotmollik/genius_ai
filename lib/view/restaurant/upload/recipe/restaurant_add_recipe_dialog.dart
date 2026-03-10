@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
@@ -21,6 +21,7 @@ class RestaurantAddRecipeDialog extends StatefulWidget {
 class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
   // Main Form Controllers - All Empty
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
   final TextEditingController _instructionController = TextEditingController();
@@ -161,6 +162,13 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
 
               _buildLabel('Recipe Name'),
               _buildTextField(_nameController, 1, hint: "e.g. Grilled Salmon"),
+              _buildLabel('Recipe Description'),
+              _buildTextField(
+                _descriptionController,
+                2,
+                hint: "Short description about the recipe...",
+              ),
+
 
               _buildLabel('Avg. Time'),
               _buildTextField(_timeController, 1, hint: "30 min"),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/common/auth_controller.dart';
+import 'package:genius_ai/controller/auth_controller.dart';
 import 'package:genius_ai/utils/form_validator.dart';
 import 'package:genius_ai/view/widgets/auth_text_form_fileld.dart';
 import 'package:genius_ai/view/widgets/primary_button.dart';

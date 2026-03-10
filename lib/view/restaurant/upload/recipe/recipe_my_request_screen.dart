@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe_request.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:get/get.dart';

@@ -12,4 +12,6 @@ class ApiConstant {
   static const String ingredients = "/ingredients";
   static const String ingredientCategories = "/ingredients/categories";
   static const String recipes = "/recipes";
+
+  static const String leaveRequest = "/staff/leave-requests";
 }

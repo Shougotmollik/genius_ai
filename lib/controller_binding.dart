@@ -1,6 +1,7 @@
-import 'package:genius_ai/controller/bar/ingredient_controller.dart';
-import 'package:genius_ai/controller/bar/recipe_controller.dart';
-import 'package:genius_ai/controller/common/auth_controller.dart';
+import 'package:genius_ai/controller/ingredient_controller.dart';
+import 'package:genius_ai/controller/recipe_controller.dart';
+import 'package:genius_ai/controller/auth_controller.dart';
+import 'package:genius_ai/controller/user_controller.dart';
 import 'package:get/get.dart';
 
 class ControllerBinding extends Bindings {
@@ -9,5 +10,6 @@ class ControllerBinding extends Bindings {
     Get.put(AuthController());
     Get.lazyPut<IngredientController>(() => IngredientController());
     Get.lazyPut<RecipeController>(() => RecipeController());
+    Get.lazyPut<UserController>(() => UserController());
   }
 }

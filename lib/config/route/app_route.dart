@@ -8,6 +8,11 @@ import 'package:genius_ai/view/bar/auth/bar_signin_screen.dart';
 import 'package:genius_ai/view/bar/auth/bar_signup_screen.dart';
 import 'package:genius_ai/view/bar/auth/bar_singup_otp_verification_screen.dart';
 import 'package:genius_ai/view/bar/bar_main_nav_bar_screen.dart';
+import 'package:genius_ai/view/bar/profile/bar_account_setting_screen.dart';
+import 'package:genius_ai/view/bar/profile/bar_edit_leave_request_screen.dart';
+import 'package:genius_ai/view/bar/profile/bar_language_selection_screen.dart';
+import 'package:genius_ai/view/bar/profile/bar_leave_history_screen.dart';
+import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_recipe_screen.dart';
@@ -23,6 +28,7 @@ import 'package:genius_ai/view/restaurant/auth/restaurant_signup_screen.dart';
 import 'package:genius_ai/view/restaurant/restaurant_main_nav_bar_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/recipe/recipe_my_request_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_recipe_screen.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 
@@ -96,7 +102,30 @@ class AppRoute {
       page: () => BarRecipeMyRequestScreen(),
       binding: ControllerBinding(),
     ),
-
+    GetPage(
+      name: RouteNames.barAccountSettings,
+      page: () => BarAccountSettingScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.barLanguageSettings,
+      page: () => BarLanguageSelectionScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.barLeaveRequest,
+      page: () => BarLeaveRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.barLeaveHistory,
+      page: () => BarLeaveHistoryScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.barEditLeaveRequest,
+      page: () => BarEditLeaveRequestScreen(),
+    ),
     //! Restaurant
     GetPage(
       name: RouteNames.restaurantSignIn,
@@ -154,7 +183,7 @@ class AppRoute {
 
     GetPage(
       name: RouteNames.restaurantRecipeRequestScreen,
-      page: () => RestaurantIngredientMyRequestScreen(),
+      page: () => RestaurantRecipeMyRequestScreen(),
       binding: ControllerBinding(),
     ),
   ];

@@ -5,14 +5,15 @@ import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
-class BarLeaveRequestScreen extends StatefulWidget {
-  const BarLeaveRequestScreen({super.key});
+class BarEditLeaveRequestScreen extends StatefulWidget {
+  const BarEditLeaveRequestScreen({super.key});
 
   @override
-  State<BarLeaveRequestScreen> createState() => _BarLeaveRequestScreenState();
+  State<BarEditLeaveRequestScreen> createState() =>
+      _BarEditLeaveRequestScreenState();
 }
 
-class _BarLeaveRequestScreenState extends State<BarLeaveRequestScreen> {
+class _BarEditLeaveRequestScreenState extends State<BarEditLeaveRequestScreen> {
   String? _selectedLeaveType = 'Casual';
   DateTime? _startDate;
   DateTime? _endDate;
@@ -27,6 +28,34 @@ class _BarLeaveRequestScreenState extends State<BarLeaveRequestScreen> {
     'Paternity',
     'Unpaid',
   ];
+
+  int? _requestId;
+  void _initializeData() {
+    // Get the LeaveRequest object passed from the previous screen
+    final leave = Get.arguments;
+
+    if (leave != null) {
+      _requestId = leave.id;
+      _selectedLeaveType = leave.leaveTypeDisplay ?? 'Casual';
+      _reasonController.text = leave.reason ?? '';
+      _startDate = _parseApiDate(leave.startDate);
+      _endDate = _parseApiDate(leave.endDate);
+    }
+  }
+
+  DateTime? _parseApiDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      final parts = dateStr.split('/');
+      return DateTime(
+        int.parse(parts[2]), // Year
+        int.parse(parts[1]), // Month
+        int.parse(parts[0]), // Day
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   final _dateFormat = 'mm/dd/yyyy';
 
@@ -101,7 +130,8 @@ class _BarLeaveRequestScreenState extends State<BarLeaveRequestScreen> {
       );
       return;
     }
-    final bool isSuccess = await controller.sendLeaveRequest(
+    final bool isSuccess = await controller.editLeaveRequest(
+      leaveId: _requestId.toString(),
       leaveType: _selectedLeaveType.toString(),
       startDate: _formatDate(_startDate),
       endDate: _formatDate(_endDate),
@@ -110,6 +140,12 @@ class _BarLeaveRequestScreenState extends State<BarLeaveRequestScreen> {
     if (isSuccess) {
       Get.back();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
   }
 
   @override
@@ -394,7 +430,7 @@ class _BarLeaveRequestScreenState extends State<BarLeaveRequestScreen> {
                                       ),
                                     )
                                   : const Text(
-                                      'Apply',
+                                      'Update',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15,

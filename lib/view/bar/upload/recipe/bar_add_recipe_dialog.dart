@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
@@ -20,6 +20,7 @@ class BarAddRecipeDialog extends StatefulWidget {
 class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
   // Main Form Controllers - All Empty
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
   final TextEditingController _instructionController = TextEditingController();
@@ -160,6 +161,12 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
 
               _buildLabel('Recipe Name'),
               _buildTextField(_nameController, 1, hint: "e.g. Grilled Salmon"),
+              _buildLabel('Recipe Description'),
+              _buildTextField(
+                _descriptionController,
+                2,
+                hint: "Short description about the recipe...",
+              ),
 
               _buildLabel('Avg. Time'),
               _buildTextField(_timeController, 1, hint: "30 min"),
@@ -386,7 +393,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                           );
                           return;
                         }
-                    
+
                         // Ingredients List
                         List<Map<String, dynamic>> ingredientData = _ingredients
                             .where((i) => i.name.text.isNotEmpty)
@@ -403,7 +410,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                               };
                             })
                             .toList();
-                    
+
                         if (ingredientData.isEmpty) {
                           AppSnackbar.show(
                             message: "Please add at least one ingredient",
@@ -411,7 +418,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                           );
                           return;
                         }
-                    
+
                         bool success = await controller.postRecipe(
                           name: _nameController.text,
                           avgTime: _timeController.text,
@@ -419,7 +426,7 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                           sellingCost: _costController.text,
                           ingredients: ingredientData,
                         );
-                    
+
                         if (success) {
                           Navigator.pop(context);
                         }

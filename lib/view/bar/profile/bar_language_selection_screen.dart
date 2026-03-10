@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LanguageSelectionScreen extends StatefulWidget {
-  const LanguageSelectionScreen({super.key});
+class BarLanguageSelectionScreen extends StatefulWidget {
+  const BarLanguageSelectionScreen({super.key});
 
   @override
-  State<LanguageSelectionScreen> createState() =>
-      _LanguageSelectionScreenState();
+  State<BarLanguageSelectionScreen> createState() =>
+      _BarLanguageSelectionScreenState();
 }
 
-class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
+class _BarLanguageSelectionScreenState
+    extends State<BarLanguageSelectionScreen> {
   //  selected language
   String _selectedLanguage = 'English';
 

@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/common/auth_controller.dart';
-import 'package:genius_ai/view/restaurant/profile/bar_leave_history_screen.dart';
+import 'package:genius_ai/controller/auth_controller.dart';
+import 'package:genius_ai/view/restaurant/profile/restaurant_leave_history_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_account_setting_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_leave_request_screen.dart';
 import 'package:genius_ai/view/widgets/log_out_dialog.dart';
@@ -159,8 +159,8 @@ class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
                       },
                     ),
                     _SettingsTile(
-                      icon: 'assets/icons/request.svg',
-                      label: 'Leave Request',
+                      icon: 'assets/icons/document.svg',
+                      label: 'Leave History',
                       onTap: () {
                         Get.to(RestaurantLeaveHistoryScreen());
                       },

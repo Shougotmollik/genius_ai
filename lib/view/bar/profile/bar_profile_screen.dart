@@ -3,11 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/common/auth_controller.dart';
+import 'package:genius_ai/controller/auth_controller.dart';
 import 'package:genius_ai/view/bar/profile/bar_account_setting_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_history_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
-import 'package:genius_ai/view/bar/profile/language_selection_screen.dart';
+import 'package:genius_ai/view/bar/profile/bar_language_selection_screen.dart';
 import 'package:genius_ai/view/widgets/log_out_dialog.dart';
 import 'package:get/get.dart';
 
@@ -137,14 +137,14 @@ class BarProfileScreen extends StatelessWidget {
                       icon: 'assets/icons/setting.svg',
                       label: 'Account Settings',
                       onTap: () {
-                        Get.to(BarAccountSettingScreen());
+                        Get.toNamed(RouteNames.barAccountSettings);
                       },
                     ),
                     _SettingsTile(
                       icon: 'assets/icons/language.svg',
                       label: 'Language',
                       onTap: () {
-                        Get.to(() => LanguageSelectionScreen());
+                        Get.toNamed(RouteNames.barLanguageSettings);
                       },
                     ),
 
@@ -152,14 +152,14 @@ class BarProfileScreen extends StatelessWidget {
                       icon: 'assets/icons/request.svg',
                       label: 'Leave Request',
                       onTap: () {
-                        Get.to(BarLeaveRequestScreen());
+                        Get.toNamed(RouteNames.barLeaveRequest);
                       },
                     ),
                     _SettingsTile(
                       icon: 'assets/icons/document.svg',
                       label: 'Leave History',
                       onTap: () {
-                        Get.to(BarLeaveHistoryScreen());
+                        Get.toNamed(RouteNames.barLeaveHistory);
                       },
                     ),
 

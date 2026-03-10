@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/bar/recipe_controller.dart';
+import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_add_recipe_dialog.dart';
 import 'package:genius_ai/view/bar/upload/recipe/recipe_info_card.dart';

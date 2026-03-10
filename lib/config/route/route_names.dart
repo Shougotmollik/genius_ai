@@ -19,6 +19,12 @@ class RouteNames {
   static const String barRecipeDetailsScreen = '/bar-recipe-details-screen';
   static const String barRecipeRequestScreen = '/bar-recipe-request-screen';
 
+  static const String barAccountSettings = '/bar-account-settings';
+  static const String barLanguageSettings = '/bar-language-settings';
+  static const String barLeaveRequest = '/bar-leave-request';
+  static const String barEditLeaveRequest = '/bar-edit-leave-request';
+  static const String barLeaveHistory = '/bar-leave-history';
+
   // Restaurant
   static const String restaurantSignIn = '/restaurant-signin';
   static const String restaurantSignUp = '/restaurant-signup';
@@ -41,4 +47,12 @@ class RouteNames {
       '/restaurant-recipe-details-screen';
   static const String restaurantRecipeRequestScreen =
       '/restaurant-recipe-request-screen';
+
+  static const String restaurantAccountSettings =
+      '/restaurant-account-settings';
+  static const String restaurantLanguageSettings =
+      '/restaurant-language-settings';
+  static const String restaurantLeaveRequest = '/restaurant-leave-request';
+  static const String restaurantEditLeaveRequest = '/restaurant-edit-leave-request';
+  static const String restaurantLeaveHistory = '/restaurant-leave-history';
 }
