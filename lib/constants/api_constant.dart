@@ -11,8 +11,8 @@ class ApiConstant {
 
   // bar
   static const String ingredients = "/ingredients";
+  static const String updateIngredient = "/ingredients/bulk-update";
   static const String ingredientCategories = "/ingredients/categories";
   static const String recipes = "/recipes";
-
   static const String leaveRequest = "/staff/leave-requests";
 }

@@ -1,16 +1,13 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
 import 'package:genius_ai/controller/ingredient_controller.dart';
 import 'package:genius_ai/model/ingredient_catergory.dart';
-import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
 class RestaurantEditIngredientDialog extends StatefulWidget {
   const RestaurantEditIngredientDialog({super.key, required this.id});
-  final String id; // Required ID to identify which ingredient to edit
+  final String id;
 
   @override
   State<RestaurantEditIngredientDialog> createState() =>
@@ -146,69 +143,68 @@ class _RestaurantEditIngredientDialogState
                 ),
               ),
 
-              SizedBox(height: 12.h),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Or",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16.sp,
-                    color: AppColors.lightText,
-                  ),
-                ),
-              ),
+              // SizedBox(height: 12.h),
+              // Align(
+              //   alignment: Alignment.center,
+              //   child: Text(
+              //     "Or",
+              //     style: TextStyle(
+              //       fontWeight: FontWeight.w400,
+              //       fontSize: 16.sp,
+              //       color: AppColors.lightText,
+              //     ),
+              //   ),
+              // ),
 
-              // Upload Box (Placeholder)
-              GestureDetector(
-                onTap: () {},
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: DottedBorder(
-                    options: RectDottedBorderOptions(
-                      color: AppColors.primary,
-                      strokeWidth: 2.w,
-                      dashPattern: const [10, 8],
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Column(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/image-upload.svg',
-                            width: 32.w,
-                            height: 32.w,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Click here to upload ingredient',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Max. File Size: 10MB',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
+              // // Upload Box (Placeholder)
+              // GestureDetector(
+              //   onTap: () {},
+              //   child: ClipRRect(
+              //     borderRadius: BorderRadius.circular(8.r),
+              //     child: DottedBorder(
+              //       options: RectDottedBorderOptions(
+              //         color: AppColors.primary,
+              //         strokeWidth: 2.w,
+              //         dashPattern: const [10, 8],
+              //       ),
+              //       child: Container(
+              //         width: double.infinity,
+              //         padding: const EdgeInsets.all(16),
+              //         decoration: BoxDecoration(
+              //           color: AppColors.primary.withValues(alpha: 0.1),
+              //           borderRadius: BorderRadius.circular(8.r),
+              //         ),
+              //         child: Column(
+              //           children: [
+              //             SvgPicture.asset(
+              //               'assets/icons/image-upload.svg',
+              //               width: 32.w,
+              //               height: 32.w,
+              //             ),
+              //             const SizedBox(height: 12),
+              //             Text(
+              //               'Click here to upload ingredient',
+              //               style: TextStyle(
+              //                 fontSize: 16.sp,
+              //                 fontWeight: FontWeight.w500,
+              //                 color: AppColors.text,
+              //               ),
+              //             ),
+              //             const SizedBox(height: 4),
+              //             Text(
+              //               'Max. File Size: 10MB',
+              //               style: TextStyle(
+              //                 fontSize: 12.sp,
+              //                 color: AppColors.text,
+              //                 fontWeight: FontWeight.w400,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 24.h),
               Row(
                 spacing: 18.w,
@@ -242,23 +238,39 @@ class _RestaurantEditIngredientDialogState
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
-                        if (selectedCategory == null) {
-                          AppSnackbar.show(
-                            message: "Please select a category",
-                            type: SnackType.error,
-                          );
-                          return;
-                        }
+                        List<Map<String, dynamic>> payload = [];
+                        // bool success = await controller.updateIngredient(
+                        //   id: int.parse(widget.id),
+                        //   name: nameController.text.trim(),
+                        //   categoryId: selectedCategory!.id,
+                        //   unit: unitController.text.trim(),
+                        //   price: priceController.text.trim(),
+                        //   currentStock:
+                        //       int.tryParse(currentStockController.text) ?? 0,
+                        //   minStock: int.tryParse(minStockController.text) ?? 0,
+                        // );
 
-                        bool success = await controller.updateIngredient(
-                          id: int.parse(widget.id),
-                          name: nameController.text.trim(),
-                          categoryId: selectedCategory!.id,
-                          unit: unitController.text.trim(),
-                          price: priceController.text.trim(),
-                          currentStock:
-                              int.tryParse(currentStockController.text) ?? 0,
-                          minStock: int.tryParse(minStockController.text) ?? 0,
+                        // if (success) {
+                        //   Navigator.pop(context);
+                        // }
+
+                        payload = [
+                          {
+                            "id": int.parse(widget.id),
+                            "name": nameController.text.trim(),
+                            "category": selectedCategory?.name ?? "",
+                            "outlet_type": "restaurant",
+                            "unit": unitController.text.trim(),
+                            "price_per_unit": priceController.text.trim(),
+                            "current_stock":
+                                int.tryParse(currentStockController.text) ?? 0,
+                            "minimum_stock":
+                                int.tryParse(minStockController.text) ?? 0,
+                            "is_special": controller.isSpecial.value,
+                          },
+                        ];
+                        final bool success = await controller.updateIngredient(
+                          ingredients: payload,
                         );
 
                         if (success) {
@@ -274,12 +286,16 @@ class _RestaurantEditIngredientDialogState
                           ),
                           child: Center(
                             child: controller.isLoading.value
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.5,
+                                ? SizedBox(
+                                    height: 18.h,
+                                    width: 18.w,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
                                   )
                                 : Text(
-                                    "Save",
+                                    "Update",
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,

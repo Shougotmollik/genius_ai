@@ -87,7 +87,7 @@ class _RestaurantIngredientScreenState
                       },
                     ),
                     buildTab(
-                      title: "Popular",
+                      title: "Others",
                       isSelected: selectedIndex == 1,
                       onTap: () {
                         setState(() => selectedIndex = 1);

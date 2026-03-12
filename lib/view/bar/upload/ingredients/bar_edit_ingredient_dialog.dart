@@ -252,21 +252,21 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
                           );
                           return;
                         }
-                        bool success = await controller.updateIngredient(
-                          id: int.parse(widget.id),
-                          name: nameController.text.trim(),
-                          categoryId: selectedCategory!.id,
-                          unit: unitController.text.trim(),
-                          price: priceController.text.trim(),
-                          currentStock:
-                              int.tryParse(currentStockController.text) ?? 0,
-                          minStock: int.tryParse(minStockController.text) ?? 0,
-                          // isSpecial: controller.isSpecialTab.value,
-                        );
+                        // bool success = await controller.updateIngredient(
+                        //   id: int.parse(widget.id),
+                        //   name: nameController.text.trim(),
+                        //   categoryId: selectedCategory!.id,
+                        //   unit: unitController.text.trim(),
+                        //   price: priceController.text.trim(),
+                        //   currentStock:
+                        //       int.tryParse(currentStockController.text) ?? 0,
+                        //   minStock: int.tryParse(minStockController.text) ?? 0,
+                        //   // isSpecial: controller.isSpecialTab.value,
+                        // );
 
-                        if (success) {
-                          Navigator.pop(context);
-                        }
+                        // if (success) {
+                        //   Navigator.pop(context);
+                        // }
                       },
                       child: Obx(
                         () => Container(
