@@ -4,11 +4,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/auth_controller.dart';
-import 'package:genius_ai/view/restaurant/profile/restaurant_leave_history_screen.dart';
-import 'package:genius_ai/view/restaurant/profile/restaurant_account_setting_screen.dart';
-import 'package:genius_ai/view/restaurant/profile/restaurant_leave_request_screen.dart';
+import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/view/widgets/log_out_dialog.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class RestaurantProfileScreen extends StatefulWidget {
   const RestaurantProfileScreen({super.key});
@@ -20,6 +19,7 @@ class RestaurantProfileScreen extends StatefulWidget {
 
 class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
   final AuthController _authController = Get.find<AuthController>();
+  final UserController _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,27 +56,31 @@ class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(50.r),
-                      child: Image.asset(
-                        'assets/image/profile.jpg',
-                        height: 60.w,
-                        width: 60.w,
-                        fit: BoxFit.cover,
-                      ),
+                      child: _userController.user.value.avatar != null
+                          ? Image.network(
+                              _userController.user.value.avatar ?? '',
+                              height: 60.w,
+                              width: 60.w,
+                              fit: BoxFit.cover,
+                            )
+                          : const Icon(Icons.person),
                     ),
                     const SizedBox(width: 14),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Jhon Doe Smith',
+                        Text(
+                          _userController.user.value.fullName ??
+                              'Name Not Found',
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'deshreen@gmail.com',
+                          _userController.user.value.emailAddress ??
+                              'Email Not Found',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.lightText,
@@ -91,13 +95,18 @@ class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
                               color: AppColors.lightText,
                             ),
                             SizedBox(width: 4),
-                            Text(
-                              'Joined Since 2025',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.lightText,
-                              ),
-                            ),
+                            Obx(() {
+                              final joinDate =
+                                  _userController.user.value.joinDate;
+
+                              return Text(
+                                'Joined ${joinDate != null ? DateFormat('dd MMM yyyy').format(DateTime.parse(joinDate.toString())) : 'Date Not Found'}',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: AppColors.lightText,
+                                ),
+                              );
+                            }),
                           ],
                         ),
                       ],
@@ -142,7 +151,10 @@ class _RestaurantProfileScreenState extends State<RestaurantProfileScreen> {
                       icon: 'assets/icons/setting.svg',
                       label: 'Account Settings',
                       onTap: () {
-                        Get.toNamed(RouteNames.restaurantAccountSettings);
+                        Get.toNamed(
+                          RouteNames.restaurantAccountSettings,
+                          arguments: _userController.user.value,
+                        );
                       },
                     ),
                     _SettingsTile(

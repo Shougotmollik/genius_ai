@@ -98,35 +98,25 @@ class IngredientController extends GetxController {
   }
 
   Future<bool> postIngredient({
-    required String name,
-    required int categoryId,
-    required String unit,
-    required String price,
-    required int currentStock,
-    required int minStock,
-    required bool isSpecial,
+    required List<Map<String, dynamic>> ingredients,
   }) async {
     isLoading(true);
-    final Map<String, dynamic> body = {
-      "name": name,
-      "category_id": categoryId,
-      "unit": unit,
-      "price_per_unit": price,
-      "current_stock": currentStock,
-      "minimum_stock": minStock,
-      "is_special": isSpecial,
-    };
 
     final response = await CustomHttp.post(
       endpoint: ApiConstant.ingredients,
-      body: body,
+      body: ingredients,
       need_auth: true,
     );
 
     isLoading(false);
 
     if (response.ok) {
-      AppSnackbar.show(message: "Ingredient added!", type: SnackType.success);
+      AppSnackbar.show(
+        message: ingredients.length > 1
+            ? "Batch ingredients added successfully!"
+            : "Ingredient added successfully!",
+        type: SnackType.success,
+      );
       getIngredient();
       return true;
     } else {
@@ -139,7 +129,7 @@ class IngredientController extends GetxController {
   }
 
   Future<bool> updateIngredient({
-    required int id, // Needed to identify which record to update
+    required int id,
     required String name,
     required int categoryId,
     required String unit,

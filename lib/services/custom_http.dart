@@ -22,7 +22,7 @@ class CustomHttpResult {
   });
 }
 
-enum _HttpMethod { post, put, patch }
+enum _HttpMethod { post, put, patch, delete }
 
 class CustomHttp {
   CustomHttp._();
@@ -34,11 +34,11 @@ class CustomHttp {
     Map<String, String>? headers,
     Map<String, dynamic>? queries,
   }) async {
-    if (!await has_internet(show_error: true)) {
+    if (!await hasInternet(showError: true)) {
       return const CustomHttpResult(
         ok: false,
         status_code: -1,
-        error: 'No internet!',
+        error: 'No internet! Please check your internet connection.',
       );
     }
 
@@ -134,6 +134,87 @@ class CustomHttp {
     );
   }
 
+  static Future<CustomHttpResult> delete({
+    required String endpoint,
+    bool add_api_prefix = true,
+    Map<String, String>? headers,
+    dynamic body,
+    bool show_floating_error = true,
+    bool need_auth = true,
+    Map<String, dynamic>? queries,
+  }) async {
+    return _send_with_body(
+      method: _HttpMethod.delete,
+      endpoint: endpoint,
+      add_api_prefix: add_api_prefix,
+      headers: headers,
+      body: body,
+      show_floating_error: show_floating_error,
+      need_auth: need_auth,
+      queries: queries,
+    );
+  }
+
+  static Future<CustomHttpResult> multipart({
+    required String endpoint,
+    required String fieldName,
+    required String filePath,
+    String method = 'POST',
+    bool need_auth = true,
+    bool show_floating_error = true,
+    Map<String, String>? headers,
+  }) async {
+    if (!await hasInternet(showError: true)) {
+      return const CustomHttpResult(
+        ok: false,
+        status_code: -1,
+        error: 'No internet! Please check your internet connection.',
+      );
+    }
+
+    String url = '';
+
+    try {
+      final resolved_headers = await _build_headers(
+        need_auth: need_auth,
+        extra: headers,
+      );
+
+      if (resolved_headers == null) {
+        return const CustomHttpResult(ok: false, status_code: 401);
+      }
+
+      url = '${AppCredentials.domain}/api$endpoint';
+
+      final uri = Uri.parse(url);
+
+      final request = http.MultipartRequest(method, uri);
+
+      request.headers.addAll(resolved_headers);
+
+      request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
+
+      // Multipart should NOT have JSON content type
+      request.headers.remove('Content-Type');
+
+      HttpLogger.logRequest(
+        method: method,
+        url: url,
+        headers: resolved_headers,
+        body: {'file': filePath},
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      return _handle_response(response, show_floating_error);
+    } catch (e, stackTrace) {
+      _log_error(method, url, e, stackTrace);
+
+      return CustomHttpResult(status_code: -2, error: e.toString(), ok: false);
+    }
+  }
+
   static Future<CustomHttpResult> _send_with_body({
     required _HttpMethod method,
     required String endpoint,
@@ -144,11 +225,11 @@ class CustomHttp {
     required bool need_auth,
     Map<String, dynamic>? queries,
   }) async {
-    if (!await has_internet(show_error: true)) {
+    if (!await hasInternet(showError: true)) {
       return const CustomHttpResult(
         ok: false,
         status_code: -1,
-        error: 'No internet!',
+        error: 'No internet! Please check your internet connection.',
       );
     }
     late String url;
@@ -192,6 +273,13 @@ class CustomHttp {
           break;
         case _HttpMethod.patch:
           response = await http.patch(
+            Uri.parse(url),
+            body: encoded_body,
+            headers: resolved_headers,
+          );
+          break;
+        case _HttpMethod.delete:
+          response = await http.delete(
             Uri.parse(url),
             body: encoded_body,
             headers: resolved_headers,

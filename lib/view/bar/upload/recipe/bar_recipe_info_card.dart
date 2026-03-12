@@ -6,16 +6,15 @@ import 'package:genius_ai/model/recipe.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_edit_recipe_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 
-class RestaurantRecipeInfoCard extends StatefulWidget {
-  const RestaurantRecipeInfoCard({super.key, required this.recipe});
+class BarRecipeInfoCard extends StatefulWidget {
+  const BarRecipeInfoCard({super.key, required this.recipe});
   final Recipe recipe;
 
   @override
-  State<RestaurantRecipeInfoCard> createState() =>
-      _RestaurantRecipeInfoCardState();
+  State<BarRecipeInfoCard> createState() => _BarRecipeInfoCardState();
 }
 
-class _RestaurantRecipeInfoCardState extends State<RestaurantRecipeInfoCard> {
+class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
   @override
   Widget build(BuildContext context) {
     return Container(

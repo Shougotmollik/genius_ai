@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
+import 'package:excel/excel.dart' hide Border;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -18,6 +22,78 @@ class RestaurantAddIngredientDialog extends StatefulWidget {
 
 class _RestaurantAddIngredientDialogState
     extends State<RestaurantAddIngredientDialog> {
+  // Batch Ingredients
+  List<Map<String, dynamic>> _batchIngredients = [];
+  Future<void> _pickExcelFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx', 'xls'],
+    );
+
+    if (result != null) {
+      var bytes = File(result.files.single.path!).readAsBytesSync();
+      var excel = Excel.decodeBytes(bytes);
+
+      var table = excel.tables.keys.first;
+      var rows = excel.tables[table]!.rows;
+
+      if (rows.length > 1) {
+        _batchIngredients.clear();
+
+        for (int i = 1; i < rows.length; i++) {
+          var row = rows[i];
+
+          // NEW LOGIC: Just get the Category Name string from Excel
+          String catName = row[3]?.value.toString().trim() ?? "";
+
+          // Normalize Unit
+          String rawUnit = row[2]?.value.toString().trim() ?? "";
+          String normalizedUnit = rawUnit.toLowerCase() == "kg"
+              ? "kg"
+              : rawUnit;
+
+          var rawPrice = row[1]?.value.toString().trim() ?? "0";
+
+          _batchIngredients.add({
+            "name": row[0]?.value.toString().trim() ?? "",
+            "category": catName, // CHANGED: Key is "category", value is String
+            "outlet_type": "restaurant",
+            "unit": normalizedUnit,
+            "price_per_unit": rawPrice,
+            "current_stock": int.tryParse(row[4]?.value.toString() ?? "0") ?? 0,
+            "minimum_stock": int.tryParse(row[5]?.value.toString() ?? "0") ?? 0,
+            "is_special": row[6]?.value.toString().toLowerCase() == "true",
+          });
+        }
+
+        // Sync first item to UI
+        if (_batchIngredients.isNotEmpty) {
+          var first = _batchIngredients.first;
+          nameController.text = first['name'];
+          unitController.text = first['unit'];
+          priceController.text = first['price_per_unit'];
+          currentStockController.text = first['current_stock'].toString();
+          minStockController.text = first['minimum_stock'].toString();
+
+          setState(() {
+            // Find the category object based on the Name from Excel to update dropdown
+            selectedCategory = controller.categoryList.firstWhereOrNull(
+              (c) =>
+                  c.name.toLowerCase().trim() ==
+                  first['category'].toString().toLowerCase(),
+            );
+          });
+        }
+
+        AppSnackbar.show(
+          message:
+              "${_batchIngredients.length} ingredients loaded successfully",
+          type: SnackType.success,
+        );
+      }
+    }
+  }
+
   final IngredientController controller = Get.find<IngredientController>();
 
   // Controllers for form data
@@ -168,7 +244,7 @@ class _RestaurantAddIngredientDialogState
               // Excel Upload Box
               GestureDetector(
                 onTap: () {
-                  // Logic for file picker would go here
+                  _pickExcelFile();
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
@@ -252,30 +328,50 @@ class _RestaurantAddIngredientDialogState
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
-                        // Validation logic
-                        if (nameController.text.isEmpty ||
-                            selectedCategory == null) {
-                          AppSnackbar.show(
-                            message: "Please fill required fields",
-                            type: SnackType.error,
-                          );
-                          return;
+                        List<Map<String, dynamic>> payload = [];
+
+                        if (_batchIngredients.isNotEmpty) {
+                          // Sync UI edits to the first item in the batch
+                          _batchIngredients[0] = {
+                            "name": nameController.text.trim(),
+                            "category":
+                                selectedCategory?.name ??
+                                "", // CHANGED: Use name
+                            "outlet_type": "restaurant",
+                            "unit": unitController.text.trim(),
+                            "price_per_unit": priceController.text.trim(),
+                            "current_stock":
+                                int.tryParse(currentStockController.text) ?? 0,
+                            "minimum_stock":
+                                int.tryParse(minStockController.text) ?? 0,
+                            "is_special": controller.isSpecial.value,
+                          };
+                          payload = _batchIngredients;
+                        } else {
+                          // Manual entry
+                          payload = [
+                            {
+                              "name": nameController.text.trim(),
+                              "category":
+                                  selectedCategory?.name ??
+                                  "", // CHANGED: Use name
+                              "outlet_type": "restaurant",
+                              "unit": unitController.text.trim(),
+                              "price_per_unit": priceController.text.trim(),
+                              "current_stock":
+                                  int.tryParse(currentStockController.text) ??
+                                  0,
+                              "minimum_stock":
+                                  int.tryParse(minStockController.text) ?? 0,
+                              "is_special": controller.isSpecial.value,
+                            },
+                          ];
                         }
 
                         bool success = await controller.postIngredient(
-                          name: nameController.text.trim(),
-                          categoryId: selectedCategory!.id,
-                          unit: unitController.text.trim(),
-                          price: priceController.text.trim(),
-                          currentStock:
-                              int.tryParse(currentStockController.text) ?? 0,
-                          minStock: int.tryParse(minStockController.text) ?? 0,
-                          isSpecial: controller.isSpecial.value,
+                          ingredients: payload,
                         );
-
-                        if (success) {
-                          Navigator.pop(context);
-                        }
+                        if (success) Navigator.pop(context);
                       },
                       child: Obx(
                         () => Container(

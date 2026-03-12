@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/recipe_controller.dart';
+import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/model/recipe.dart';
-import 'package:genius_ai/view/bar/upload/recipe/bar_edit_recipe_dialog.dart';
 import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_edit_recipe_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
+import 'package:get/get.dart';
 
 class RestaurantRecipeInfoCard extends StatefulWidget {
   const RestaurantRecipeInfoCard({super.key, required this.recipe});
@@ -17,6 +19,8 @@ class RestaurantRecipeInfoCard extends StatefulWidget {
 }
 
 class _RestaurantRecipeInfoCardState extends State<RestaurantRecipeInfoCard> {
+  final UserController _userController = Get.find<UserController>();
+  final RecipeController _recipeController = Get.find<RecipeController>();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,43 +40,55 @@ class _RestaurantRecipeInfoCardState extends State<RestaurantRecipeInfoCard> {
       child: Column(
         children: [
           // Edit / Delete
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) =>
-                        RestaurantEditRecipeDialog(recipe: widget.recipe),
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
-                  icon: "assets/icons/pen_edit.svg",
+          _userController.user.value.id != widget.recipe.createdBy
+              ? SizedBox()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              RestaurantEditRecipeDialog(recipe: widget.recipe),
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
+                        icon: "assets/icons/pen_edit.svg",
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return DeleteDialogWidget(
+                              title:
+                                  "Are you sure you want to delete ${widget.recipe.name}?",
+                              onDelete: () async {
+                                final bool success = await _recipeController
+                                    .deleteRecipe(
+                                      id: widget.recipe.id.toString(),
+                                    );
+                                if (success) {
+                                  Get.back();
+                                }
+                              },
+                            );
+                          },
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffFAE9E9),
+                        icon: "assets/icons/delete.svg",
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(width: 12.w),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return DeleteDialogWidget(
-                        title: "Are you sure you want to delete it?",
-                      );
-                    },
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffFAE9E9),
-                  icon: "assets/icons/delete.svg",
-                ),
-              ),
-            ],
-          ),
 
           //Ingredient name & price
           Row(

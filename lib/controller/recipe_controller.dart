@@ -3,6 +3,7 @@ import 'package:genius_ai/model/recipe.dart';
 import 'package:genius_ai/model/recipe_request.dart';
 import 'package:genius_ai/services/custom_http.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
+import 'package:get/get.dart' hide SnackPosition;
 import 'package:get/state_manager.dart';
 
 class RecipeController extends GetxController {
@@ -49,26 +50,12 @@ class RecipeController extends GetxController {
   }
 
   // Add recipe
-  Future<bool> postRecipe({
-    required String name,
-    required String avgTime,
-    required String instruction,
-    required String sellingCost,
-    required List<Map<String, dynamic>> ingredients,
-  }) async {
+  Future<bool> postRecipe({required List<Map<String, dynamic>> recipes}) async {
     isLoading(true);
-
-    final Map<String, dynamic> body = {
-      "name": name,
-      "avg_time": int.tryParse(avgTime.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
-      "instruction": instruction,
-      "selling_cost": sellingCost.replaceAll('\$', '').trim(),
-      "ingredients": ingredients,
-    };
 
     final response = await CustomHttp.post(
       endpoint: ApiConstant.recipes,
-      body: body,
+      body: recipes,
       need_auth: true,
     );
 
@@ -76,15 +63,16 @@ class RecipeController extends GetxController {
 
     if (response.ok) {
       AppSnackbar.show(
-        message: "Recipe added successfully!",
+        message: "Recipes added successfully!",
         type: SnackType.success,
       );
       getRecipe();
       return true;
     } else {
       AppSnackbar.show(
-        message: response.error ?? "Failed to add recipe",
+        message: response.error ?? "Failed to add recipes",
         type: SnackType.error,
+        position: SnackPosition.top,
       );
       return false;
     }
@@ -92,30 +80,16 @@ class RecipeController extends GetxController {
 
   // Update recipe
   Future<bool> updateRecipe({
-    required int id,
-    required String name,
-    required String avgTime,
-    required String instruction,
-    required String sellingCost,
-    required List<Map<String, dynamic>> ingredients,
+    required List<Map<String, dynamic>> recipes,
   }) async {
     isLoading(true);
 
-    final Map<String, dynamic> body = {
-      "name": name,
-      "avg_time": int.tryParse(avgTime.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
-      "instruction": instruction,
-      "selling_cost": sellingCost.replaceAll('\$', '').trim(),
-      "ingredients": ingredients,
-    };
-
-    final String url = "${ApiConstant.recipes}/$id";
+    final String url = ApiConstant.recipes;
     final response = await CustomHttp.patch(
       endpoint: url,
-      body: body,
+      body: recipes,
       need_auth: true,
     );
-
     isLoading(false);
 
     if (response.ok) {
@@ -134,6 +108,31 @@ class RecipeController extends GetxController {
     }
   }
 
+  // Delete recipe
+  Future<bool> deleteRecipe({required String id}) async {
+    isLoading(true);
+
+    final String url = "${ApiConstant.recipes}/$id";
+    final response = await CustomHttp.delete(endpoint: url, need_auth: true);
+    isLoading(false);
+
+    if (response.ok) {
+      AppSnackbar.show(
+        message: "Recipe deleted successfully!",
+        type: SnackType.success,
+      );
+      getRecipe();
+      return true;
+    } else {
+      AppSnackbar.show(
+        message: response.error ?? "Delete failed",
+        type: SnackType.error,
+      );
+      return false;
+    }
+  }
+
+  // Fetch my recipe requests
   Future<void> fetchMyRecipeRequests({String status = ""}) async {
     isLoading(true);
 

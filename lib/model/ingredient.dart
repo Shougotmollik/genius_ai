@@ -1,7 +1,7 @@
 class Ingredient {
   final int? id;
   final String? name;
-  final int? category;
+  final String? category;
   final String? categoryName;
   final String? unit;
   final String? pricePerUnit;
@@ -35,7 +35,7 @@ class Ingredient {
     return Ingredient(
       id: json['id'],
       name: json['name'],
-      category: json['category'],
+      category: json['category']?.toString(),
       categoryName: json['category_name'],
       unit: json['unit'],
       pricePerUnit: json['price_per_unit'],

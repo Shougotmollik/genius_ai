@@ -5,8 +5,9 @@ import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe.dart';
-import 'package:genius_ai/view/bar/upload/recipe/recipe_info_card.dart';
+import 'package:genius_ai/view/bar/upload/recipe/bar_recipe_info_card.dart';
 import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_add_recipe_dialog.dart';
+import 'package:genius_ai/view/restaurant/upload/recipe/restaurant_recipe_info_card.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -80,7 +81,7 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
                       3,
                       (index) => Skeletonizer(
                         enabled: true,
-                        child: RestaurantRecipeInfoCard(
+                        child: BarRecipeInfoCard(
                           recipe: Recipe(id: 0, name: "Loading...", avgTime: 0),
                         ),
                       ),
@@ -102,7 +103,7 @@ class _RestaurantRecipeScreenState extends State<RestaurantRecipeScreen> {
                   children: controller.recipeList.map((recipe) {
                     return Skeletonizer(
                       enabled: controller.isLoading.value,
-                      child: RestaurantRecipeInfoCard(recipe: recipe),
+                      child: RestaurantRecipeInfoCard(recipe: recipe,),
                     );
                   }).toList(),
                 );

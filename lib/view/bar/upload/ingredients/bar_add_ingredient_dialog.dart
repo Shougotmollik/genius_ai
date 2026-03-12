@@ -250,20 +250,20 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                           return;
                         }
 
-                        bool success = await controller.postIngredient(
-                          name: nameController.text.trim(),
-                          categoryId: selectedCategory!.id,
-                          unit: unitController.text.trim(),
-                          price: priceController.text.trim(),
-                          currentStock:
-                              int.tryParse(currentStockController.text) ?? 0,
-                          minStock: int.tryParse(minStockController.text) ?? 0,
-                          isSpecial: controller.isSpecial.value,
-                        );
+                        // bool success = await controller.postIngredient(
+                        //   name: nameController.text.trim(),
+                        //   categoryId: selectedCategory!.id,
+                        //   unit: unitController.text.trim(),
+                        //   price: priceController.text.trim(),
+                        //   currentStock:
+                        //       int.tryParse(currentStockController.text) ?? 0,
+                        //   minStock: int.tryParse(minStockController.text) ?? 0,
+                        //   isSpecial: controller.isSpecial.value,
+                        // );
 
-                        if (success) {
-                          Navigator.pop(context);
-                        }
+                        // if (success) {
+                        //   Navigator.pop(context);
+                        // }
                       },
                       child: Obx(
                         () => Container(

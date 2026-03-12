@@ -419,17 +419,17 @@ class _BarAddRecipeDialogState extends State<BarAddRecipeDialog> {
                           return;
                         }
 
-                        bool success = await controller.postRecipe(
-                          name: _nameController.text,
-                          avgTime: _timeController.text,
-                          instruction: _instructionController.text,
-                          sellingCost: _costController.text,
-                          ingredients: ingredientData,
-                        );
+                        // bool success = await controller.postRecipe(
+                        //   name: _nameController.text,
+                        //   avgTime: _timeController.text,
+                        //   instruction: _instructionController.text,
+                        //   sellingCost: _costController.text,
+                        //   ingredients: ingredientData,
+                        // );
 
-                        if (success) {
-                          Navigator.pop(context);
-                        }
+                        // if (success) {
+                        //   Navigator.pop(context);
+                        // }
                       },
                       icon: controller.isLoading.value
                           ? const SizedBox(

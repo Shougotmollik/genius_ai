@@ -5,6 +5,7 @@ import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe_request.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class RestaurantRecipeMyRequestScreen extends StatefulWidget {
   const RestaurantRecipeMyRequestScreen({super.key});
@@ -14,7 +15,8 @@ class RestaurantRecipeMyRequestScreen extends StatefulWidget {
       _RestaurantRecipeMyRequestScreenState();
 }
 
-class _RestaurantRecipeMyRequestScreenState extends State<RestaurantRecipeMyRequestScreen> {
+class _RestaurantRecipeMyRequestScreenState
+    extends State<RestaurantRecipeMyRequestScreen> {
   final RecipeController controller = Get.find<RecipeController>();
   int selectedIndex = 0;
 
@@ -141,7 +143,22 @@ class _RestaurantRecipeMyRequestScreenState extends State<RestaurantRecipeMyRequ
 
                     // Content List
                     if (controller.isLoading.value)
-                      const Center(child: CircularProgressIndicator())
+                      Skeletonizer(
+                        enabled: true,
+                        child: Column(
+                          children: List.generate(
+                            3,
+                            (index) => InventoryCard(
+                              request: RecipeRequest(
+                                approvalStatus: '',
+                                name: "",
+                                avgTime: 0,
+                                totalCost: "",
+                              ),
+                            ),
+                          ), // Use a skeleton placeholder
+                        ),
+                      )
                     else if (controller.myRequests.isEmpty)
                       const Center(child: Text("No requests found"))
                     else

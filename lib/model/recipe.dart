@@ -1,6 +1,7 @@
 class Recipe {
   final int? id;
   final String? name;
+  final String? description;
   final int? avgTime;
   final String? instruction;
   final String? sellingCost;
@@ -17,6 +18,7 @@ class Recipe {
   Recipe({
     this.id,
     this.name,
+    this.description,
     this.avgTime,
     this.instruction,
     this.sellingCost,
@@ -34,6 +36,7 @@ class Recipe {
   factory Recipe.fromJson(Map<String, dynamic> json) => Recipe(
     id: json["id"],
     name: json["name"],
+    description: json["description"],
     avgTime: json["avg_time"],
     instruction: json["instruction"],
     sellingCost: json["selling_cost"],
@@ -82,19 +85,20 @@ class RecipeIngredient {
     this.updatedAt,
   });
 
-  factory RecipeIngredient.fromJson(Map<String, dynamic> json) => RecipeIngredient(
-    id: json["id"],
-    ingredient: json["ingredient"],
-    quantity: json["quantity"],
-    unit: json["unit"],
-    cost: json["cost"],
-    createdBy: json["created_by"],
-    updatedBy: json["updated_by"],
-    createdAt: json["created_at"] == null
-        ? null
-        : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null
-        ? null
-        : DateTime.parse(json["updated_at"]),
-  );
+  factory RecipeIngredient.fromJson(Map<String, dynamic> json) =>
+      RecipeIngredient(
+        id: json["id"],
+        ingredient: json["ingredient"],
+        quantity: json["quantity"],
+        unit: json["unit"],
+        cost: json["cost"],
+        createdBy: json["created_by"],
+        updatedBy: json["updated_by"],
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
+      );
 }

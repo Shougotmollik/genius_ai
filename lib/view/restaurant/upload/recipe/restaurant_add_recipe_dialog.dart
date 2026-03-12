@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:excel/excel.dart';
+import 'package:excel/excel.dart' hide Border;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +9,7 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 
 class RestaurantAddRecipeDialog extends StatefulWidget {
   const RestaurantAddRecipeDialog({super.key});
@@ -19,22 +20,24 @@ class RestaurantAddRecipeDialog extends StatefulWidget {
 }
 
 class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
-  // Main Form Controllers - All Empty
+  final RecipeController controller = Get.find<RecipeController>();
+
+  //  Controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
   final TextEditingController _instructionController = TextEditingController();
 
-  final RecipeController controller = Get.find<RecipeController>();
-
-  // Ingredients List
+  // Ingredient Rows for the UI
   final List<IngredientRow> _ingredients = [];
+
+  // Batch data storage
+  List<Map<String, dynamic>> _batchRecipes = [];
 
   @override
   void initState() {
     super.initState();
-    // Initialize with one empty row for the user to start with
     _addIngredientRow();
   }
 
@@ -43,58 +46,124 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx'],
-        withData: true,
       );
 
       if (result == null || result.files.isEmpty) return;
 
-      var bytes = result.files.single.bytes;
-      if (bytes == null && result.files.single.path != null) {
-        final file = File(result.files.single.path!);
-        bytes = await file.readAsBytes();
-      }
+      var bytes = File(result.files.single.path!).readAsBytesSync();
+      var excel = Excel.decodeBytes(bytes);
+      var table = excel.tables.keys.first;
+      var sheet = excel.tables[table];
+      if (sheet == null) return;
 
-      if (bytes != null) {
-        var excel = Excel.decodeBytes(bytes);
-        List<IngredientRow> importedRows = [];
+      Map<String, Map<String, dynamic>> groupedRecipes = {};
 
-        for (var table in excel.tables.keys) {
-          var sheet = excel.tables[table];
-          if (sheet == null) continue;
+      // Memory variables to "remember" info for rows where columns A-E are empty
+      String lastRecipeName = "";
+      String lastDesc = "";
+      String lastTime = "";
+      String lastInstr = "";
+      String lastSellCost = "";
 
-          // Skip header row (i = 0), start at i = 1
-          for (int i = 1; i < sheet.maxRows; i++) {
-            var row = sheet.rows[i];
-            if (row.isEmpty) continue;
+      for (int i = 1; i < sheet.maxRows; i++) {
+        var row = sheet.rows[i];
+        if (row.isEmpty) continue;
 
-            // value extractor
-            String val(int index) {
-              if (index >= row.length || row[index] == null) return "";
-              var cV = row[index]!.value;
-              // handle to string into filed
-              return cV != null ? cV.toString() : "";
-            }
-
-            importedRows.add(
-              IngredientRow(
-                name: TextEditingController(text: val(0)),
-                qty: TextEditingController(text: val(1)),
-                unit: TextEditingController(text: val(2)),
-                cost: TextEditingController(text: val(3)),
-              ),
-            );
-          }
+        String getVal(int index) {
+          if (index >= row.length || row[index] == null) return "";
+          var val = row[index]!.value;
+          return val == null ? "" : val.toString().trim();
         }
 
-        if (importedRows.isNotEmpty) {
-          setState(() {
-            _ingredients.clear();
-            _ingredients.addAll(importedRows);
+        //MAPPING BASED ON YOUR SCREENSHOT ---
+        String currentName = getVal(0); // Col A
+        String currentDesc = getVal(1); // Col B
+        String currentTime = getVal(2); // Col C
+        String currentPrice = getVal(3); // Col D (Price/Selling Cost)
+        String currentInstr = getVal(4); // Col E (Instructions)
+
+        // Only update "Memory" if the current cell is NOT empty
+        if (currentName.isNotEmpty) lastRecipeName = currentName;
+        if (currentDesc.isNotEmpty) lastDesc = currentDesc;
+        if (currentTime.isNotEmpty) lastTime = currentTime;
+        if (currentPrice.isNotEmpty) lastSellCost = currentPrice;
+        if (currentInstr.isNotEmpty) lastInstr = currentInstr;
+
+        // Skip row if we haven't even found the first recipe name yet
+        if (lastRecipeName.isEmpty) continue;
+
+        // Initialize the recipe in our map if it's the first time we see this name
+        if (!groupedRecipes.containsKey(lastRecipeName)) {
+          groupedRecipes[lastRecipeName] = {
+            "name": lastRecipeName,
+            "description": lastDesc,
+            "avg_time":
+                int.tryParse(lastTime.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+            "instruction": lastInstr,
+            "selling_cost": lastSellCost.replaceAll(
+              RegExp(r'[^0-9.]'),
+              '',
+            ), // Removes "$" and extra dots
+            "outlet_type": "restaurant",
+            "ingredients": <Map<String, dynamic>>[],
+          };
+        }
+
+        // Add the Ingredient data (Cols F, G, H, I)
+        String ingName = getVal(5);
+        if (ingName.isNotEmpty) {
+          (groupedRecipes[lastRecipeName]!["ingredients"] as List).add({
+            "ingredient": ingName,
+            "quantity": double.tryParse(getVal(6)) ?? 0.0,
+            "unit": getVal(7),
+            "cost":
+                double.tryParse(getVal(8).replaceAll(RegExp(r'[^0-9.]'), '')) ??
+                0.0,
           });
         }
       }
+
+      if (groupedRecipes.isNotEmpty) {
+        setState(() {
+          _batchRecipes = groupedRecipes.values.toList();
+          _fillUiWithFirstRecipe(); // Sync the UI with the first recipe found
+        });
+        AppSnackbar.show(
+          message: "Successfully loaded ${_batchRecipes.length} recipes",
+          type: SnackType.success,
+        );
+      }
     } catch (e) {
       debugPrint("Excel Parsing Error: $e");
+      AppSnackbar.show(
+        message: "Check Excel format: Col D should be Price, Col E Instruction",
+        type: SnackType.error,
+      );
+    }
+  }
+
+  void _fillUiWithFirstRecipe() {
+    if (_batchRecipes.isEmpty) return;
+    var first = _batchRecipes.first;
+
+    // Fill Header Controllers
+    _nameController.text = first['name'];
+    _descriptionController.text = first['description'];
+    _timeController.text = first['avg_time'].toString();
+    _costController.text = first['selling_cost'];
+    _instructionController.text = first['instruction'];
+
+    // Fill Ingredient Table
+    _ingredients.clear();
+    for (var ing in first['ingredients']) {
+      _ingredients.add(
+        IngredientRow(
+          name: TextEditingController(text: ing['ingredient']),
+          qty: TextEditingController(text: ing['quantity'].toString()),
+          unit: TextEditingController(text: ing['unit']),
+          cost: TextEditingController(text: ing['cost'].toString()),
+        ),
+      );
     }
   }
 
@@ -113,17 +182,14 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
 
   void _removeIngredientRow(int index) {
     if (_ingredients.length > 1) {
-      setState(() {
-        _ingredients.removeAt(index);
-      });
+      setState(() => _ingredients.removeAt(index));
     }
   }
 
   double _calculateTotal() {
     double total = 0;
     for (var item in _ingredients) {
-      String cleanCost = item.cost.text.replaceAll('\$', '').trim();
-      total += double.tryParse(cleanCost) ?? 0;
+      total += double.tryParse(item.cost.text) ?? 0;
     }
     return total;
   }
@@ -158,160 +224,126 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
                   ),
                 ],
               ),
-              SizedBox(height: 16.h),
 
               _buildLabel('Recipe Name'),
               _buildTextField(_nameController, 1, hint: "e.g. Grilled Salmon"),
+
               _buildLabel('Recipe Description'),
               _buildTextField(
                 _descriptionController,
                 2,
-                hint: "Short description about the recipe...",
+                hint: "Description...",
               ),
 
-
-              _buildLabel('Avg. Time'),
-              _buildTextField(_timeController, 1, hint: "30 min"),
+              _buildLabel('Avg. Time (min)'),
+              _buildTextField(_timeController, 1, hint: "10", isNumber: true),
 
               _buildLabel('Selling Cost'),
-              _buildTextField(
-                _costController,
-                1,
-                hint: "\$0.00",
-                isNumber: true,
-              ),
+              _buildTextField(_costController, 1, hint: "0.00", isNumber: true),
 
               _buildLabel('Instruction'),
               _buildTextField(
                 _instructionController,
-                4,
-                hint: "Step by step instructions...",
+                3,
+                hint: "Instructions...",
               ),
 
               SizedBox(height: 24.h),
 
-              // Ingredients Section Header
+              // Ingredients Table
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Add Ingredients',
-                    style: TextStyle(fontSize: 16.sp, color: Colors.black54),
+                    'Ingredients',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   TextButton.icon(
                     onPressed: _addIngredientRow,
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add'),
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFE3F2FD),
-                      foregroundColor: const Color(0xFF2196F3),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                    ),
+                    label: const Text('Add Row'),
                   ),
                 ],
               ),
-              SizedBox(height: 12.h),
 
-              // Table Headers
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                child: Row(
-                  children: [
-                    Expanded(flex: 3, child: _buildTableHeader('Name')),
-                    Expanded(flex: 2, child: _buildTableHeader('Qty')),
-                    Expanded(flex: 2, child: _buildTableHeader('Unit')),
-                    Expanded(flex: 2, child: _buildTableHeader('Cost')),
-                    SizedBox(width: 30.w),
-                  ],
-                ),
+              Row(
+                children: [
+                  Expanded(flex: 3, child: _buildTableHeader('Name')),
+                  Expanded(flex: 2, child: _buildTableHeader('Qty')),
+                  Expanded(flex: 2, child: _buildTableHeader('Unit')),
+                  Expanded(flex: 2, child: _buildTableHeader('Cost')),
+                  SizedBox(width: 40.w),
+                ],
               ),
-              Divider(color: AppColors.text, thickness: 1.w),
+              const Divider(),
 
-              //  Ingredients
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _ingredients.length,
                 itemBuilder: (context, index) {
                   final item = _ingredients[index];
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 8.h),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: _buildTableField(item.name, "Name"),
+                  return Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: _buildTableField(item.name, "Name"),
+                      ),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        flex: 2,
+                        child: _buildTableField(item.qty, "0", isNumber: true),
+                      ),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        flex: 2,
+                        child: _buildTableField(item.unit, "unit"),
+                      ),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        flex: 2,
+                        child: _buildTableField(item.cost, "0", isNumber: true),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
                         ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          flex: 2,
-                          child: _buildTableField(
-                            item.qty,
-                            "0",
-                            isNumber: true,
-                          ),
-                        ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          flex: 2,
-                          child: _buildTableField(item.unit, "unit"),
-                        ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          flex: 2,
-                          child: _buildTableField(
-                            item.cost,
-                            "0",
-                            isNumber: true,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.remove_circle_outline,
-                            color: Colors.red.shade400,
-                            size: 20.sp,
-                          ),
-                          onPressed: () => _removeIngredientRow(index),
-                        ),
-                      ],
-                    ),
+                        onPressed: () => _removeIngredientRow(index),
+                      ),
+                    ],
                   );
                 },
               ),
 
-              const SizedBox(height: 16),
-              Divider(color: AppColors.text, thickness: 1.w),
+              SizedBox(height: 12.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Total',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Total Cost:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
                     '\$${_calculateTotal().toStringAsFixed(2)}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
                       color: AppColors.primary,
                     ),
                   ),
                 ],
               ),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: Text('Or', style: TextStyle(color: Colors.grey)),
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('OR'),
                 ),
               ),
 
-              // Upload Box
               GestureDetector(
                 onTap: () {
                   _pickAndParseExcel();
@@ -365,96 +397,50 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
 
               SizedBox(height: 24.h),
 
-              // Action Buttons
+              // Actions
               Row(
+                spacing: 18.w,
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        shape: StadiumBorder(),
-                        side: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      child: Text(
+                      child: const Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.grey.shade700),
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 48.w),
-
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: Obx(
-                      () => ElevatedButton.icon(
-                        onPressed: () async {
-                          if (_nameController.text.isEmpty ||
-                              _costController.text.isEmpty) {
-                            AppSnackbar.show(
-                              message: "Please fill in recipe name and cost",
-                              type: SnackType.warning,
-                            );
-                            return;
-                          }
-
-                          // Ingredients List
-                          List<Map<String, dynamic>> ingredientData =
-                              _ingredients
-                                  .where((i) => i.name.text.isNotEmpty)
-                                  .map((i) {
-                                    return {
-                                      "ingredient": i.name.text,
-                                      "quantity":
-                                          double.tryParse(i.qty.text) ?? 0.0,
-                                      "unit": i.unit.text,
-                                      "cost":
-                                          double.tryParse(
-                                            i.cost.text.replaceAll('\$', ''),
-                                          ) ??
-                                          0.0,
-                                    };
-                                  })
-                                  .toList();
-
-                          if (ingredientData.isEmpty) {
-                            AppSnackbar.show(
-                              message: "Please add at least one ingredient",
-                              type: SnackType.warning,
-                            );
-                            return;
-                          }
-
-                          bool success = await controller.postRecipe(
-                            name: _nameController.text,
-                            avgTime: _timeController.text,
-                            instruction: _instructionController.text,
-                            sellingCost: _costController.text,
-                            ingredients: ingredientData,
-                          );
-
-                          if (success) {
-                            Navigator.pop(context);
-                          }
-                        },
-                        icon: controller.isLoading.value
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.add, color: Colors.white),
-                        label: Text(
-                          controller.isLoading.value ? "Adding..." : "Add",
-                          style: const TextStyle(color: Colors.white),
-                        ),
+                      () => ElevatedButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : _submitRecipe,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: const StadiumBorder(),
                         ),
+                        child: controller.isLoading.value
+                            ? SizedBox(
+                                height: 18.h,
+                                width: 18.w,
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add, color: Colors.white),
+                                  const Text(
+                                    "Add",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                   ),
@@ -467,27 +453,70 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
     );
   }
 
-  Widget _buildLabel(String label) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 6.h, top: 12.h),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: Colors.black87,
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
+  Future<void> _submitRecipe() async {
+    // 1. Build the recipe currently shown in the Dialog UI
+    Map<String, dynamic> currentUiRecipe = {
+      "name": _nameController.text.trim(),
+      "description": _descriptionController.text.trim(),
+      "avg_time": int.tryParse(_timeController.text) ?? 0,
+      "instruction": _instructionController.text.trim(),
+      "selling_cost": _costController.text.trim(),
+      "outlet_type": "restaurant",
+      "ingredients": _ingredients
+          .where((i) => i.name.text.isNotEmpty)
+          .map(
+            (i) => {
+              "ingredient": i.name.text.trim(),
+              "quantity": double.tryParse(i.qty.text) ?? 0.0,
+              "unit": i.unit.text.trim(),
+              "cost": double.tryParse(i.cost.text) ?? 0.0,
+            },
+          )
+          .toList(),
+    };
+
+    if (currentUiRecipe["name"].isEmpty) {
+      AppSnackbar.show(
+        message: "Recipe name is required",
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    // 2. Prepare the final list
+    List<Map<String, dynamic>> finalPayload = [];
+
+    if (_batchRecipes.isNotEmpty) {
+      // Replace the first item of batch with current UI data (in case user edited it)
+      _batchRecipes[0] = currentUiRecipe;
+      finalPayload = _batchRecipes;
+    } else {
+      finalPayload = [currentUiRecipe];
+    }
+
+    // 3. Send to API
+    bool success = await controller.postRecipe(recipes: finalPayload);
+    if (success) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pop(context);
+    }
   }
 
-  Widget _buildTableHeader(String title) {
-    return Text(
-      title,
-      textAlign: TextAlign.center,
-      style: TextStyle(color: Colors.grey, fontSize: 12.sp),
-    );
-  }
+  // UI Helpers (Labels, Textfields, etc.)
+  Widget _buildLabel(String label) => Padding(
+    padding: EdgeInsets.only(bottom: 4.h, top: 10.h),
+    child: Text(
+      label,
+      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500),
+    ),
+  );
+
+  Widget _buildTableHeader(String title) => Text(
+    title,
+    textAlign: TextAlign.center,
+    style: TextStyle(color: Colors.grey, fontSize: 11.sp),
+  );
 
   Widget _buildTextField(
     TextEditingController controller,
@@ -498,20 +527,12 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      minLines: null,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: AppColors.lightText, fontSize: 13.sp),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         isDense: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.border, width: 1.w),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: AppColors.border, width: 1.w),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
       ),
     );
   }
@@ -524,30 +545,19 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
     return TextField(
       controller: controller,
       textAlign: TextAlign.center,
+      onChanged: (_) => setState(() {}),
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-      onChanged: (v) => setState(() {}),
-      style: TextStyle(fontSize: 13.sp),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: AppColors.lightText, fontSize: 12.sp),
-        contentPadding: EdgeInsets.symmetric(vertical: 8.h),
         isDense: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide(color: Colors.grey.shade200),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4.r)),
       ),
     );
   }
 }
 
 class IngredientRow {
-  final TextEditingController name;
-  final TextEditingController qty;
-  final TextEditingController unit;
-  final TextEditingController cost;
-
+  final TextEditingController name, qty, unit, cost;
   IngredientRow({
     required this.name,
     required this.qty,

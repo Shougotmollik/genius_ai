@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class DeleteDialogWidget extends StatelessWidget {
-  const DeleteDialogWidget({super.key, required this.title});
+  const DeleteDialogWidget({super.key, required this.title, this.onDelete});
 
   final String title;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +33,13 @@ class DeleteDialogWidget extends StatelessWidget {
               width: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.black54, width: 2),
+                border: Border.all(color: Colors.redAccent.shade100, width: 2),
               ),
               child: const Center(
                 child: Icon(
                   Icons.error_outline,
                   size: 28,
-                  color: Colors.black54,
+                  color: Colors.redAccent,
                 ),
               ),
             ),
@@ -87,10 +88,7 @@ class DeleteDialogWidget extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    onPressed: () {
-                      // TODO: delete logic
-                      Navigator.pop(context);
-                    },
+                    onPressed: onDelete,
                     child: const Text("Delete"),
                   ),
                 ),

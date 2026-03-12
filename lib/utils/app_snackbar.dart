@@ -13,6 +13,11 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
 enum SnackType { success, error, warning, info }
 
 /// =============================================================
+/// SNACK Position
+/// =============================================================
+enum SnackPosition { bottom, top }
+
+/// =============================================================
 /// SNACK ICONS
 /// =============================================================
 class SnackIcons {
@@ -250,13 +255,18 @@ class AppSnackbar {
     required String message,
     SnackType type = SnackType.info,
     int duration = 3000,
+    SnackPosition position = SnackPosition.bottom,
   }) {
+    final margin = position == SnackPosition.bottom
+        ? const EdgeInsets.only(bottom: 20, left: 16, right: 16)
+        : const EdgeInsets.only(top: 20, left: 16, right: 16);
+
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.transparent,
       elevation: 0,
       duration: Duration(milliseconds: duration),
-      margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+      margin: margin,
       padding: EdgeInsets.zero,
       content: CustomSnackbar(
         message: message,

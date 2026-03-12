@@ -313,29 +313,29 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
-                        List<Map<String, dynamic>> ingredientMaps = _ingredients
-                            .map((item) {
-                              return {
-                                "ingredient": item.name.text,
-                                "quantity": item.qty.text,
-                                "unit": item.unit.text,
-                                "cost": item.cost.text
-                                    .replaceAll('\$', '')
-                                    .trim(),
-                              };
-                            })
-                            .toList();
-                        bool success = await controller.updateRecipe(
-                          id: widget.recipe.id!,
-                          name: _nameController.text,
-                          avgTime: _timeController.text,
-                          instruction: _instructionController.text,
-                          sellingCost: _costController.text,
-                          ingredients: ingredientMaps,
-                        );
-                        if (success) {
-                          Navigator.pop(context);
-                        }
+                        // List<Map<String, dynamic>> ingredientMaps = _ingredients
+                        //     .map((item) {
+                        //       return {
+                        //         "ingredient": item.name.text,
+                        //         "quantity": item.qty.text,
+                        //         "unit": item.unit.text,
+                        //         "cost": item.cost.text
+                        //             .replaceAll('\$', '')
+                        //             .trim(),
+                        //       };
+                        //     })
+                        //     .toList();
+                        // bool success = await controller.updateRecipe(
+                        //   id: widget.recipe.id!,
+                        //   name: _nameController.text,
+                        //   avgTime: _timeController.text,
+                        //   instruction: _instructionController.text,
+                        //   sellingCost: _costController.text,
+                        //   ingredients: ingredientMaps,
+                        // );
+                        // if (success) {
+                        //   Navigator.pop(context);
+                        // }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(12),

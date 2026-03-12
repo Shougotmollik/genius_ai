@@ -1,7 +1,5 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe.dart';
@@ -19,6 +17,7 @@ class RestaurantEditRecipeDialog extends StatefulWidget {
 class _RestaurantEditRecipeDialogState
     extends State<RestaurantEditRecipeDialog> {
   late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
   late TextEditingController _timeController;
   late TextEditingController _costController;
   late TextEditingController _instructionController;
@@ -31,6 +30,9 @@ class _RestaurantEditRecipeDialogState
     super.initState();
     // Pre-fill controllers with existing data
     _nameController = TextEditingController(text: widget.recipe.name);
+    _descriptionController = TextEditingController(
+      text: widget.recipe.description ?? "No description given yet",
+    );
     _timeController = TextEditingController(
       text: widget.recipe.avgTime?.toString(),
     );
@@ -113,6 +115,8 @@ class _RestaurantEditRecipeDialogState
 
               _buildLabel('Recipe Name'),
               _buildTextField(_nameController, 1),
+              _buildLabel('Description Name'),
+              _buildTextField(_descriptionController, 2),
 
               _buildLabel('Avg. Time'),
               _buildTextField(_timeController, 1),
@@ -162,6 +166,7 @@ class _RestaurantEditRecipeDialogState
                         style: TextStyle(color: Colors.grey),
                       ),
                     ),
+
                     Expanded(
                       flex: 2,
                       child: Text(
@@ -233,62 +238,62 @@ class _RestaurantEditRecipeDialogState
                 ],
               ),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: Text('Or', style: TextStyle(color: Colors.grey)),
-                ),
-              ),
+              // const Padding(
+              //   padding: EdgeInsets.symmetric(vertical: 16.0),
+              //   child: Center(
+              //     child: Text('Or', style: TextStyle(color: Colors.grey)),
+              //   ),
+              // ),
 
-              // Upload Box
-              GestureDetector(
-                onTap: () {},
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: DottedBorder(
-                    options: RectDottedBorderOptions(
-                      color: AppColors.primary,
-                      strokeWidth: 2.w,
-                      dashPattern: const [10, 8],
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Column(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/excel.svg',
-                            width: 32.w,
-                            height: 32.w,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Click here to upload ingredient',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Max. File Size: 10MB',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // // Upload Box
+              // GestureDetector(
+              //   onTap: () {},
+              //   child: ClipRRect(
+              //     borderRadius: BorderRadius.circular(8.r),
+              //     child: DottedBorder(
+              //       options: RectDottedBorderOptions(
+              //         color: AppColors.primary,
+              //         strokeWidth: 2.w,
+              //         dashPattern: const [10, 8],
+              //       ),
+              //       child: Container(
+              //         width: double.infinity,
+              //         padding: const EdgeInsets.all(16),
+              //         decoration: BoxDecoration(
+              //           color: AppColors.primary.withValues(alpha: 0.1),
+              //           borderRadius: BorderRadius.circular(8.r),
+              //         ),
+              //         child: Column(
+              //           children: [
+              //             SvgPicture.asset(
+              //               'assets/icons/excel.svg',
+              //               width: 32.w,
+              //               height: 32.w,
+              //             ),
+              //             const SizedBox(height: 12),
+              //             Text(
+              //               'Click here to upload ingredient',
+              //               style: TextStyle(
+              //                 fontSize: 16.sp,
+              //                 fontWeight: FontWeight.w500,
+              //                 color: AppColors.text,
+              //               ),
+              //             ),
+              //             const SizedBox(height: 4),
+              //             Text(
+              //               'Max. File Size: 10MB',
+              //               style: TextStyle(
+              //                 fontSize: 12.sp,
+              //                 color: AppColors.text,
+              //                 fontWeight: FontWeight.w400,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 24.h),
               Row(
                 spacing: 18.w,
@@ -320,24 +325,32 @@ class _RestaurantEditRecipeDialogState
                     child: Obx(
                       () => GestureDetector(
                         onTap: () async {
-                          List<Map<String, dynamic>> ingredientMaps =
-                              _ingredients.map((item) {
-                                return {
-                                  "ingredient": item.name.text,
-                                  "quantity": item.qty.text,
-                                  "unit": item.unit.text,
-                                  "cost": item.cost.text
-                                      .replaceAll('\$', '')
-                                      .trim(),
-                                };
-                              }).toList();
                           bool success = await controller.updateRecipe(
-                            id: widget.recipe.id!,
-                            name: _nameController.text,
-                            avgTime: _timeController.text,
-                            instruction: _instructionController.text,
-                            sellingCost: _costController.text,
-                            ingredients: ingredientMaps,
+                            recipes: [
+                              {
+                                "id": widget.recipe.id,
+                                "name": _nameController.text,
+                                "description": _descriptionController.text,
+                                "avg_time":
+                                    int.tryParse(_timeController.text) ?? 0,
+                                "instruction": _instructionController.text
+                                    .trim(),
+                                "selling_cost": _costController.text,
+                                "ingredients": _ingredients
+                                    .where((i) => i.name.text.isNotEmpty)
+                                    .map(
+                                      (i) => {
+                                        "ingredient": i.name.text,
+                                        "quantity":
+                                            double.tryParse(i.qty.text) ?? 0.0,
+                                        "unit": i.unit.text.trim(),
+                                        "cost":
+                                            double.tryParse(i.cost.text) ?? 0.0,
+                                      },
+                                    )
+                                    .toList(),
+                              },
+                            ],
                           );
                           if (success) {
                             Navigator.pop(context);

@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/ingredient_controller.dart'; // Ensure this exists or create a Restaurant version
+import 'package:genius_ai/controller/ingredient_controller.dart';
+import 'package:genius_ai/model/ingredient.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_dialog.dart';
+import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_add_ingredient_dialog.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_info_card.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -106,22 +108,30 @@ class _RestaurantIngredientScreenState
 
   Widget buildTabContent() {
     return Obx(() {
-      // 1. Loading State
+      //Loading State
       if (controller.isLoading.value && controller.ingredientList.isEmpty) {
         return Column(
           children: List.generate(
             3,
-            (index) => const Skeletonizer(
+            (index) => Skeletonizer(
               enabled: true,
-              child: Card(
-                child: ListTile(title: Text("Loading Ingredient Data...")),
+              child: RestaurantIngredientsInfoCard(
+                ingredient: Ingredient(
+                  approvalStatus: "",
+                  name: "",
+                  categoryName: "",
+                  minimumStock: 00,
+                  unit: "",
+                  currentStock: 00,
+                  pricePerUnit: "",
+                ),
               ),
             ),
           ),
         );
       }
 
-      // 2. Empty State
+      //Empty State
       if (controller.ingredientList.isEmpty) {
         return Center(
           child: Padding(
@@ -134,7 +144,6 @@ class _RestaurantIngredientScreenState
         );
       }
 
-      // 3. Data State
       return Column(
         children: controller.ingredientList
             .map(
@@ -221,7 +230,6 @@ class _RestaurantIngredientScreenState
                 ? GestureDetector(
                     onTap: () {
                       controller.searchQuery.value = '';
-                      // Note: To clear the text visually, you'd need a TextEditingController
                     },
                     child: const Icon(Icons.close, size: 20),
                   )
@@ -242,7 +250,7 @@ class _RestaurantIngredientScreenState
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const BarAddIngredientDialog(),
+                builder: (context) => const RestaurantAddIngredientDialog(),
               );
             },
             child: Container(
