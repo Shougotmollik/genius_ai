@@ -1,8 +1,15 @@
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/user_controller.dart';
+import 'package:genius_ai/model/user.dart';
+import 'package:genius_ai/utils/image_picker.dart';
+import 'package:get/get.dart';
 
 enum AccountSettingState { view, editName, editPassword, editCV }
 
@@ -18,16 +25,13 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
     with TickerProviderStateMixin {
   // ---- State ----
   AccountSettingState _currentState = AccountSettingState.view;
+  late UserModel user;
 
   // ---- Controllers ----
-  final TextEditingController _nameController = TextEditingController(
-    text: 'Jhon Doe Smith',
-  );
-  final TextEditingController _currentPasswordController =
-      TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _currentPasswordController;
+  late TextEditingController _newPasswordController;
+  late TextEditingController _confirmPasswordController;
 
   // ---- Visibility ----
   bool _showCurrentPassword = false;
@@ -35,17 +39,36 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
   bool _showConfirmPassword = false;
 
   // ---- Data ----
-  String _displayName = 'Jhon Doe Smith';
-  String _cvFileName = 'cv_John.pdf';
+  String _displayName = '';
+  String _email = '';
+  String _cvFileName = '';
   bool _hasCv = true;
 
   // ---- Animation ----
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
 
+  final UserController _userController = Get.find<UserController>();
+
   @override
   void initState() {
     super.initState();
+    user = Get.arguments as UserModel;
+    _displayName = user.fullName ?? 'Guest User';
+    _email = user.emailAddress ?? 'Email Not Found';
+    if (user.myCv != null && user.myCv!.isNotEmpty) {
+      _cvFileName = user.myCv!.split('/').last;
+      _hasCv = true;
+    } else {
+      _cvFileName = 'No CV uploaded';
+      _hasCv = false;
+    }
+
+    _nameController = TextEditingController(text: _displayName);
+    _currentPasswordController = TextEditingController();
+    _newPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
@@ -78,10 +101,10 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
   void _saveName() {
     setState(() => _displayName = _nameController.text);
     _switchState(AccountSettingState.view);
-    _showSnack('Name updated successfully');
+    _userController.updateUserName(name: _nameController.text);
   }
 
-  void _savePassword() {
+  void _savePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
       _showSnack('Passwords do not match', isError: true);
       return;
@@ -93,8 +116,16 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
     _currentPasswordController.clear();
     _newPasswordController.clear();
     _confirmPasswordController.clear();
-    _switchState(AccountSettingState.view);
-    _showSnack('Password updated successfully');
+
+    final bool update = await _userController.updatePassword(
+      currentPassword: _currentPasswordController.text,
+      newPassword: _newPasswordController.text,
+      confirmPassword: _confirmPasswordController.text,
+    );
+
+    if (update) {
+      _switchState(AccountSettingState.view);
+    }
   }
 
   void _cancelEdit() {
@@ -105,14 +136,26 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
     _switchState(AccountSettingState.view);
   }
 
-  void _pickCV() {
-    // Simulate file pick
+  void _pickCV() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result == null) return;
+
+    final file = result.files.first;
+
     setState(() {
-      _cvFileName = 'cv_John_updated.pdf';
+      _cvFileName = file.name;
       _hasCv = true;
     });
+
     _switchState(AccountSettingState.view);
-    _showSnack('CV uploaded successfully');
+
+    if (file.path != null) {
+      _userController.updateUserCv(cv: File(file.path!));
+    }
   }
 
   void _showSnack(String msg, {bool isError = false}) {
@@ -195,22 +238,40 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(50.r),
-                child: Image.asset(
-                  "assets/image/profile.jpg",
-                  fit: BoxFit.cover,
-                  height: 60.w,
-                  width: 60.h,
-                ),
+                child: _userController.user.value.avatar != null
+                    ? Image.network(
+                        _userController.user.value.avatar ?? '',
+                        fit: BoxFit.cover,
+                        height: 60.w,
+                        width: 60.h,
+                      )
+                    : SizedBox(
+                        height: 60.w,
+                        width: 60.h,
+                        child: Icon(Icons.person),
+                      ),
               ),
               Positioned(
                 bottom: 0.w,
-                right: -15.w,
+                right: -10.w,
                 child: GestureDetector(
-                  onTap: () => _showSnack('Profile photo updated'),
+                  onTap: () {
+                    showImagePickerOptions(context, (imageSource) async {
+                      File? pickedImage = await pickSingleImage(
+                        context: context,
+                        source: imageSource,
+                      );
+
+                      if (pickedImage != null) {
+                        _userController.updateProfileImage(pickedImage);
+                      }
+                    });
+                  },
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
+                      color: Colors.white,
                       border: Border.all(
                         color: AppColors.primary.withValues(alpha: 0.5),
                         width: 2,
@@ -218,8 +279,8 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
                     ),
                     child: SvgPicture.asset(
                       'assets/icons/Camera.svg',
-                      width: 16.w,
-                      height: 16.h,
+                      width: 20.w,
+                      height: 20.h,
                     ),
                   ),
                 ),
@@ -240,7 +301,7 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
               ),
               const SizedBox(height: 2),
               Text(
-                'Jhon @gmail.com',
+                _email,
                 style: TextStyle(fontSize: 14.sp, color: AppColors.lightText),
               ),
             ],
@@ -648,7 +709,7 @@ class _BarAccountSettingScreenState extends State<BarAccountSettingScreen>
               elevation: 0,
             ),
             child: const Text(
-              'Save',
+              'Change Password',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),

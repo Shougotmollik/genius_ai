@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/ingredient_controller.dart';
+import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/model/ingredient.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_purechase_dialog.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_edit_ingredient_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
-import 'package:get/get_utils/get_utils.dart';
+import 'package:get/get.dart';
 
 class BarIngredientsInfoCard extends StatefulWidget {
   const BarIngredientsInfoCard({super.key, required this.ingredient});
@@ -18,11 +20,11 @@ class BarIngredientsInfoCard extends StatefulWidget {
 }
 
 class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
-  String _selectedStatusType = 'Good';
-  final List<String> _leaveTypes = ["Good", "Low", "None"];
-  bool isMissing = false;
+  final UserController _userController = Get.find<UserController>();
+  final IngredientController _ingredientController =
+      Get.find<IngredientController>();
 
-  // Status → Color
+  // Status → Color mapping
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Good':
@@ -36,7 +38,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
     }
   }
 
-  // Status Badge
+  // Status Badge Widget
   Widget _statusBadge(String status) {
     final color = _getStatusColor(status);
 
@@ -75,64 +77,66 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
       ),
       child: Column(
         children: [
-          // Edit / Delete
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => BarEditIngredientDialog(
-                      id: widget.ingredient.id.toString(),
+          // Edit / Delete Row (Permission check included)
+          _userController.user.value.id != widget.ingredient.createdBy
+              ? const SizedBox()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => BarEditIngredientDialog(
+                            id: widget.ingredient.id.toString(),
+                          ),
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
+                        icon: "assets/icons/pen_edit.svg",
+                      ),
                     ),
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
-                  icon: "assets/icons/pen_edit.svg",
+                    SizedBox(width: 12.w),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return DeleteDialogWidget(
+                              title:
+                                  "Are you sure you want to delete ${widget.ingredient.name}?",
+                              onDelete: () async {
+                                final bool success = await _ingredientController
+                                    .deleteIngredient(
+                                      id: widget.ingredient.id.toString(),
+                                    );
+                                if (success) {
+                                  Get.back();
+                                }
+                              },
+                            );
+                          },
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffFAE9E9),
+                        icon: "assets/icons/delete.svg",
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(width: 12.w),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return DeleteDialogWidget(
-                        title: "Are you sure you want to delete it ?",
-                      );
-                    },
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffFAE9E9),
-                  icon: "assets/icons/delete.svg",
-                ),
-              ),
-            ],
-          ),
 
-          // SizedBox(height: 12.h),
-
-          // //Mark Missing + Status Dropdown
-          // Row(
-          //   children: [
-          //     Expanded(child: _outlineChip("Mark Missing")),
-          //     SizedBox(width: 200.w),
-          //     // Expanded(child: _statusDropdown()),
-          //   ],
-          // ),
           SizedBox(height: 12.h),
 
-          //Ingredient name & price
+          // Ingredient Name & Price Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.ingredient.name!.capitalize ?? "",
+                widget.ingredient.name?.capitalize ?? "Unknown",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -152,7 +156,7 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
 
           SizedBox(height: 8.h),
 
-          //DETAILS
+          // Details List
           Column(
             children: [
               IngredientDetailRow(
@@ -167,10 +171,10 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
               ),
               IngredientDetailRow(
                 title: "Category",
-                value: widget.ingredient.categoryName!,
+                value: widget.ingredient.categoryName ?? "N/A",
               ),
 
-              // STATUS ROW WITH BADGE
+              // Status Badge Row
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 2.h),
                 child: Row(
@@ -196,70 +200,25 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
                 value:
                     "\$${widget.ingredient.pricePerUnit}/${widget.ingredient.unit}",
               ),
+
+              SizedBox(height: 12.h),
+
+              // Export / Import Buttons
               Row(
-                spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              "assets/icons/export.svg",
-                              height: 24.w,
-                              width: 24.w,
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "Export",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.lightText,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _actionButton(
+                      title: "Export",
+                      icon: "assets/icons/export.svg",
+                      isPrimary: false,
                     ),
                   ),
+                  SizedBox(width: 18.w),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          spacing: 5.w,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              "assets/icons/download.svg",
-                              height: 24.w,
-                              width: 24.w,
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "Import",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _actionButton(
+                      title: "Import",
+                      icon: "assets/icons/download.svg",
+                      isPrimary: true,
                     ),
                   ),
                 ],
@@ -267,10 +226,9 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
             ],
           ),
 
-          SizedBox(height: 18.h),
-
-          // ! Add to Purchase
+          // Add to Purchase Button (Only shows if status is 'None')
           if (widget.ingredient.status?.capitalizeFirst == 'None') ...[
+            SizedBox(height: 18.h),
             GestureDetector(
               onTap: () {
                 showDialog(
@@ -280,17 +238,17 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50.r),
                 ),
                 child: Center(
                   child: Row(
-                    spacing: 5.w,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add, color: AppColors.primary, size: 24.w),
+                      Icon(Icons.add, color: AppColors.primary, size: 22.w),
+                      SizedBox(width: 5.w),
                       Text(
                         "Add to Purchase",
                         style: TextStyle(
@@ -310,77 +268,48 @@ class _BarIngredientsInfoCardState extends State<BarIngredientsInfoCard> {
     );
   }
 
+  // Helper for Export/Import style buttons
+  Widget _actionButton({
+    required String title,
+    required String icon,
+    required bool isPrimary,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: isPrimary
+            ? AppColors.primary.withValues(alpha: 0.15)
+            : AppColors.surface,
+        border: isPrimary
+            ? null
+            : Border.all(color: AppColors.border, width: 1.w),
+        borderRadius: BorderRadius.circular(50.r),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(icon, height: 20.w, width: 20.w),
+            SizedBox(width: 5.w),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: isPrimary ? AppColors.primary : AppColors.lightText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _iconButton({required Color bgColor, required String icon}) {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: SvgPicture.asset(icon, height: 18.h, width: 18.w),
-    );
-  }
-
-  Widget _outlineChip(String text) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isMissing = !isMissing;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.h),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isMissing ? Colors.red : AppColors.border,
-            width: 1.w,
-          ),
-          borderRadius: BorderRadius.circular(50.r),
-        ),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 4.w,
-            children: [
-              if (isMissing)
-                Icon(Icons.check_rounded, color: Colors.red, size: 18.w),
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: isMissing ? Colors.red : AppColors.lightText,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _statusDropdown() {
-    return Container(
-      height: 32.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedStatusType,
-          isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
-          items: _leaveTypes
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e, style: TextStyle(fontSize: 12.sp)),
-                ),
-              )
-              .toList(),
-          onChanged: (val) {
-            setState(() => _selectedStatusType = val!);
-          },
-        ),
-      ),
     );
   }
 }

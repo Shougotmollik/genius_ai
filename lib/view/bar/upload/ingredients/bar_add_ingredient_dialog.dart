@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:excel/excel.dart' hide Border;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -16,9 +19,77 @@ class BarAddIngredientDialog extends StatefulWidget {
 }
 
 class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
-  // String selectedCategory = "Other";
-  String selectedStatus = "Good";
   final IngredientController controller = Get.find<IngredientController>();
+
+  // Batch Ingredients logic
+  List<Map<String, dynamic>> _batchIngredients = [];
+
+  Future<void> _pickExcelFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx', 'xls'],
+    );
+
+    if (result != null) {
+      var bytes = File(result.files.single.path!).readAsBytesSync();
+      var excel = Excel.decodeBytes(bytes);
+
+      var table = excel.tables.keys.first;
+      var rows = excel.tables[table]!.rows;
+
+      if (rows.length > 1) {
+        _batchIngredients.clear();
+
+        for (int i = 1; i < rows.length; i++) {
+          var row = rows[i];
+
+          String catName = row[3]?.value.toString().trim() ?? "";
+          String rawUnit = row[2]?.value.toString().trim() ?? "";
+          String normalizedUnit = rawUnit.toLowerCase() == "kg"
+              ? "kg"
+              : rawUnit;
+          var rawPrice = row[1]?.value.toString().trim() ?? "0";
+
+          _batchIngredients.add({
+            "name": row[0]?.value.toString().trim() ?? "",
+            "category": catName,
+            "outlet_type": "bar", // Set to bar
+            "unit": normalizedUnit,
+            "price_per_unit": rawPrice,
+            "current_stock": int.tryParse(row[4]?.value.toString() ?? "0") ?? 0,
+            "minimum_stock": int.tryParse(row[5]?.value.toString() ?? "0") ?? 0,
+            "is_special": row[6]?.value.toString().toLowerCase() == "true",
+          });
+        }
+
+        // Sync first item to UI fields
+        if (_batchIngredients.isNotEmpty) {
+          var first = _batchIngredients.first;
+          nameController.text = first['name'];
+          unitController.text = first['unit'];
+          priceController.text = first['price_per_unit'];
+          currentStockController.text = first['current_stock'].toString();
+          minStockController.text = first['minimum_stock'].toString();
+
+          setState(() {
+            selectedCategory = controller.categoryList.firstWhereOrNull(
+              (c) =>
+                  c.name.toLowerCase().trim() ==
+                  first['category'].toString().toLowerCase(),
+            );
+          });
+        }
+
+        AppSnackbar.show(
+          message:
+              "${_batchIngredients.length} ingredients loaded successfully",
+          type: SnackType.success,
+        );
+      }
+    }
+  }
+
+  // Controllers
   IngredientCategory? selectedCategory;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController unitController = TextEditingController();
@@ -42,7 +113,7 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Close Button
+              // Close Button
               Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
@@ -56,7 +127,6 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
 
               SizedBox(height: 12.h),
 
-              /// Unit & Price
               Row(
                 children: [
                   Expanded(
@@ -64,7 +134,7 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _label("Unit"),
-                        _textField(hint: "Type Unit", ctr: unitController),
+                        _textField(hint: "e.g. Kg", ctr: unitController),
                       ],
                     ),
                   ),
@@ -74,7 +144,11 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _label("Price / Unit"),
-                        _textField(hint: "Type Price", ctr: priceController),
+                        _textField(
+                          hint: "Price",
+                          ctr: priceController,
+                          keyboardType: TextInputType.number,
+                        ),
                       ],
                     ),
                   ),
@@ -87,16 +161,20 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
               _textField(
                 hint: "Enter Current Stock",
                 ctr: currentStockController,
+                keyboardType: TextInputType.number,
               ),
 
               SizedBox(height: 12.h),
 
               _label("Minimum Stock"),
-              _textField(hint: "Type Minimum Stock", ctr: minStockController),
+              _textField(
+                hint: "Type Minimum Stock",
+                ctr: minStockController,
+                keyboardType: TextInputType.number,
+              ),
 
               SizedBox(height: 12.h),
 
-              /// Category Dropdown
               _label("Category"),
               Obx(
                 () => DropdownButtonFormField<IngredientCategory>(
@@ -120,27 +198,17 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                 ),
               ),
 
-              // SizedBox(height: 12.h),
+              SizedBox(height: 12.h),
 
-              // /// Status Dropdown
-              // _label("Status"),
-              // _dropdown(
-              //   value: selectedStatus,
-              //   items: ["Good", "Low ", "None"],
-              //   onChanged: (value) {
-              //     setState(() => selectedStatus = value!);
-              //   },
-              // ),
               Row(
                 children: [
-                  Checkbox(
-                    value: controller.isSpecial.value,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: (value) {
-                      setState(() {
-                        controller.isSpecial.value = value ?? false;
-                      });
-                    },
+                  Obx(
+                    () => Checkbox(
+                      value: controller.isSpecial.value,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (value) =>
+                          controller.isSpecial.value = value ?? false,
+                    ),
                   ),
                   Text(
                     "Is it special?",
@@ -148,6 +216,7 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                   ),
                 ],
               ),
+
               SizedBox(height: 12.h),
               Align(
                 alignment: Alignment.center,
@@ -161,9 +230,9 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                 ),
               ),
 
-              // Upload Box
+              // Excel Upload Box
               GestureDetector(
-                onTap: () {},
+                onTap: _pickExcelFile,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: DottedBorder(
@@ -201,7 +270,6 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: AppColors.text,
-                              fontWeight: FontWeight.w400,
                             ),
                           ),
                         ],
@@ -212,19 +280,24 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
               ),
 
               SizedBox(height: 24.h),
+
+              // Action Buttons
               Row(
                 spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          border: Border.all(
+                            color: AppColors.border,
+                            width: 1.w,
+                          ),
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
                         child: Center(
                           child: Text(
                             "Cancel",
@@ -241,29 +314,44 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
-                        //  Validation
-                        if (selectedCategory == null) {
-                          AppSnackbar.show(
-                            message: "Select a category",
-                            type: SnackType.error,
-                          );
-                          return;
+                        List<Map<String, dynamic>> payload = [];
+
+                        if (_batchIngredients.isNotEmpty) {
+                          _batchIngredients[0] = {
+                            "name": nameController.text.trim(),
+                            "category": selectedCategory?.name ?? "",
+                            "outlet_type": "bar",
+                            "unit": unitController.text.trim(),
+                            "price_per_unit": priceController.text.trim(),
+                            "current_stock":
+                                int.tryParse(currentStockController.text) ?? 0,
+                            "minimum_stock":
+                                int.tryParse(minStockController.text) ?? 0,
+                            "is_special": controller.isSpecial.value,
+                          };
+                          payload = _batchIngredients;
+                        } else {
+                          payload = [
+                            {
+                              "name": nameController.text.trim(),
+                              "category": selectedCategory?.name ?? "",
+                              "outlet_type": "bar",
+                              "unit": unitController.text.trim(),
+                              "price_per_unit": priceController.text.trim(),
+                              "current_stock":
+                                  int.tryParse(currentStockController.text) ??
+                                  0,
+                              "minimum_stock":
+                                  int.tryParse(minStockController.text) ?? 0,
+                              "is_special": controller.isSpecial.value,
+                            },
+                          ];
                         }
 
-                        // bool success = await controller.postIngredient(
-                        //   name: nameController.text.trim(),
-                        //   categoryId: selectedCategory!.id,
-                        //   unit: unitController.text.trim(),
-                        //   price: priceController.text.trim(),
-                        //   currentStock:
-                        //       int.tryParse(currentStockController.text) ?? 0,
-                        //   minStock: int.tryParse(minStockController.text) ?? 0,
-                        //   isSpecial: controller.isSpecial.value,
-                        // );
-
-                        // if (success) {
-                        //   Navigator.pop(context);
-                        // }
+                        bool success = await controller.postIngredient(
+                          ingredients: payload,
+                        );
+                        if (success) Navigator.pop(context);
                       },
                       child: Obx(
                         () => Container(
@@ -274,14 +362,23 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                           ),
                           child: Center(
                             child: controller.isLoading.value
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
+                                ? SizedBox(
+                                    height: 20.w,
+                                    width: 20.w,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : Row(
-                                    spacing: 5.w,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.add, color: AppColors.surface),
+                                      Icon(
+                                        Icons.add,
+                                        color: AppColors.surface,
+                                        size: 20.w,
+                                      ),
+                                      SizedBox(width: 5.w),
                                       Text(
                                         "Add",
                                         style: TextStyle(
@@ -307,7 +404,6 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
     );
   }
 
-  /// Label
   Widget _label(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
@@ -322,10 +418,14 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
     );
   }
 
-  /// TextField
-  Widget _textField({required String hint, TextEditingController? ctr}) {
+  Widget _textField({
+    required String hint,
+    TextEditingController? ctr,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return TextFormField(
       controller: ctr,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
         isDense: true,
@@ -334,26 +434,6 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
           borderRadius: BorderRadius.circular(8.r),
           borderSide: BorderSide(color: AppColors.border),
         ),
-      ),
-    );
-  }
-
-  /// Dropdown Field
-  Widget _dropdown({
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
       ),
     );
   }

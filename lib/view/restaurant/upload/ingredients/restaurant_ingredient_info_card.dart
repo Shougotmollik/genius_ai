@@ -108,7 +108,8 @@ class _RestaurantIngredientsInfoCardState
                           barrierDismissible: false,
                           builder: (context) {
                             return DeleteDialogWidget(
-                              title: "Are you sure you want to delete it?",
+                              title:
+                                  "Are you sure you want to delete ${widget.ingredient.name}?",
                               onDelete: () async {
                                 final bool success = await _ingredientController
                                     .deleteIngredient(

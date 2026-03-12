@@ -18,10 +18,6 @@ class BarEditIngredientDialog extends StatefulWidget {
 }
 
 class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
-  // String selectedCategory = "Other";
-  String selectedStatus = "Good";
-
-  // Get your controller
   final IngredientController controller = Get.find<IngredientController>();
 
   late TextEditingController nameController;
@@ -29,18 +25,17 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
   late TextEditingController priceController;
   late TextEditingController currentStockController;
   late TextEditingController minStockController;
-
   IngredientCategory? selectedCategory;
 
   @override
   void initState() {
     super.initState();
-    // 1. Find the existing ingredient data by ID
+    // 1. Find existing data from the controller's list
     final ingredient = controller.ingredientList.firstWhere(
       (element) => element.id.toString() == widget.id,
     );
 
-    // 2. Initialize controllers with existing data
+    // 2. Initialize controllers with current values
     nameController = TextEditingController(text: ingredient.name);
     unitController = TextEditingController(text: ingredient.unit);
     priceController = TextEditingController(text: ingredient.pricePerUnit);
@@ -51,10 +46,20 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
       text: ingredient.minimumStock.toString(),
     );
 
-    // 3. Match the category object
+    // 3. Set the initial category match
     selectedCategory = controller.categoryList.firstWhereOrNull(
       (cat) => cat.name == ingredient.categoryName,
     );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    unitController.dispose();
+    priceController.dispose();
+    currentStockController.dispose();
+    minStockController.dispose();
+    super.dispose();
   }
 
   @override
@@ -73,7 +78,7 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Close Button
+              // Close Button
               Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
@@ -87,7 +92,6 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
 
               SizedBox(height: 12.h),
 
-              /// Unit & Price
               Row(
                 children: [
                   Expanded(
@@ -124,7 +128,7 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
 
               SizedBox(height: 12.h),
 
-              /// Category Dropdown
+              /// Dynamic Category Dropdown
               _label("Category"),
               Obx(
                 () => _dropdown<IngredientCategory>(
@@ -141,94 +145,25 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
                 ),
               ),
 
-              SizedBox(height: 12.h),
-
-              // /// Status Dropdown
-              // _label("Status"),
-              // _dropdown(
-              //   value: selectedStatus,
-              //   items: ["Good", "Low ", "None"],
-              //   onChanged: (value) {
-              //     setState(() => selectedStatus = value!);
-              //   },
-              // ),
-              // SizedBox(height: 12.h),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Or",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16.sp,
-                    color: AppColors.lightText,
-                  ),
-                ),
-              ),
-
-              // Upload Box
-              GestureDetector(
-                onTap: () {},
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: DottedBorder(
-                    options: RectDottedBorderOptions(
-                      color: AppColors.primary,
-                      strokeWidth: 2.w,
-                      dashPattern: const [10, 8],
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Column(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/image-upload.svg',
-                            width: 32.w,
-                            height: 32.w,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Click here to upload ingredient',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Max. File Size: 10MB',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
               SizedBox(height: 24.h),
+
+              // Action Buttons
               Row(
                 spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          border: Border.all(
+                            color: AppColors.border,
+                            width: 1.w,
+                          ),
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
                         child: Center(
                           child: Text(
                             "Cancel",
@@ -245,24 +180,36 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
-                        if (selectedCategory == null) {
-                          AppSnackbar.show(
-                            message: "Please select a category",
-                            type: SnackType.error,
-                          );
-                          return;
-                        }
-                        // bool success = await controller.updateIngredient(
-                        //   id: int.parse(widget.id),
-                        //   name: nameController.text.trim(),
-                        //   categoryId: selectedCategory!.id,
-                        //   unit: unitController.text.trim(),
-                        //   price: priceController.text.trim(),
-                        //   currentStock:
-                        //       int.tryParse(currentStockController.text) ?? 0,
-                        //   minStock: int.tryParse(minStockController.text) ?? 0,
-                        //   // isSpecial: controller.isSpecialTab.value,
-                        // );
+                        // if (selectedCategory == null) {
+                        //   AppSnackbar.show(
+                        //     message: "Please select a category",
+                        //     type: SnackType.error,
+                        //   );
+                        //   return;
+                        // }
+
+                        // Payload setup matching Restaurant logic
+                        List<Map<String, dynamic>> payload = [
+                          {
+                            "id": int.parse(widget.id),
+                            "name": nameController.text.trim(),
+                            "category": selectedCategory?.name ?? "",
+                            "outlet_type": "bar",
+                            "unit": unitController.text.trim(),
+                            "price_per_unit": priceController.text.trim(),
+                            "current_stock":
+                                int.tryParse(currentStockController.text) ?? 0,
+                            "minimum_stock":
+                                int.tryParse(minStockController.text) ?? 0,
+                            "is_special": controller.isSpecial.value,
+                          },
+                        ];
+
+                        final bool success = await controller.updateIngredient(
+                          ingredients: payload,
+                        );
+
+                        Navigator.pop(context);
 
                         // if (success) {
                         //   Navigator.pop(context);
@@ -277,12 +224,16 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
                           ),
                           child: Center(
                             child: controller.isLoading.value
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.5,
+                                ? SizedBox(
+                                    height: 18.h,
+                                    width: 18.w,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
                                   )
                                 : Text(
-                                    "Save",
+                                    "Update",
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,
@@ -304,7 +255,6 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
     );
   }
 
-  /// Label
   Widget _label(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
@@ -319,7 +269,6 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
     );
   }
 
-  /// TextField
   Widget _textField({required TextEditingController ctr}) {
     return TextFormField(
       controller: ctr,
@@ -334,7 +283,6 @@ class _BarEditIngredientDialogState extends State<BarEditIngredientDialog> {
     );
   }
 
-  /// Dropdown Field
   Widget _dropdown<T>({
     required T? value,
     required List<DropdownMenuItem<T>> items,

@@ -711,7 +711,7 @@ class _RestaurantAccountSettingScreenState
               elevation: 0,
             ),
             child: const Text(
-              'Save',
+              'Change Password',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),

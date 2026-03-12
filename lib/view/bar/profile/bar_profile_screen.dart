@@ -4,19 +4,23 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/auth_controller.dart';
-import 'package:genius_ai/view/bar/profile/bar_account_setting_screen.dart';
-import 'package:genius_ai/view/bar/profile/bar_leave_history_screen.dart';
-import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
-import 'package:genius_ai/view/bar/profile/bar_language_selection_screen.dart';
+import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/view/widgets/log_out_dialog.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
-class BarProfileScreen extends StatelessWidget {
+class BarProfileScreen extends StatefulWidget {
   const BarProfileScreen({super.key});
 
   @override
+  State<BarProfileScreen> createState() => _BarProfileScreenState();
+}
+
+class _BarProfileScreenState extends State<BarProfileScreen> {
+  final AuthController authController = Get.find<AuthController>();
+  final UserController _userController = Get.find<UserController>();
+  @override
   Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>();
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -51,19 +55,22 @@ class BarProfileScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(50.r),
-                      child: Image.asset(
-                        'assets/image/profile.jpg',
-                        height: 60.w,
-                        width: 60.w,
-                        fit: BoxFit.cover,
-                      ),
+                      child: _userController.user.value.avatar != null
+                          ? Image.network(
+                              _userController.user.value.avatar ?? '',
+                              height: 60.w,
+                              width: 60.w,
+                              fit: BoxFit.cover,
+                            )
+                          : const Icon(Icons.person),
                     ),
                     const SizedBox(width: 14),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Jhon Doe Smith',
+                        Text(
+                          _userController.user.value.fullName ??
+                              'Name Not Found',
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
@@ -71,7 +78,8 @@ class BarProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'deshreen@gmail.com',
+                          _userController.user.value.emailAddress ??
+                              'Email Not Found',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.lightText,
@@ -86,13 +94,18 @@ class BarProfileScreen extends StatelessWidget {
                               color: AppColors.lightText,
                             ),
                             SizedBox(width: 4),
-                            Text(
-                              'Joined Since 2025',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.lightText,
-                              ),
-                            ),
+                            Obx(() {
+                              final joinDate =
+                                  _userController.user.value.joinDate;
+
+                              return Text(
+                                'Joined ${joinDate != null ? DateFormat('dd MMM yyyy').format(DateTime.parse(joinDate.toString())) : 'Date Not Found'}',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: AppColors.lightText,
+                                ),
+                              );
+                            }),
                           ],
                         ),
                       ],
@@ -137,7 +150,10 @@ class BarProfileScreen extends StatelessWidget {
                       icon: 'assets/icons/setting.svg',
                       label: 'Account Settings',
                       onTap: () {
-                        Get.toNamed(RouteNames.barAccountSettings);
+                        Get.toNamed(
+                          RouteNames.barAccountSettings,
+                          arguments: _userController.user.value,
+                        );
                       },
                     ),
                     _SettingsTile(
