@@ -9,7 +9,6 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 
 class RestaurantAddRecipeDialog extends StatefulWidget {
   const RestaurantAddRecipeDialog({super.key});

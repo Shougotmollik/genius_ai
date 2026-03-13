@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/view/bar/upload/menu/bar_add_menu_dialog.dart';
 import 'package:genius_ai/view/bar/upload/menu/menu_info_card.dart';
-import 'package:genius_ai/view/bar/upload/menu/recipe_my_request_screen.dart';
+import 'package:genius_ai/view/bar/upload/menu/bar_menu_request_screen.dart';
 import 'package:get/get.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
@@ -65,7 +65,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               _buildSearchBar(),
               SizedBox(height: 12.h),
 
-              Column(children: List.generate(3, (index) => MenuInfoCard())),
+              // Column(children: List.generate(3, (index) => MenuInfoCard())),
             ],
           ),
         ),
@@ -116,7 +116,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(MenuMyRequestScreen());
+              Get.to(BarMenuRequestScreen());
             },
             child: Container(
               padding: const EdgeInsets.all(12),

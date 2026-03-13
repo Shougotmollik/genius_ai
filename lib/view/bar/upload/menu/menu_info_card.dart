@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/menu_controller.dart';
+import 'package:genius_ai/controller/user_controller.dart';
+import 'package:genius_ai/model/menu.dart';
 import 'package:genius_ai/view/bar/upload/menu/bar_edit_menu_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
+import 'package:get/get.dart';
 
 class MenuInfoCard extends StatefulWidget {
-  const MenuInfoCard({super.key});
+  const MenuInfoCard({super.key, required this.menu});
 
+  final Menu menu;
   @override
   State<MenuInfoCard> createState() => _MenuInfoCardState();
 }
 
 class _MenuInfoCardState extends State<MenuInfoCard> {
+  final UserController _userController = Get.find<UserController>();
+  final BarMenuController _barMenuController = Get.find<BarMenuController>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -32,42 +40,53 @@ class _MenuInfoCardState extends State<MenuInfoCard> {
       child: Column(
         children: [
           // Edit / Delete
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => const BarEditMenuDialog(),
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
-                  icon: "assets/icons/pen_edit.svg",
+          _userController.user.value.id != widget.menu.createdBy
+              ? const SizedBox()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              BarEditMenuDialog(id: widget.menu.id.toString()),
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
+                        icon: "assets/icons/pen_edit.svg",
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return DeleteDialogWidget(
+                              title:
+                                  "Are you sure you want to delete ${widget.menu.name}?",
+                              onDelete: () async {
+                                final bool success = await _barMenuController
+                                    .deleteMenu(id: widget.menu.id.toString());
+                                if (success) {
+                                  Get.back();
+                                }
+                              },
+                            );
+                          },
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffFAE9E9),
+                        icon: "assets/icons/delete.svg",
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(width: 12.w),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return DeleteDialogWidget(
-                        title: "Are you sure you want to delete it?",
-                      );
-                    },
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffFAE9E9),
-                  icon: "assets/icons/delete.svg",
-                ),
-              ),
-            ],
-          ),
 
           SizedBox(height: 12.h),
 
@@ -76,7 +95,7 @@ class _MenuInfoCardState extends State<MenuInfoCard> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Summer Special Menu",
+                widget.menu.name ?? "Not Defined",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -91,9 +110,18 @@ class _MenuInfoCardState extends State<MenuInfoCard> {
           //DETAILS
           Column(
             children: [
-              IngredientDetailRow(title: "Items", value: "7"),
-              IngredientDetailRow(title: "Cost", value: "\$25"),
-              IngredientDetailRow(title: "Type", value: "Lunch"),
+              IngredientDetailRow(
+                title: "Items",
+                value: (widget.menu.dishes?.length ?? 0).toString(),
+              ),
+              IngredientDetailRow(
+                title: "Cost",
+                value: "\$${widget.menu.totalCost}",
+              ),
+              IngredientDetailRow(
+                title: "Type",
+                value: widget.menu.menuType ?? "Not Defined",
+              ),
               SizedBox(height: 8.h),
               Row(
                 spacing: 18.w,

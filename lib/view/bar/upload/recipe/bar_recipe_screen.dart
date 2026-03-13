@@ -18,7 +18,7 @@ class BarRecipeScreen extends StatefulWidget {
 }
 
 class _BarRecipeScreenState extends State<BarRecipeScreen> {
-  final RecipeController controller = Get.put(RecipeController());
+  final RecipeController controller = Get.find<RecipeController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,7 +78,12 @@ class _BarRecipeScreenState extends State<BarRecipeScreen> {
                       (index) => Skeletonizer(
                         enabled: true,
                         child: BarRecipeInfoCard(
-                          recipe: Recipe(id: 1, name: "Loading...", avgTime: 0),
+                          recipe: Recipe(
+                            id: 1,
+                            name: "Loading...",
+                            avgTime: 0,
+                            sellingCost: "",
+                          ),
                         ),
                       ),
                     ),

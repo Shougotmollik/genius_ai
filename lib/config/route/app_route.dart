@@ -15,8 +15,10 @@ import 'package:genius_ai/view/bar/profile/bar_leave_history_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
+import 'package:genius_ai/view/bar/upload/menu/bar_menu_request_screen.dart';
+import 'package:genius_ai/view/bar/upload/menu/bar_menu_screen.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_recipe_screen.dart';
-import 'package:genius_ai/view/bar/upload/recipe/recipe_my_request_screen.dart';
+import 'package:genius_ai/view/bar/upload/recipe/bar_recipe_my_request_screen.dart';
 import 'package:genius_ai/view/onboarding/onboarding_screen.dart';
 import 'package:genius_ai/view/onboarding/splash_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_create_new_password_screen.dart';
@@ -107,6 +109,17 @@ class AppRoute {
       page: () => BarRecipeMyRequestScreen(),
       binding: ControllerBinding(),
     ),
+
+    GetPage(
+      name: RouteNames.barMenuScreen,
+      page: () => BarMenuScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.barMenuRequestScreen,
+      page: () => BarMenuRequestScreen(),
+      binding: ControllerBinding(),
+    ),
     GetPage(
       name: RouteNames.barAccountSettings,
       page: () => BarAccountSettingScreen(),
@@ -130,6 +143,7 @@ class AppRoute {
     GetPage(
       name: RouteNames.barEditLeaveRequest,
       page: () => BarEditLeaveRequestScreen(),
+      binding: ControllerBinding(),
     ),
     //! Restaurant
     GetPage(

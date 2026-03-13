@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/recipe_controller.dart'; // Added
+import 'package:genius_ai/controller/user_controller.dart'; // Added
 import 'package:genius_ai/model/recipe.dart';
+import 'package:genius_ai/view/bar/upload/menu/menu_info_card.dart';
 import 'package:genius_ai/view/bar/upload/recipe/bar_edit_recipe_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
+import 'package:get/get.dart'; // Added
 
 class BarRecipeInfoCard extends StatefulWidget {
   const BarRecipeInfoCard({super.key, required this.recipe});
@@ -15,6 +19,9 @@ class BarRecipeInfoCard extends StatefulWidget {
 }
 
 class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
+  final UserController _userController = Get.find<UserController>();
+  final RecipeController _recipeController = Get.find<RecipeController>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -34,43 +41,55 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
       child: Column(
         children: [
           // Edit / Delete
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) =>
-                        BarEditRecipeDialog(recipe: widget.recipe),
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
-                  icon: "assets/icons/pen_edit.svg",
+          _userController.user.value.id != widget.recipe.createdBy
+              ? const SizedBox()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              BarEditRecipeDialog(recipe: widget.recipe),
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffF0B100).withValues(alpha: 0.2),
+                        icon: "assets/icons/pen_edit.svg",
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return DeleteDialogWidget(
+                              title:
+                                  "Are you sure you want to delete ${widget.recipe.name}?",
+                              onDelete: () async {
+                                final bool success = await _recipeController
+                                    .deleteRecipe(
+                                      id: widget.recipe.id.toString(),
+                                    );
+                                if (success) {
+                                  Get.back();
+                                }
+                              },
+                            );
+                          },
+                        );
+                      },
+                      child: _iconButton(
+                        bgColor: const Color(0xffFAE9E9),
+                        icon: "assets/icons/delete.svg",
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(width: 12.w),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return DeleteDialogWidget(
-                        title: "Are you sure you want to delete it?",
-                      );
-                    },
-                  );
-                },
-                child: _iconButton(
-                  bgColor: const Color(0xffFAE9E9),
-                  icon: "assets/icons/delete.svg",
-                ),
-              ),
-            ],
-          ),
 
           //Ingredient name & price
           Row(
@@ -181,61 +200,6 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: SvgPicture.asset(icon, height: 18.h, width: 18.w),
-    );
-  }
-
-  Widget _outlineChip(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 12.sp, color: AppColors.lightText),
-        ),
-      ),
-    );
-  }
-}
-
-class IngredientDetailRow extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const IngredientDetailRow({
-    super.key,
-    required this.title,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.text,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.text,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -26,6 +26,8 @@ class _BarLeaveRequestScreenState extends State<BarLeaveRequestScreen> {
     'Maternity',
     'Paternity',
     'Unpaid',
+    "Emergency",
+    "Others",
   ];
 
   final _dateFormat = 'mm/dd/yyyy';

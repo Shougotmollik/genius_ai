@@ -272,6 +272,18 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                               color: AppColors.text,
                             ),
                           ),
+                          // Show loaded batch count
+                          if (_batchIngredients.isNotEmpty) ...[
+                            SizedBox(height: 6.h),
+                            Text(
+                              '${_batchIngredients.length} menu(s) loaded',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

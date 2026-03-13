@@ -5,6 +5,7 @@ import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe_request.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class BarRecipeMyRequestScreen extends StatefulWidget {
   const BarRecipeMyRequestScreen({super.key});
@@ -141,7 +142,23 @@ class _BarRecipeMyRequestScreenState extends State<BarRecipeMyRequestScreen> {
 
                     // Content List
                     if (controller.isLoading.value)
-                      const Center(child: CircularProgressIndicator())
+                      Column(
+                        children: List.generate(
+                          3,
+                          (index) => Skeletonizer(
+                            enabled: true,
+                            child: InventoryCard(
+                              request: RecipeRequest(
+                                approvalStatus: '',
+                                id: 0,
+                                name: "",
+                                avgTime: 0,
+                                sellingCost: "",
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
                     else if (controller.myRequests.isEmpty)
                       const Center(child: Text("No requests found"))
                     else
@@ -247,7 +264,7 @@ class InventoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  request.approvalStatus ?? "Pending",
+                  request.approvalStatus?.capitalizeFirst ?? "Pending",
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.w500,

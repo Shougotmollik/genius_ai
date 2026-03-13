@@ -1,7 +1,5 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/model/recipe.dart';
@@ -17,6 +15,7 @@ class BarEditRecipeDialog extends StatefulWidget {
 
 class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
   late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
   late TextEditingController _timeController;
   late TextEditingController _costController;
   late TextEditingController _instructionController;
@@ -27,17 +26,20 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill controllers with existing data
+    // Pre-fill controllers with existing bar recipe data
     _nameController = TextEditingController(text: widget.recipe.name);
+    _descriptionController = TextEditingController(
+      text: widget.recipe.description ?? "No description available",
+    );
     _timeController = TextEditingController(
-      text: widget.recipe.avgTime?.toString(),
+      text: widget.recipe.avgTime?.toString() ?? "",
     );
     _costController = TextEditingController(text: widget.recipe.sellingCost);
     _instructionController = TextEditingController(
       text: widget.recipe.instruction,
     );
 
-    // Pre-fill ingredients list from the model
+    // Pre-fill ingredients list from the bar recipe model
     if (widget.recipe.ingredients != null) {
       _ingredients = widget.recipe.ingredients!.map((ing) {
         return IngredientRow(
@@ -49,32 +51,37 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
         );
       }).toList();
     }
+
+    // Fallback if no ingredients exist
+    if (_ingredients.isEmpty) {
+      _addIngredientRow();
+    }
   }
 
-  void _addIngredientRow({
-    String name = '',
-    String qty = '',
-    String unit = '',
-    String cost = '',
-  }) {
+  void _addIngredientRow() {
     setState(() {
       _ingredients.add(
         IngredientRow(
-          name: TextEditingController(text: name),
-          qty: TextEditingController(text: qty),
-          unit: TextEditingController(text: unit),
-          cost: TextEditingController(text: cost),
+          name: TextEditingController(),
+          qty: TextEditingController(),
+          unit: TextEditingController(),
+          cost: TextEditingController(),
           onChanged: () => setState(() {}),
         ),
       );
     });
   }
 
+  void _removeIngredientRow(int index) {
+    if (_ingredients.length > 1) {
+      setState(() => _ingredients.removeAt(index));
+    }
+  }
+
   double _calculateTotal() {
     double total = 0;
     for (var item in _ingredients) {
-      // Strips '$' if present and parses to double
-      String cleanCost = item.cost.text.replaceAll('\$', '');
+      String cleanCost = item.cost.text.replaceAll('\$', '').trim();
       total += double.tryParse(cleanCost) ?? 0;
     }
     return total;
@@ -84,11 +91,11 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,262 +104,188 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Edit Recipe',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  Text(
+                    'Edit Bar Recipe',
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red, size: 30),
+                    icon: Icon(Icons.close, color: Colors.red, size: 30.sp),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
 
               _buildLabel('Recipe Name'),
-              _buildTextField(_nameController, 1),
+              _buildTextField(_nameController, 1, hint: "e.g. Martini"),
 
-              _buildLabel('Avg. Time'),
-              _buildTextField(_timeController, 1),
+              _buildLabel('Description'),
+              _buildTextField(
+                _descriptionController,
+                2,
+                hint: "Enter description...",
+              ),
+
+              _buildLabel('Avg. Time (min)'),
+              _buildTextField(
+                _timeController,
+                1,
+                hint: "e.g. 5",
+                isNumber: true,
+              ),
 
               _buildLabel('Selling Cost'),
-              _buildTextField(_costController, 1),
+              _buildTextField(_costController, 1, hint: "0.00", isNumber: true),
 
-              _buildLabel('Instruction'),
-              _buildTextField(_instructionController, 4),
+              _buildLabel('Instructions'),
+              _buildTextField(
+                _instructionController,
+                4,
+                hint: "Step-by-step prep...",
+              ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Ingredients Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Add Ingredients',
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  Text(
+                    'Ingredients',
+                    style: TextStyle(fontSize: 16.sp, color: Colors.black54),
                   ),
                   TextButton.icon(
-                    onPressed: () => _addIngredientRow(),
+                    onPressed: _addIngredientRow,
                     icon: const Icon(Icons.add, size: 18),
                     label: const Text('Add'),
                     style: TextButton.styleFrom(
                       backgroundColor: const Color(0xFFE3F2FD),
                       foregroundColor: const Color(0xFF2196F3),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
 
               // Table Headers
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.0),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
                 child: Row(
                   children: [
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        'Name',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Quantity',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Unit',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Cost',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
+                    Expanded(flex: 3, child: _buildTableHeader('Name')),
+                    Expanded(flex: 2, child: _buildTableHeader('Qty')),
+                    Expanded(flex: 2, child: _buildTableHeader('Unit')),
+                    Expanded(flex: 2, child: _buildTableHeader('Cost')),
+                    SizedBox(width: 30.w),
                   ],
                 ),
               ),
               const Divider(),
 
               // Dynamic List of Ingredients
-              ..._ingredients
-                  .map(
-                    (item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          Expanded(flex: 3, child: _buildTableField(item.name)),
-                          const SizedBox(width: 8),
-                          Expanded(flex: 2, child: _buildTableField(item.qty)),
-                          const SizedBox(width: 8),
-                          Expanded(flex: 2, child: _buildTableField(item.unit)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 2,
-                            child: _buildTableField(item.cost, isPrefix: true),
-                          ),
-                        ],
+              ...List.generate(_ingredients.length, (index) {
+                final item = _ingredients[index];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 8.h),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 3, child: _buildTableField(item.name)),
+                      SizedBox(width: 8.w),
+                      Expanded(flex: 2, child: _buildTableField(item.qty)),
+                      SizedBox(width: 8.w),
+                      Expanded(flex: 2, child: _buildTableField(item.unit)),
+                      SizedBox(width: 8.w),
+                      Expanded(flex: 2, child: _buildTableField(item.cost)),
+                      IconButton(
+                        onPressed: () => _removeIngredientRow(index),
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                    ),
-                  )
-                  .toList(),
-              const SizedBox(height: 16),
+                    ],
+                  ),
+                );
+              }),
+
+              SizedBox(height: 16.h),
               Divider(color: Colors.grey.shade300, thickness: 1),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total', style: TextStyle(color: Colors.grey)),
                   Text(
-                    '\$${_calculateTotal().toStringAsFixed(0)}',
-                    style: const TextStyle(
+                    'Total Cost',
+                    style: TextStyle(color: AppColors.primary, fontSize: 16.sp),
+                  ),
+                  Text(
+                    '\$${_calculateTotal().toStringAsFixed(2)}',
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 16.sp,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
               ),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: Text('Or', style: TextStyle(color: Colors.grey)),
-                ),
-              ),
-
-              // Upload Box
-              GestureDetector(
-                onTap: () {},
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: DottedBorder(
-                    options: RectDottedBorderOptions(
-                      color: AppColors.primary,
-                      strokeWidth: 2.w,
-                      dashPattern: const [10, 8],
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Column(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/excel.svg',
-                            width: 32.w,
-                            height: 32.w,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Click here to upload ingredient',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Max. File Size: 10MB',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               SizedBox(height: 24.h),
+
+              // Action Buttons
               Row(
                 spacing: 18.w,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border, width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        shape: StadiumBorder(),
+                        side: BorderSide(color: AppColors.border, width: 1.w),
+                        padding: EdgeInsets.all(12),
                       ),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: Center(
-                          child: Text(
-                            "Cancel",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.lightText,
-                            ),
-                          ),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: AppColors.lightText,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
                   ),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        // List<Map<String, dynamic>> ingredientMaps = _ingredients
-                        //     .map((item) {
-                        //       return {
-                        //         "ingredient": item.name.text,
-                        //         "quantity": item.qty.text,
-                        //         "unit": item.unit.text,
-                        //         "cost": item.cost.text
-                        //             .replaceAll('\$', '')
-                        //             .trim(),
-                        //       };
-                        //     })
-                        //     .toList();
-                        // bool success = await controller.updateRecipe(
-                        //   id: widget.recipe.id!,
-                        //   name: _nameController.text,
-                        //   avgTime: _timeController.text,
-                        //   instruction: _instructionController.text,
-                        //   sellingCost: _costController.text,
-                        //   ingredients: ingredientMaps,
-                        // );
-                        // if (success) {
-                        //   Navigator.pop(context);
-                        // }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(50.r),
+                    child: Obx(
+                      () => ElevatedButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : _updateRecipe,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: StadiumBorder(),
+                          padding: EdgeInsets.all(12),
                         ),
-                        child: Center(
-                          child: Text(
-                            "Update",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.surface,
-                            ),
-                          ),
-                        ),
+                        child: controller.isLoading.value
+                            ? SizedBox(
+                                height: 20.h,
+                                width: 20.w,
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                "Update",
+                                style: TextStyle(
+                                  color: AppColors.surface,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -365,30 +298,75 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
     );
   }
 
+  Future<void> _updateRecipe() async {
+    bool success = await controller.updateRecipe(
+      recipes: [
+        {
+          "id": widget.recipe.id,
+          "name": _nameController.text.trim(),
+          "description": _descriptionController.text.trim(),
+          "avg_time": int.tryParse(_timeController.text) ?? 0,
+          "instruction": _instructionController.text.trim(),
+          "selling_cost": _costController.text.trim(),
+          "outlet_type": "bar",
+          "ingredients": _ingredients
+              .where((i) => i.name.text.isNotEmpty)
+              .map(
+                (i) => {
+                  "ingredient": i.name.text.trim(),
+                  "quantity": double.tryParse(i.qty.text) ?? 0.0,
+                  "unit": i.unit.text.trim(),
+                  "cost": double.tryParse(i.cost.text) ?? 0.0,
+                },
+              )
+              .toList(),
+        },
+      ],
+    );
+    if (success) {
+      Navigator.pop(context);
+    }
+  }
+
   Widget _buildLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+      padding: EdgeInsets.only(bottom: 8.h, top: 12.h),
       child: Text(
         label,
-        style: const TextStyle(color: Colors.black54, fontSize: 14),
+        style: TextStyle(
+          color: Colors.black54,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, int? maxLines) {
+  Widget _buildTableHeader(String title) {
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    int maxLines, {
+    String? hint,
+    bool isNumber = false,
+  }) {
     return TextField(
       controller: controller,
-      maxLines: maxLines ?? 1,
+      maxLines: maxLines,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        hintText: hint,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         isDense: true,
-
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
       ),
@@ -397,17 +375,20 @@ class _BarEditRecipeDialogState extends State<BarEditRecipeDialog> {
 
   Widget _buildTableField(
     TextEditingController controller, {
-    bool isPrefix = false,
+    bool isNumber = false,
   }) {
     return TextField(
       controller: controller,
       textAlign: TextAlign.center,
       onChanged: (v) => setState(() {}),
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      style: TextStyle(fontSize: 13.sp),
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 10),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: EdgeInsets.symmetric(vertical: 10.h),
+        isDense: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           borderSide: BorderSide(color: Colors.grey.shade200),
         ),
       ),
@@ -430,37 +411,4 @@ class IngredientRow {
     required this.cost,
     required this.onChanged,
   });
-}
-
-// Custom Painter for the Dashed Border
-class DashedRectPainter extends CustomPainter {
-  final Color color;
-  DashedRectPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double dashWidth = 5, dashSpace = 3, startX = 0;
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    RRect rrect = RRect.fromLTRBAndCorners(
-      0,
-      0,
-      size.width,
-      size.height,
-      topLeft: const Radius.circular(12),
-      topRight: const Radius.circular(12),
-      bottomLeft: const Radius.circular(12),
-      bottomRight: const Radius.circular(12),
-    );
-    canvas.drawRRect(
-      rrect,
-      paint,
-    ); // Note: For a true dashed effect on RRect, a path-based approach is usually needed, but this provides the clean outline.
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

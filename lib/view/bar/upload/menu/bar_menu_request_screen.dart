@@ -1,59 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/ingredient_controller.dart';
-import 'package:genius_ai/model/ingredient.dart';
-import 'package:genius_ai/model/inventory_item.dart';
+import 'package:genius_ai/controller/menu_controller.dart';
+import 'package:genius_ai/model/menu.dart';
+import 'package:genius_ai/model/menu_inventory.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:get/get_utils/src/extensions/string_extensions.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class BarIngredientMyRequestScreen extends StatefulWidget {
-  const BarIngredientMyRequestScreen({super.key});
+class BarMenuRequestScreen extends StatefulWidget {
+  const BarMenuRequestScreen({super.key});
 
   @override
-  State<BarIngredientMyRequestScreen> createState() =>
-      _BarIngredientMyRequestScreenState();
+  State<BarMenuRequestScreen> createState() => _BarMenuRequestScreenState();
 }
 
-class _BarIngredientMyRequestScreenState
-    extends State<BarIngredientMyRequestScreen> {
+class _BarMenuRequestScreenState extends State<BarMenuRequestScreen> {
   int selectedIndex = 0;
 
-  final IngredientController controller = Get.find<IngredientController>();
+  final BarMenuController controller = Get.find<BarMenuController>();
 
-  // Data List
-  // final List<InventoryItem> allItems = [
-  //   InventoryItem(
-  //     title: "Vanilla Syrup",
+  // // Data List
+  // final List<MenuInventory> allItems = [
+  //   MenuInventory(
+  //     title: "Summer Special Menu",
   //     status: "Approved",
-  //     price: "100",
-  //     category: "Low",
-  //     currentStock: "20 kg",
-  //     minStock: "2 kg",
+  //     itemCount: "7",
+  //     cost: "\$30",
+  //     type: "Lunch",
   //   ),
-  //   InventoryItem(
-  //     title: "Chocolate Sauce",
+  //   MenuInventory(
+  //     title: "Summer Special Menu",
   //     status: "Pending",
-  //     price: "85",
-  //     category: "Medium",
-  //     currentStock: "10 kg",
-  //     minStock: "5 kg",
+  //     itemCount: "7",
+  //     cost: "\$30",
+  //     type: "Lunch",
   //   ),
-  //   InventoryItem(
-  //     title: "Caramel Topping",
+  //   MenuInventory(
+  //     title: "Summer Special Menu",
+  //     status: "Pending",
+  //     itemCount: "7",
+  //     cost: "\$30",
+  //     type: "Lunch",
+  //   ),
+  //   MenuInventory(
+  //     title: "Summer Special Menu",
   //     status: "Approved",
-  //     price: "120",
-  //     category: "High",
-  //     currentStock: "50 kg",
-  //     minStock: "10 kg",
+  //     itemCount: "7",
+  //     cost: "\$30",
+  //     type: "Lunch",
   //   ),
   // ];
 
-  // filter based on tab selection
-  // List<InventoryItem> get filteredItems {
+  // // filter based on tab selection
+  // List<MenuInventory> get filteredItems {
   //   if (selectedIndex == 1) {
   //     return allItems.where((i) => i.status == "Approved").toList();
   //   }
@@ -117,7 +117,7 @@ class _BarIngredientMyRequestScreenState
                       Expanded(
                         child: InfoHighlighterCard(
                           title: "Approved",
-                          value: controller.summary.value?.approved ?? 0,
+                          value: controller.menuRequest.value?.approved ?? 0,
                           color: const Color(0xff_43A047),
                           iconPath: "assets/icons/approve.svg",
                         ),
@@ -125,7 +125,7 @@ class _BarIngredientMyRequestScreenState
                       Expanded(
                         child: InfoHighlighterCard(
                           title: "Pending",
-                          value: controller.summary.value?.pending ?? 0,
+                          value: controller.menuRequest.value?.pending ?? 0,
                           color: Color(0xff_FF8F0F),
                           iconPath: "assets/icons/pending.svg",
                         ),
@@ -164,7 +164,6 @@ class _BarIngredientMyRequestScreenState
                   ),
                   SizedBox(height: 18.h),
 
-                
                   Skeletonizer(
                     enabled: controller.isLoading.value,
                     child:
@@ -223,13 +222,13 @@ class _BarIngredientMyRequestScreenState
 
 // --- YOUR ORIGINAL UI DESIGN WITH DYNAMIC LOGIC ---
 class InventoryCard extends StatelessWidget {
-  final Ingredient item;
+  final Menu item;
   const InventoryCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     // Logic for conditional colors
-    final bool isApproved = item.status?.toLowerCase() == 'approved';
+    final bool isApproved = item.approvalStatus?.toLowerCase() == 'approved';
     final Color statusColor = isApproved
         ? const Color(0xFF4CAF50)
         : const Color(0xFFFF8F0F);
@@ -241,7 +240,7 @@ class InventoryCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r), // Kept your 12.r
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow.withValues(alpha: 0.25),
@@ -268,7 +267,7 @@ class InventoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  item.status?.capitalizeFirst ?? "",
+                  item.approvalStatus?.capitalizeFirst ?? '',
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.w500,
@@ -296,34 +295,12 @@ class InventoryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  item.name?.capitalizeFirst ?? "Name",
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2D2D2D),
-                  ),
-                ),
-              ),
-              RichText(
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black, fontSize: 18),
-                  children: [
-                    TextSpan(
-                      text: '\$${item.pricePerUnit}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: '/${item.unit}',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+              Text(
+                item.name ?? '',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D2D2D),
                 ),
               ),
             ],
@@ -331,11 +308,11 @@ class InventoryCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Data Rows
-          _buildDataRow('Category', item.categoryName ?? 'Category'),
-          const SizedBox(height: 8),
-          _buildDataRow('Current Stock', item.currentStock.toString()),
-          const SizedBox(height: 8),
-          _buildDataRow('Minimun Stock', item.minimumStock.toString()),
+          _buildDataRow('Item Count', item.dishes?.length.toString() ?? '0'),
+          SizedBox(height: 8),
+          _buildDataRow('Cost', "\$${item.totalCost?.toString() ?? '0'}"),
+          SizedBox(height: 8),
+          _buildDataRow('Type', item.menuType ?? ''),
         ],
       ),
     );

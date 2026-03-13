@@ -1,11 +1,8 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart' show AppColors;
 import 'package:genius_ai/controller/ingredient_controller.dart';
 import 'package:genius_ai/model/ingredient_catergory.dart';
-import 'package:genius_ai/utils/app_snackbar.dart';
 import 'package:get/get.dart';
 
 class BarEditIngredientDialog extends StatefulWidget {

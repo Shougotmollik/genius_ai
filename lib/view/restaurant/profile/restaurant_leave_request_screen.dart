@@ -9,10 +9,12 @@ class RestaurantLeaveRequestScreen extends StatefulWidget {
   const RestaurantLeaveRequestScreen({super.key});
 
   @override
-  State<RestaurantLeaveRequestScreen> createState() => _RestaurantLeaveRequestScreenState();
+  State<RestaurantLeaveRequestScreen> createState() =>
+      _RestaurantLeaveRequestScreenState();
 }
 
-class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScreen> {
+class _RestaurantLeaveRequestScreenState
+    extends State<RestaurantLeaveRequestScreen> {
   String? _selectedLeaveType = 'Casual';
   DateTime? _startDate;
   DateTime? _endDate;
@@ -26,6 +28,8 @@ class _RestaurantLeaveRequestScreenState extends State<RestaurantLeaveRequestScr
     'Maternity',
     'Paternity',
     'Unpaid',
+    "Emergency",
+    "Others",
   ];
 
   final _dateFormat = 'mm/dd/yyyy';
