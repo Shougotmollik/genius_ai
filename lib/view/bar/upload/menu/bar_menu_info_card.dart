@@ -9,15 +9,15 @@ import 'package:genius_ai/view/bar/upload/menu/bar_edit_menu_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 import 'package:get/get.dart';
 
-class MenuInfoCard extends StatefulWidget {
-  const MenuInfoCard({super.key, required this.menu});
+class BarMenuInfoCard extends StatefulWidget {
+  const BarMenuInfoCard({super.key, required this.menu});
 
   final Menu menu;
   @override
-  State<MenuInfoCard> createState() => _MenuInfoCardState();
+  State<BarMenuInfoCard> createState() => _BarMenuInfoCardState();
 }
 
-class _MenuInfoCardState extends State<MenuInfoCard> {
+class _BarMenuInfoCardState extends State<BarMenuInfoCard> {
   final UserController _userController = Get.find<UserController>();
   final BarMenuController _barMenuController = Get.find<BarMenuController>();
 

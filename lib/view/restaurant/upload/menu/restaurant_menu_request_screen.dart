@@ -7,60 +7,25 @@ import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class BarMenuRequestScreen extends StatefulWidget {
-  const BarMenuRequestScreen({super.key});
+class RestaurantMenuRequestScreen extends StatefulWidget {
+  const RestaurantMenuRequestScreen({super.key});
 
   @override
-  State<BarMenuRequestScreen> createState() => _BarMenuRequestScreenState();
+  State<RestaurantMenuRequestScreen> createState() =>
+      _RestaurantMenuRequestScreenState();
 }
 
-class _BarMenuRequestScreenState extends State<BarMenuRequestScreen> {
+class _RestaurantMenuRequestScreenState
+    extends State<RestaurantMenuRequestScreen> {
   int selectedIndex = 0;
 
   final BarMenuController controller = Get.find<BarMenuController>();
 
-  // // Data List
-  // final List<MenuInventory> allItems = [
-  //   MenuInventory(
-  //     title: "Summer Special Menu",
-  //     status: "Approved",
-  //     itemCount: "7",
-  //     cost: "\$30",
-  //     type: "Lunch",
-  //   ),
-  //   MenuInventory(
-  //     title: "Summer Special Menu",
-  //     status: "Pending",
-  //     itemCount: "7",
-  //     cost: "\$30",
-  //     type: "Lunch",
-  //   ),
-  //   MenuInventory(
-  //     title: "Summer Special Menu",
-  //     status: "Pending",
-  //     itemCount: "7",
-  //     cost: "\$30",
-  //     type: "Lunch",
-  //   ),
-  //   MenuInventory(
-  //     title: "Summer Special Menu",
-  //     status: "Approved",
-  //     itemCount: "7",
-  //     cost: "\$30",
-  //     type: "Lunch",
-  //   ),
-  // ];
-
-  // // filter based on tab selection
-  // List<MenuInventory> get filteredItems {
-  //   if (selectedIndex == 1) {
-  //     return allItems.where((i) => i.status == "Approved").toList();
-  //   }
-  //   if (selectedIndex == 2) {
-  //     return allItems.where((i) => i.status == "Pending").toList();
-  //   }
-  //   return allItems;
-  // }
+  @override
+  void initState() {
+    // controller.fetchRequests(status: "");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,6 +135,7 @@ class _BarMenuRequestScreenState extends State<BarMenuRequestScreen> {
                             !controller.isLoading.value
                         ? const Center(child: Text("No requests found"))
                         : Column(
+                            spacing: 12.h,
                             children: controller.requestList
                                 .map((item) => InventoryCard(item: item))
                                 .toList(),

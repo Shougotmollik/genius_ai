@@ -4,15 +4,16 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/menu_controller.dart';
 import 'package:get/get.dart';
 
-class BarEditMenuDialog extends StatefulWidget {
-  const BarEditMenuDialog({super.key, required this.id});
+class RestaurantEditMenuDialog extends StatefulWidget {
+  const RestaurantEditMenuDialog({super.key, required this.id});
   final String id;
 
   @override
-  State<BarEditMenuDialog> createState() => _BarEditMenuDialogState();
+  State<RestaurantEditMenuDialog> createState() =>
+      _RestaurantEditMenuDialogState();
 }
 
-class _BarEditMenuDialogState extends State<BarEditMenuDialog> {
+class _RestaurantEditMenuDialogState extends State<RestaurantEditMenuDialog> {
   final BarMenuController _controller = Get.find<BarMenuController>();
 
   // Controllers
@@ -332,7 +333,7 @@ class _BarEditMenuDialogState extends State<BarEditMenuDialog> {
                     "id": int.parse(widget.id),
                     "name": _nameController.text.trim(),
                     "menu_type": _selectedType.toLowerCase(),
-                    "outlet_type": "bar",
+                    "outlet_type": "restaurant",
                     "total_cost": _costController.text.trim(),
                     "dishes": _selectedDishes,
                   },

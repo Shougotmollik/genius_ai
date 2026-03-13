@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/recipe_controller.dart'; // Added
-import 'package:genius_ai/controller/user_controller.dart'; // Added
-import 'package:genius_ai/model/recipe.dart';
-import 'package:genius_ai/view/bar/upload/menu/bar_menu_info_card.dart';
-import 'package:genius_ai/view/bar/upload/recipe/bar_edit_recipe_dialog.dart';
+import 'package:genius_ai/controller/menu_controller.dart';
+import 'package:genius_ai/controller/user_controller.dart';
+import 'package:genius_ai/model/menu.dart';
+import 'package:genius_ai/view/bar/upload/menu/bar_edit_menu_dialog.dart';
+import 'package:genius_ai/view/restaurant/upload/menu/restaurant_edit_menu_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
-import 'package:get/get.dart'; // Added
+import 'package:get/get.dart';
 
-class BarRecipeInfoCard extends StatefulWidget {
-  const BarRecipeInfoCard({super.key, required this.recipe});
-  final Recipe recipe;
+class RestaurantMenuInfoCard extends StatefulWidget {
+  const RestaurantMenuInfoCard({super.key, required this.menu});
 
+  final Menu menu;
   @override
-  State<BarRecipeInfoCard> createState() => _BarRecipeInfoCardState();
+  State<RestaurantMenuInfoCard> createState() => _RestaurantMenuInfoCardState();
 }
 
-class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
+class _RestaurantMenuInfoCardState extends State<RestaurantMenuInfoCard> {
   final UserController _userController = Get.find<UserController>();
-  final RecipeController _recipeController = Get.find<RecipeController>();
+  final BarMenuController _barMenuController = Get.find<BarMenuController>();
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
       child: Column(
         children: [
           // Edit / Delete
-          _userController.user.value.id != widget.recipe.createdBy
+          _userController.user.value.id != widget.menu.createdBy
               ? const SizedBox()
               : Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -52,7 +52,7 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
                           context: context,
                           barrierDismissible: false,
                           builder: (context) =>
-                              BarEditRecipeDialog(recipe: widget.recipe),
+                              RestaurantEditMenuDialog(id: widget.menu.id.toString()),
                         );
                       },
                       child: _iconButton(
@@ -69,12 +69,10 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
                           builder: (context) {
                             return DeleteDialogWidget(
                               title:
-                                  "Are you sure you want to delete ${widget.recipe.name}?",
+                                  "Are you sure you want to delete ${widget.menu.name}?",
                               onDelete: () async {
-                                final bool success = await _recipeController
-                                    .deleteRecipe(
-                                      id: widget.recipe.id.toString(),
-                                    );
+                                final bool success = await _barMenuController
+                                    .deleteMenu(id: widget.menu.id.toString());
                                 if (success) {
                                   Get.back();
                                 }
@@ -91,12 +89,14 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
                   ],
                 ),
 
+          SizedBox(height: 12.h),
+
           //Ingredient name & price
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                widget.recipe.name ?? "Unknown",
+                widget.menu.name ?? "Not Defined",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -112,12 +112,16 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
           Column(
             children: [
               IngredientDetailRow(
-                title: "Cooking Time",
-                value: "${widget.recipe.avgTime} min",
+                title: "Items",
+                value: (widget.menu.dishes?.length ?? 0).toString(),
               ),
               IngredientDetailRow(
                 title: "Cost",
-                value: "\$${widget.recipe.totalCost}",
+                value: "\$${widget.menu.totalCost}",
+              ),
+              IngredientDetailRow(
+                title: "Type",
+                value: widget.menu.menuType ?? "Not Defined",
               ),
               SizedBox(height: 8.h),
               Row(
@@ -200,6 +204,61 @@ class _BarRecipeInfoCardState extends State<BarRecipeInfoCard> {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: SvgPicture.asset(icon, height: 18.h, width: 18.w),
+    );
+  }
+
+  Widget _outlineChip(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(50.r),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 12.sp, color: AppColors.lightText),
+        ),
+      ),
+    );
+  }
+}
+
+class IngredientDetailRow extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const IngredientDetailRow({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.text,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

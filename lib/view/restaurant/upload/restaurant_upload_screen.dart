@@ -49,7 +49,7 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 title: "Ingredients",
                 color: const Color(0xff_43A047),
                 onTap: () {
-                Get.toNamed(RouteNames.restaurantIngredientScreen);
+                  Get.toNamed(RouteNames.restaurantIngredientScreen);
                 },
               ),
               SizedBox(height: 18.h),
@@ -71,7 +71,7 @@ class _RestaurantUploadScreenState extends State<RestaurantUploadScreen> {
                 title: "Menu",
                 color: const Color(0xff_FF8F0F),
                 onTap: () {
-                  Get.to(RestaurantMenuScreen());
+                  Get.toNamed(RouteNames.restaurantMenuScreen);
                 },
               ),
             ],

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/menu_controller.dart';
+import 'package:genius_ai/model/menu.dart';
 import 'package:genius_ai/view/bar/upload/menu/bar_add_menu_dialog.dart';
-import 'package:genius_ai/view/bar/upload/menu/menu_info_card.dart';
-import 'package:genius_ai/view/bar/upload/menu/bar_menu_request_screen.dart';
+import 'package:genius_ai/view/restaurant/upload/menu/restaurant_add_menu_dialog.dart';
+import 'package:genius_ai/view/restaurant/upload/menu/restaurant_menu_info_card.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   const RestaurantMenuScreen({super.key});
@@ -15,6 +19,7 @@ class RestaurantMenuScreen extends StatefulWidget {
 }
 
 class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
+  final BarMenuController controller = Get.find<BarMenuController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +70,41 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               _buildSearchBar(),
               SizedBox(height: 12.h),
 
-              // Column(children: List.generate(3, (index) => MenuInfoCard())),
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return Column(
+                    children: List.generate(
+                      3,
+                      (index) => Skeletonizer(
+                        enabled: true,
+                        child: RestaurantMenuInfoCard(
+                          menu: Menu(name: "", totalCost: "", menuType: ""),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                if (controller.menuList.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 50.h),
+                      child: const Text("No Menu Found"),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: List.generate(
+                    controller.menuList.length,
+                    (index) => Skeletonizer(
+                      enabled: controller.isLoading.value,
+                      child: RestaurantMenuInfoCard(
+                        menu: controller.menuList[index],
+                      ),
+                    ),
+                  ),
+                );
+              }),
             ],
           ),
         ),
@@ -83,7 +122,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const BarAddMenuDialog(),
+                builder: (context) => const RestaurantAddMenuDialog(),
               );
             },
             child: Container(
@@ -116,7 +155,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(BarMenuRequestScreen());
+              Get.toNamed(RouteNames.restaurantMenuRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),
@@ -171,8 +210,12 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
+              onChanged: (value) {
+                controller.searchQuery.value = value;
+                controller.getMenu();
+              },
               decoration: InputDecoration(
-                hintText: "Search Menu",
+                hintText: "Search Recipes",
                 hintStyle: TextStyle(
                   color: AppColors.lightText,
                   fontSize: 14.sp,
