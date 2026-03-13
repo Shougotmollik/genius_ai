@@ -109,25 +109,23 @@ class _BarHomeScreenState extends State<BarHomeScreen> {
                         return Row(
                           children: List.generate(
                             isLoading ? 3 : recipes.length,
-                            (index) => Padding(
-                              padding: EdgeInsets.only(right: 16.w),
-                              child: Skeletonizer(
-                                enabled: isLoading,
-                                child: BarRecipeCard(
-                                  recipe: isLoading
-                                      ? HomeRecipe(
-                                          name: "",
-                                          description: "",
-                                          totalCost: 0,
-                                        )
-                                      : recipes[index],
-                                ),
+                            (index) => Skeletonizer(
+                              enabled: isLoading,
+                              child: BarRecipeCard(
+                                recipe: isLoading
+                                    ? HomeRecipe(
+                                        name: "",
+                                        description: "",
+                                        totalCost: 0,
+                                      )
+                                    : recipes[index],
                               ),
                             ),
                           ),
                         );
                       }),
                     ),
+                    SizedBox(height: 18.h),
                   ],
                 ),
               ),
