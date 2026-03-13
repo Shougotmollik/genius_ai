@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/model/home.dart';
 import 'package:genius_ai/view/bar/home/bar_recipe_details_screen.dart';
 import 'package:get/get.dart';
 
 class BarRecipeCard extends StatelessWidget {
-  const BarRecipeCard({super.key});
+  const BarRecipeCard({super.key, required this.recipe});
+  final HomeRecipe recipe;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class BarRecipeCard extends StatelessWidget {
       child: Container(
         height: 235.h,
         width: 195.w,
-        margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+        margin: EdgeInsets.symmetric(vertical: 24.h),
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -36,21 +38,29 @@ class BarRecipeCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.r),
-                child: Image.asset("assets/image/mocktail.jpg"),
-              ),
-              SizedBox(height: 08.h),
-      
-              Text(
-                "Mocktail",
-                style: TextStyle(
-                  color: AppColors.text,
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w500,
+                child: Image.asset(
+                  "assets/image/receipe.jpg",
+                  width: double.infinity,
+                  height: 110.h,
+                  fit: BoxFit.cover,
                 ),
               ),
-      
+              SizedBox(height: 08.h),
+
+              Expanded(
+                child: Text(
+                  recipe.name ?? "",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.text,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+
               Text(
-                "Traditional Italian pizza made by native Italians and with some",
+                recipe.description ?? "",
                 maxLines: 2,
                 textAlign: TextAlign.start,
                 overflow: TextOverflow.ellipsis,
@@ -67,7 +77,7 @@ class BarRecipeCard extends StatelessWidget {
                 spacing: 4.w,
                 children: [
                   Text(
-                    "\$20",
+                    "\$${recipe.totalCost}",
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       color: AppColors.text,
@@ -75,15 +85,15 @@ class BarRecipeCard extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Text(
-                    "cost",
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      color: AppColors.text,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                  // Text(
+                  //   "cost",
+                  //   textAlign: TextAlign.end,
+                  //   style: TextStyle(
+                  //     color: AppColors.text,
+                  //     fontSize: 14.sp,
+                  //     fontWeight: FontWeight.w400,
+                  //   ),
+                  // ),
                 ],
               ),
             ],

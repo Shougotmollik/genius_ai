@@ -10,6 +10,7 @@ class ApiConstant {
   static const String user = "/settings/personal-info/me";
 
   // bar
+  static const String home = "/dashboard/home";
   static const String ingredients = "/ingredients";
   static const String updateIngredient = "/ingredients/bulk-update";
   static const String ingredientCategories = "/ingredients/categories";
