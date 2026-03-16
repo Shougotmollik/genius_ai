@@ -5,7 +5,6 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/menu_controller.dart';
 import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/model/menu.dart';
-import 'package:genius_ai/view/bar/upload/menu/bar_edit_menu_dialog.dart';
 import 'package:genius_ai/view/restaurant/upload/menu/restaurant_edit_menu_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 import 'package:get/get.dart';

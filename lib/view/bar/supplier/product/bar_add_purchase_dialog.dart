@@ -71,9 +71,7 @@ class BarAddPurchaseDialog extends StatelessWidget {
               SizedBox(height: 8.h),
               // Upload Box
               GestureDetector(
-                onTap: () async{
-                  
-                },
+                onTap: () async {},
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: DottedBorder(
@@ -121,70 +119,70 @@ class BarAddPurchaseDialog extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 16.h),
-              Text(
-                "Report(If find any problem with the product)",
-                style: TextStyle(
-                  color: AppColors.text,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14.sp,
-                ),
-              ),
-              SizedBox(height: 8.h),
+              // Text(
+              //   "Report(If find any problem with the product)",
+              //   style: TextStyle(
+              //     color: AppColors.text,
+              //     fontWeight: FontWeight.w400,
+              //     fontSize: 14.sp,
+              //   ),
+              // ),
+              // SizedBox(height: 8.h),
               // Upload Box
-              GestureDetector(
-                onTap: () {},
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: DottedBorder(
-                    options: RectDottedBorderOptions(
-                      color: AppColors.primary,
-                      strokeWidth: 2.w,
-                      dashPattern: const [10, 8],
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Column(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/image-upload.svg',
-                            width: 32.w,
-                            height: 32.w,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Click here to upload',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Max. File Size: 10MB',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // GestureDetector(
+              //   onTap: () {},
+              //   child: ClipRRect(
+              //     borderRadius: BorderRadius.circular(8.r),
+              //     child: DottedBorder(
+              //       options: RectDottedBorderOptions(
+              //         color: AppColors.primary,
+              //         strokeWidth: 2.w,
+              //         dashPattern: const [10, 8],
+              //       ),
+              //       child: Container(
+              //         width: double.infinity,
+              //         padding: const EdgeInsets.all(16),
+              //         decoration: BoxDecoration(
+              //           color: AppColors.primary.withValues(alpha: 0.1),
+              //           borderRadius: BorderRadius.circular(8.r),
+              //         ),
+              //         child: Column(
+              //           children: [
+              //             SvgPicture.asset(
+              //               'assets/icons/image-upload.svg',
+              //               width: 32.w,
+              //               height: 32.w,
+              //             ),
+              //             const SizedBox(height: 12),
+              //             Text(
+              //               'Click here to upload',
+              //               style: TextStyle(
+              //                 fontSize: 16.sp,
+              //                 fontWeight: FontWeight.w500,
+              //                 color: AppColors.text,
+              //               ),
+              //             ),
+              //             const SizedBox(height: 4),
+              //             Text(
+              //               'Max. File Size: 10MB',
+              //               style: TextStyle(
+              //                 fontSize: 12.sp,
+              //                 color: AppColors.text,
+              //                 fontWeight: FontWeight.w400,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               // _uploadArea(
               //   "Upload Product",
               //   Icons.table_view_rounded,
               //   Colors.green,
               // ),
-              const SizedBox(height: 16),
+              // const SizedBox(height: 16),
               // _uploadArea(
               //   "Report (If find any problem with the product)",
               //   Icons.image_outlined,

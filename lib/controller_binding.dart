@@ -3,6 +3,7 @@ import 'package:genius_ai/controller/ingredient_controller.dart';
 import 'package:genius_ai/controller/menu_controller.dart';
 import 'package:genius_ai/controller/recipe_controller.dart';
 import 'package:genius_ai/controller/auth_controller.dart';
+import 'package:genius_ai/controller/supplier_controller.dart';
 import 'package:genius_ai/controller/user_controller.dart';
 import 'package:get/get.dart';
 
@@ -15,5 +16,6 @@ class ControllerBinding extends Bindings {
     Get.lazyPut<RecipeController>(() => RecipeController());
     Get.lazyPut<BarMenuController>(() => BarMenuController());
     Get.lazyPut<HomeController>(() => HomeController());
+    Get.lazyPut<SupplierController>(() => SupplierController());
   }
 }

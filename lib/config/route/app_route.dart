@@ -13,6 +13,7 @@ import 'package:genius_ai/view/bar/profile/bar_edit_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_language_selection_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_history_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
+import 'package:genius_ai/view/bar/supplier/bar_supplier_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
 import 'package:genius_ai/view/bar/upload/menu/bar_menu_request_screen.dart';
@@ -122,6 +123,13 @@ class AppRoute {
       page: () => BarMenuRequestScreen(),
       binding: ControllerBinding(),
     ),
+
+    GetPage(
+      name: RouteNames.barSupplierRequestScreen,
+      page: () => BarSupplierRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+
     GetPage(
       name: RouteNames.barAccountSettings,
       page: () => BarAccountSettingScreen(),

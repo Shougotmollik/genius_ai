@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/model/supplier.dart';
 
 class BarSupplierCard extends StatelessWidget {
-  const BarSupplierCard({super.key, required this.onTap});
+  const BarSupplierCard({
+    super.key,
+    required this.onTap,
+    required this.supplier,
+  });
   final VoidCallback onTap;
+
+  final Supplier supplier;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +35,8 @@ class BarSupplierCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Company Title
-            const Text(
-              'Ocean Fresh Ltd.',
+            Text(
+              supplier.name ?? 'N/A',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -39,13 +46,19 @@ class BarSupplierCard extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Contact Information Rows
-            _buildContactRow(Icons.phone_outlined, '+1 (555) 123-4567'),
+            _buildContactRow(
+              Icons.phone_outlined,
+              supplier.phone ?? 'N/A',
+            ),
             const SizedBox(height: 16),
-            _buildContactRow(Icons.mail_outline, 'orders@oceanfresh'),
+            _buildContactRow(
+              Icons.mail_outline,
+              supplier.email ?? 'N/A',
+            ),
             const SizedBox(height: 16),
             _buildContactRow(
               Icons.location_on_outlined,
-              '123 Harbor Way, Boston, MA',
+              supplier.address ?? 'N/A',
             ),
 
             const SizedBox(height: 28),

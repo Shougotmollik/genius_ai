@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:genius_ai/controller/supplier_controller.dart';
+import 'package:genius_ai/model/supplier.dart';
+import 'package:get/get.dart';
 
 class BarEditSupplierDialog extends StatefulWidget {
-  const BarEditSupplierDialog({super.key});
+  const BarEditSupplierDialog({super.key, required this.supplier});
+  final Supplier supplier;
 
   @override
   State<BarEditSupplierDialog> createState() => _BarEditSupplierDialogState();
@@ -10,14 +14,33 @@ class BarEditSupplierDialog extends StatefulWidget {
 class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers to capture user input
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _startController = TextEditingController();
-  final TextEditingController _endController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  // Controllers
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _emailController;
+  late TextEditingController _addressController;
+  late TextEditingController _startController;
+  late TextEditingController _endController;
+  late TextEditingController _notesController;
+
+  final SupplierController controller = Get.find<SupplierController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with existing data
+    _nameController = TextEditingController(text: widget.supplier.name);
+    _phoneController = TextEditingController(text: widget.supplier.phone);
+    _emailController = TextEditingController(text: widget.supplier.email);
+    _addressController = TextEditingController(text: widget.supplier.address);
+    _startController = TextEditingController(
+      text: widget.supplier.contractStartDate?.toString().split(' ')[0] ?? '',
+    );
+    _endController = TextEditingController(
+      text: widget.supplier.contractEndDate?.toString().split(' ')[0] ?? '',
+    );
+    _notesController = TextEditingController(text: widget.supplier.notes);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +54,12 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // --- Header ---
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 16,
                 ),
-                color: const Color(0xFF0091FF), // Primary Blue
+                color: const Color(0xFF0091FF),
                 child: Row(
                   children: [
                     Container(
@@ -70,7 +92,6 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
                 ),
               ),
 
-              // --- Form Body ---
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -112,8 +133,28 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
                                   _buildLabel("Contract Start"),
                                   _buildTextField(
                                     _startController,
-                                    "",
+                                    "Select date",
                                     icon: Icons.calendar_today_outlined,
+                                    readOnly: true,
+                                    onTap: () async {
+                                      DateTime? pickedDate =
+                                          await showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(3000),
+                                          );
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          String formattedDate =
+                                              "${pickedDate.day.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.year}";
+
+                                          _startController.text = formattedDate;
+                                        });
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -126,8 +167,27 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
                                   _buildLabel("Contract End"),
                                   _buildTextField(
                                     _endController,
-                                    "",
+                                    "Select date",
                                     icon: Icons.calendar_today_outlined,
+                                    readOnly: true,
+                                    onTap: () async {
+                                      DateTime? pickedDate =
+                                          await showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(3000),
+                                          );
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          String formattedDate =
+                                              "${pickedDate.day.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.year}";
+                                          _endController.text = formattedDate;
+                                        });
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -147,7 +207,6 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
                 ),
               ),
 
-              // --- Footer Buttons ---
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Row(
@@ -170,25 +229,58 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // Logic to save supplier
-                            print("Supplier Added: ${_nameController.text}");
-                            Navigator.pop(context);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0091FF),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              var payload = {
+                                "name": _nameController.text,
+                                "phone": _phoneController.text
+                                    .replaceAll("(", "")
+                                    .replaceAll(")", "")
+                                    .replaceAll("-", "")
+                                    .replaceAll(" ", ""),
+                                "email": _emailController.text.trim(),
+                                "address": _addressController.text,
+                                "contract_start_date": _startController.text,
+                                "contract_end_date": _endController.text,
+                                "notes": _notesController.text,
+                                "rating": 4.5,
+                                "is_active": true,
+                              };
+                              final bool success = await controller
+                                  .editSupplier(
+                                    id: widget.supplier.id.toString(),
+                                    body: payload,
+                                  );
+                              if (success) {
+                                Get.back();
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0091FF),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          "Save",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          child: controller.isLoading.value
+                              ? SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  "Update",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -223,10 +315,14 @@ class _BarEditSupplierDialogState extends State<BarEditSupplierDialog> {
     String hint, {
     IconData? icon,
     int maxLines = 1,
+    VoidCallback? onTap,
+    bool readOnly = false,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),

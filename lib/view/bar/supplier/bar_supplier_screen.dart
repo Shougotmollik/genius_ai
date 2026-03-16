@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/supplier_controller.dart';
 import 'package:genius_ai/view/bar/supplier/bar_add_supplier_dialog.dart';
 import 'package:genius_ai/view/bar/supplier/bar_comparison_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_details_card.dart';
@@ -9,10 +11,10 @@ import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.
 import 'package:genius_ai/view/bar/supplier/suplier_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_alert_card.dart';
 import 'package:genius_ai/view/bar/supplier/supplier_history_card.dart';
-import 'package:genius_ai/view/bar/supplier/supplier_request_screen.dart';
 import 'package:genius_ai/view/bar/supplier/surface_chart.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class BarSupplierScreen extends StatefulWidget {
   const BarSupplierScreen({super.key});
@@ -33,6 +35,8 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
     'Carrot',
   ];
   String? _selectedComparisonType = 'Tomato';
+
+  final SupplierController controller = Get.find<SupplierController>();
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +145,7 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
                 ],
               ),
               SizedBox(height: 12.h),
-              buildTabContent(),
+              Obx(() => buildTabContent()),
               SizedBox(height: 24.h),
             ],
           ),
@@ -160,22 +164,41 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
             SizedBox(height: 18.h),
             Column(
               spacing: 12.h,
-              children: List.generate(3, (index) {
-                return BarSupplierCard(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        insetPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                        ),
-                        child: const SupplierDetailCard(),
-                      ),
-                    );
-                  },
+              children: List.generate(controller.supplierList.length, (index) {
+                return Skeletonizer(
+                  enabled:
+                      controller.isLoading.value &&
+                      controller.supplierList.isEmpty,
+                  child: BarSupplierCard(
+                    supplier: controller.supplierList[index],
+                    onTap: () async {
+                      final supplierId = controller.supplierList[index].id;
+                      if (supplierId != null) {
+                        await controller.getSupplierDetails(
+                          id: supplierId.toString(),
+                        );
+
+                        if (controller.supplierDetails.value != null) {
+                          if (mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                insetPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: SupplierDetailCard(
+                                  supplier: controller.supplierDetails.value!,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    },
+                  ),
                 );
               }),
             ),
@@ -384,6 +407,10 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
+              onChanged: (value) {
+                controller.searchQuery.value = value;
+                controller.getSupplier();
+              },
               decoration: InputDecoration(
                 hintText: "Search Suppliers",
                 hintStyle: TextStyle(
@@ -444,7 +471,7 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(BarSupplierRequestScreen());
+              Get.toNamed(RouteNames.barSupplierRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),

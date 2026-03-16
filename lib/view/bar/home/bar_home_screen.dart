@@ -107,6 +107,7 @@ class _BarHomeScreenState extends State<BarHomeScreen> {
                         final isLoading = _homeController.isLoading.value;
 
                         return Row(
+                          spacing: 18.w,
                           children: List.generate(
                             isLoading ? 3 : recipes.length,
                             (index) => Skeletonizer(

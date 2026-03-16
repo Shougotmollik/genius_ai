@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:genius_ai/controller/supplier_controller.dart';
+import 'package:get/get.dart';
 
 class AddSupplierDialog extends StatefulWidget {
   const AddSupplierDialog({super.key});
@@ -19,6 +21,8 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
   final TextEditingController _endController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
+  final SupplierController controller = Get.find<SupplierController>();
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -31,13 +35,12 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // --- Header ---
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 16,
                 ),
-                color: const Color(0xFF0091FF), // Primary Blue
+                color: const Color(0xFF0091FF),
                 child: Row(
                   children: [
                     Container(
@@ -70,7 +73,6 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
                 ),
               ),
 
-              // --- Form Body ---
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -112,8 +114,28 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
                                   _buildLabel("Contract Start"),
                                   _buildTextField(
                                     _startController,
-                                    "",
+                                    "select date",
                                     icon: Icons.calendar_today_outlined,
+                                    readOnly: true,
+                                    onTap: () async {
+                                      DateTime? pickedDate =
+                                          await showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(3000),
+                                          );
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          String formattedDate =
+                                              "${pickedDate.day.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.year}";
+
+                                          _startController.text = formattedDate;
+                                        });
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -126,8 +148,27 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
                                   _buildLabel("Contract End"),
                                   _buildTextField(
                                     _endController,
-                                    "",
+                                    "select date",
                                     icon: Icons.calendar_today_outlined,
+                                    readOnly: true,
+                                    onTap: () async {
+                                      DateTime? pickedDate =
+                                          await showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(3000),
+                                          );
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          String formattedDate =
+                                              "${pickedDate.day.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.year}";
+                                          _endController.text = formattedDate;
+                                        });
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -147,7 +188,6 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
                 ),
               ),
 
-              // --- Footer Buttons ---
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Row(
@@ -170,25 +210,56 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // Logic to save supplier
-                            print("Supplier Added: ${_nameController.text}");
-                            Navigator.pop(context);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0091FF),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              var payload = {
+                                "name": _nameController.text,
+                                "phone": _phoneController.text
+                                    .replaceAll("(", "")
+                                    .replaceAll(")", "")
+                                    .replaceAll("-", "")
+                                    .replaceAll(" ", ""),
+                                "email": _emailController.text.trim(),
+                                "address": _addressController.text,
+                                "contract_start_date": _startController.text,
+                                "contract_end_date": _endController.text,
+                                "notes": _notesController.text,
+                                "rating": 4.5,
+                                "is_active": true,
+                              };
+                              final bool success = await controller.addSupplier(
+                                body: payload,
+                              );
+                              if (success) {
+                                Get.back();
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0091FF),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          "Add",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          child: controller.isLoading.value
+                              ? SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  "Add",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -223,10 +294,14 @@ class _AddSupplierDialogState extends State<AddSupplierDialog> {
     String hint, {
     IconData? icon,
     int maxLines = 1,
+    VoidCallback? onTap,
+    bool readOnly = false,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),

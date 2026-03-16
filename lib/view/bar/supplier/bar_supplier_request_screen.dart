@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/controller/supplier_controller.dart';
 import 'package:genius_ai/model/supplier.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
+import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class BarSupplierRequestScreen extends StatefulWidget {
   const BarSupplierRequestScreen({super.key});
@@ -14,53 +17,7 @@ class BarSupplierRequestScreen extends StatefulWidget {
 
 class _BarSupplierRequestScreenState extends State<BarSupplierRequestScreen> {
   int selectedIndex = 0;
-
-  // Data List
-  final List<Supplier> allItems = [
-    Supplier(
-      supplierName: "Fresh Ltd.",
-      phoneNumber: "+1 (555) 123-4567",
-      address: "123 Harbor Way, Boston, MA",
-      contractStart: "Jan 15, 2024",
-      contractEnd: "Jan 15, 2024",
-      status: "Approved",
-    ),
-    Supplier(
-      supplierName: "Fresh Ltd.",
-      phoneNumber: "+1 (555) 123-4567",
-      address: "123 Harbor Way, Boston, MA",
-      contractStart: "Jan 15, 2024",
-      contractEnd: "Jan 15, 2024",
-      status: "Pending",
-    ),
-    Supplier(
-      supplierName: "Fresh Ltd.",
-      phoneNumber: "+1 (555) 123-4567",
-      address: "123 Harbor Way, Boston, MA",
-      contractStart: "Jan 15, 2024",
-      contractEnd: "Jan 15, 2024",
-      status: "Pending",
-    ),
-    Supplier(
-      supplierName: "Fresh Ltd.",
-      phoneNumber: "+1 (555) 123-4567",
-      address: "123 Harbor Way, Boston, MA",
-      contractStart: "Jan 15, 2024",
-      contractEnd: "Jan 15, 2024",
-      status: "Approved",
-    ),
-  ];
-
-  // filter based on tab selection
-  List<Supplier> get filteredItems {
-    if (selectedIndex == 1) {
-      return allItems.where((i) => i.status == "Approved").toList();
-    }
-    if (selectedIndex == 2) {
-      return allItems.where((i) => i.status == "Pending").toList();
-    }
-    return allItems;
-  }
+  final SupplierController controller = Get.find<SupplierController>();
 
   @override
   Widget build(BuildContext context) {
@@ -109,26 +66,38 @@ class _BarSupplierRequestScreenState extends State<BarSupplierRequestScreen> {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                Row(
-                  spacing: 18.w,
-                  children: [
-                    Expanded(
-                      child: InfoHighlighterCard(
-                        title: "Approved",
-                        value: 02,
-                        color: const Color(0xff_43A047),
-                        iconPath: "assets/icons/approve.svg",
+                Obx(
+                  () => Row(
+                    spacing: 18.w,
+                    children: [
+                      Expanded(
+                        child: InfoHighlighterCard(
+                          title: "Approved",
+                          value:
+                              controller
+                                  .supplierRequestSummary
+                                  .value
+                                  ?.approved ??
+                              0,
+                          color: const Color(0xff_43A047),
+                          iconPath: "assets/icons/approve.svg",
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: InfoHighlighterCard(
-                        title: "Pending",
-                        value: 01,
-                        color: Color(0xff_FF8F0F),
-                        iconPath: "assets/icons/pending.svg",
+                      Expanded(
+                        child: InfoHighlighterCard(
+                          title: "Pending",
+                          value:
+                              controller
+                                  .supplierRequestSummary
+                                  .value
+                                  ?.pending ??
+                              0,
+                          color: Color(0xff_FF8F0F),
+                          iconPath: "assets/icons/pending.svg",
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 // Tabs Row
@@ -137,33 +106,73 @@ class _BarSupplierRequestScreenState extends State<BarSupplierRequestScreen> {
                     buildTab(
                       title: "All",
                       isSelected: selectedIndex == 0,
-                      onTap: () => setState(() => selectedIndex = 0),
+                      onTap: () {
+                        setState(() => selectedIndex = 0);
+                        controller.fetchSupplierRequests(status: "");
+                      },
                     ),
                     buildTab(
                       title: "Approved",
                       isSelected: selectedIndex == 1,
-                      onTap: () => setState(() => selectedIndex = 1),
+                      onTap: () {
+                        setState(() => selectedIndex = 1);
+                        controller.fetchSupplierRequests(status: "approved");
+                      },
                     ),
                     buildTab(
                       title: "Pending",
                       isSelected: selectedIndex == 2,
-                      onTap: () => setState(() => selectedIndex = 2),
+                      onTap: () {
+                        setState(() => selectedIndex = 2);
+                        controller.fetchSupplierRequests(status: "pending");
+                      },
                     ),
                   ],
                 ),
                 SizedBox(height: 18.h),
 
-                // 3. Dynamic Content List using your exact UI
-                Column(
-                  children: filteredItems
-                      .map(
-                        (item) => Padding(
-                          padding: EdgeInsets.only(bottom: 18.h),
-                          child: InventoryCard(item: item),
+                // Dynamic Content List
+                Obx(() {
+                  if (controller.isLoading.value &&
+                      controller.supplierRequestList.isEmpty) {
+                    return Center(
+                      child: Skeletonizer(
+                        enabled: controller.isLoading.value,
+                        child: InventoryCard(
+                          item: Supplier(
+                            name: "",
+                            phone: "",
+                            address: "",
+                            contractStartDate: "",
+                            contractEndDate: "",
+                            approvalStatus: "",
+                          ),
                         ),
-                      )
-                      .toList(),
-                ),
+                      ),
+                    );
+                  }
+                  if (controller.supplierRequestList.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "No requests found.",
+                        style: TextStyle(color: AppColors.lightText),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: controller.supplierRequestList
+                        .map(
+                          (item) => Padding(
+                            padding: EdgeInsets.only(bottom: 18.h),
+                            child: Skeletonizer(
+                              enabled: controller.isLoading.value,
+                              child: InventoryCard(item: item),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  );
+                }),
                 SizedBox(height: 20.h),
               ],
             ),
@@ -207,7 +216,6 @@ class _BarSupplierRequestScreenState extends State<BarSupplierRequestScreen> {
   }
 }
 
-// --- YOUR ORIGINAL UI DESIGN WITH DYNAMIC LOGIC ---
 class InventoryCard extends StatelessWidget {
   final Supplier item;
   const InventoryCard({super.key, required this.item});
@@ -215,7 +223,7 @@ class InventoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Logic for conditional colors
-    final bool isApproved = item.status.toLowerCase() == 'approved';
+    final bool isApproved = item.approvalStatus?.toLowerCase() == 'approved';
     final Color statusColor = isApproved
         ? const Color(0xFF4CAF50)
         : const Color(0xFFFF8F0F);
@@ -227,7 +235,7 @@ class InventoryCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r), // Kept your 12.r
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow.withValues(alpha: 0.25),
@@ -240,7 +248,6 @@ class InventoryCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Badge and Download Icon
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -254,7 +261,7 @@ class InventoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  item.status,
+                  item.approvalStatus?.capitalizeFirst ?? "",
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.w500,
@@ -276,34 +283,18 @@ class InventoryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // Title and Address Row
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Text(
-          //       item.supplierName,
-          //       style: const TextStyle(
-          //         fontSize: 18,
-          //         fontWeight: FontWeight.bold,
-          //         color: Color(0xFF2D2D2D),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // const SizedBox(height: 12),
+          const SizedBox(height: 12),
 
           // Data Rows
-          _buildDataRow('Supplier Name', item.supplierName),
+          _buildDataRow('Supplier Name', item.name ?? 'N/A'),
           const SizedBox(height: 8),
-          _buildDataRow('Phone Number', item.phoneNumber),
+          _buildDataRow('Phone Number', item.phone ?? 'N/A'),
           const SizedBox(height: 8),
-          _buildDataRow('Address', item.address),
+          _buildDataRow('Address', item.address ?? 'N/A'),
           const SizedBox(height: 8),
-          _buildDataRow('Contract Start', item.contractStart),
+          _buildDataRow('Contract Start', item.contractStartDate ?? 'N/A'),
           const SizedBox(height: 8),
-          _buildDataRow('Contract End', item.contractEnd),
+          _buildDataRow('Contract End', item.contractEndDate ?? 'N/A'),
         ],
       ),
     );

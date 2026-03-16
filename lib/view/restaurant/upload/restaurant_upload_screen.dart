@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/view/restaurant/upload/menu/restaurant_menu_screen.dart';
 import 'package:genius_ai/view/widgets/upload_card.dart';
 import 'package:get/get.dart';
 

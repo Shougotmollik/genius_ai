@@ -29,6 +29,8 @@ class RouteNames {
   static const String barEditLeaveRequest = '/bar-edit-leave-request';
   static const String barLeaveHistory = '/bar-leave-history';
 
+  static const String barSupplierRequestScreen = '/bar-supplier-request-screen';
+
   // Restaurant
   static const String restaurantSignIn = '/restaurant-signin';
   static const String restaurantSignUp = '/restaurant-signup';

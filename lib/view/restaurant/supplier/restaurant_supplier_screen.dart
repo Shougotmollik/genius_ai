@@ -9,7 +9,7 @@ import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.
 import 'package:genius_ai/view/bar/supplier/suplier_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_alert_card.dart';
 import 'package:genius_ai/view/bar/supplier/supplier_history_card.dart';
-import 'package:genius_ai/view/bar/supplier/supplier_request_screen.dart';
+import 'package:genius_ai/view/bar/supplier/bar_supplier_request_screen.dart';
 import 'package:genius_ai/view/bar/supplier/surface_chart.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:get/get.dart';
@@ -158,27 +158,27 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
           children: [
             _buildSearchBar(),
             SizedBox(height: 18.h),
-            Column(
-              spacing: 12.h,
-              children: List.generate(3, (index) {
-                return BarSupplierCard(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        insetPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                        ),
-                        child: const SupplierDetailCard(),
-                      ),
-                    );
-                  },
-                );
-              }),
-            ),
+            // Column(
+            //   spacing: 12.h,
+            //   children: List.generate(3, (index) {
+            //     return BarSupplierCard(
+            //       onTap: () {
+            //         showDialog(
+            //           context: context,
+            //           builder: (context) => Dialog(
+            //             shape: RoundedRectangleBorder(
+            //               borderRadius: BorderRadius.circular(24),
+            //             ),
+            //             insetPadding: const EdgeInsets.symmetric(
+            //               horizontal: 20,
+            //             ),
+            //             child: const SupplierDetailCard(),
+            //           ),
+            //         );
+            //       },
+            //     );
+            //   }),
+            // ),
           ],
         );
       case 1:
