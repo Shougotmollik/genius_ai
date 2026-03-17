@@ -321,55 +321,75 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
   }
 
   Widget _buildDropdownMenu() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border, width: 1.w),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedComparisonType,
-          dropdownColor: Colors.white,
-          isExpanded: true,
-          hint: const Text(
-            'Select Leave Type',
-            style: TextStyle(color: Colors.grey, fontSize: 14),
-          ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-          items: _comparisonTypes
-              .map(
-                (t) => DropdownMenuItem(
-                  value: t,
-                  child: Row(
-                    spacing: 4.w,
-                    children: [
-                      Text(
-                        t,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.lightText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+    return Obx(() {
+      if (_selectedComparisonType != null &&
+          !controller.supplierAvailableProduct.contains(
+            _selectedComparisonType,
+          )) {
+        _selectedComparisonType = null;
+      }
 
-                      Text(
-                        "(Per kg)",
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.lightText,
-                          fontWeight: FontWeight.w500,
-                        ),
+      return Skeletonizer(
+        enabled: controller.isLoading.value,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border, width: 1.w),
+            borderRadius: BorderRadius.circular(50.r),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value:
+                  (controller.supplierAvailableProduct.contains(
+                    _selectedComparisonType,
+                  ))
+                  ? _selectedComparisonType
+                  : null,
+              dropdownColor: Colors.white,
+              isExpanded: true,
+              hint: const Text(
+                'Select Product',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+              items: controller.supplierAvailableProduct
+                  .map(
+                    (t) => DropdownMenuItem<String>(
+                      value: t,
+                      child: Row(
+                        children: [
+                          Text(
+                            t,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.lightText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            "(Per kg)",
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.lightText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: (val) => setState(() => _selectedComparisonType = val),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (val) {
+                setState(() {
+                  _selectedComparisonType = val;
+                });
+              },
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget buildTab({

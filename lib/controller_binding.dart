@@ -1,3 +1,4 @@
+import 'package:genius_ai/controller/chatbot_controller.dart';
 import 'package:genius_ai/controller/home_controller.dart';
 import 'package:genius_ai/controller/ingredient_controller.dart';
 import 'package:genius_ai/controller/menu_controller.dart';
@@ -17,5 +18,6 @@ class ControllerBinding extends Bindings {
     Get.lazyPut<BarMenuController>(() => BarMenuController());
     Get.lazyPut<HomeController>(() => HomeController());
     Get.lazyPut<SupplierController>(() => SupplierController());
+    Get.lazyPut<ChatbotController>(() => ChatbotController());
   }
 }

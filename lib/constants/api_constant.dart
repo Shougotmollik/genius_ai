@@ -22,4 +22,10 @@ class ApiConstant {
   static const String supplier = "/suppliers";
   static const String supplierOverview = "/suppliers/overview";
   static const String supplierRequest = "/supplier/requests";
+  static const String supplierAvailableProduct =
+      "/suppliers/purchases/product-list";
+  static const String supplierPriceComparison = "/suppliers/price-comparison";
+
+  // Ai Chat bot
+  static const String restaurantAiChatBot = "/ai/generate-recipe";
 }
