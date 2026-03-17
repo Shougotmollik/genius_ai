@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:genius_ai/controller/supplier_controller.dart';
 import 'package:get/get.dart';
 
-class BarAddSupplierDialog extends StatefulWidget {
-  const BarAddSupplierDialog({super.key});
+class RestaurantAddSupplierDialog extends StatefulWidget {
+  const RestaurantAddSupplierDialog({super.key});
 
   @override
-  State<BarAddSupplierDialog> createState() => _BarAddSupplierDialogState();
+  State<RestaurantAddSupplierDialog> createState() => _RestaurantAddSupplierDialogState();
 }
 
-class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
+class _RestaurantAddSupplierDialogState extends State<RestaurantAddSupplierDialog> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers to capture user input

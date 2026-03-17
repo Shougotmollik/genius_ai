@@ -1,27 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:genius_ai/controller/supplier_controller.dart';
+import 'package:genius_ai/model/supplier.dart';
 import 'package:get/get.dart';
 
-class BarAddSupplierDialog extends StatefulWidget {
-  const BarAddSupplierDialog({super.key});
+class RestaurantEditSupplierDialog extends StatefulWidget {
+  const RestaurantEditSupplierDialog({super.key, required this.supplier});
+  final Supplier supplier;
 
   @override
-  State<BarAddSupplierDialog> createState() => _BarAddSupplierDialogState();
+  State<RestaurantEditSupplierDialog> createState() =>
+      _RestaurantEditSupplierDialogState();
 }
 
-class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
+class _RestaurantEditSupplierDialogState
+    extends State<RestaurantEditSupplierDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers to capture user input
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _startController = TextEditingController();
-  final TextEditingController _endController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  // Controllers
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _emailController;
+  late TextEditingController _addressController;
+  late TextEditingController _startController;
+  late TextEditingController _endController;
+  late TextEditingController _notesController;
 
   final SupplierController controller = Get.find<SupplierController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with existing data
+    _nameController = TextEditingController(text: widget.supplier.name);
+    _phoneController = TextEditingController(text: widget.supplier.phone);
+    _emailController = TextEditingController(text: widget.supplier.email);
+    _addressController = TextEditingController(text: widget.supplier.address);
+    _startController = TextEditingController(
+      text: widget.supplier.contractStartDate?.toString().split(' ')[0] ?? '',
+    );
+    _endController = TextEditingController(
+      text: widget.supplier.contractEndDate?.toString().split(' ')[0] ?? '',
+    );
+    _notesController = TextEditingController(text: widget.supplier.notes);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +78,7 @@ class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
                     ),
                     const SizedBox(width: 16),
                     const Text(
-                      'Add Supplier',
+                      'Edit Supplier',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -114,7 +135,7 @@ class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
                                   _buildLabel("Contract Start"),
                                   _buildTextField(
                                     _startController,
-                                    "select date",
+                                    "Select date",
                                     icon: Icons.calendar_today_outlined,
                                     readOnly: true,
                                     onTap: () async {
@@ -148,7 +169,7 @@ class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
                                   _buildLabel("Contract End"),
                                   _buildTextField(
                                     _endController,
-                                    "select date",
+                                    "Select date",
                                     icon: Icons.calendar_today_outlined,
                                     readOnly: true,
                                     onTap: () async {
@@ -229,9 +250,11 @@ class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
                                 "rating": 4.5,
                                 "is_active": true,
                               };
-                              final bool success = await controller.addSupplier(
-                                body: payload,
-                              );
+                              final bool success = await controller
+                                  .editSupplier(
+                                    id: widget.supplier.id.toString(),
+                                    body: payload,
+                                  );
                               if (success) {
                                 Get.back();
                               }
@@ -253,8 +276,8 @@ class _BarAddSupplierDialogState extends State<BarAddSupplierDialog> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text(
-                                  "Add",
+                              : Text(
+                                  "Update",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,

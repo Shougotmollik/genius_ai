@@ -438,7 +438,7 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const AddSupplierDialog(),
+                builder: (context) => const BarAddSupplierDialog(),
               );
             },
             child: Container(
