@@ -90,18 +90,38 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
                 ),
               ),
               SizedBox(height: 24.h),
-              InfoHighlighterCard(
-                title: "Active Suppliers",
-                value: 20,
-                color: const Color(0xff_43A047),
-                iconPath: "assets/icons/supplier.svg",
+              Obx(
+                () => Skeletonizer(
+                  enabled: controller.isLoading.value,
+                  child: InfoHighlighterCard(
+                    title: "Active Suppliers",
+                    value:
+                        controller
+                            .supplierOverviewSummary
+                            .value
+                            ?.activeSupplier ??
+                        0,
+                    color: const Color(0xff_43A047),
+                    iconPath: "assets/icons/supplier.svg",
+                  ),
+                ),
               ),
               SizedBox(height: 18.h),
-              InfoHighlighterCard(
-                title: "Price Alerts",
-                value: 20,
-                color: const Color(0xff_CB2020),
-                iconPath: "assets/icons/alert.svg",
+              Obx(
+                () => Skeletonizer(
+                  enabled: controller.isLoading.value,
+                  child: InfoHighlighterCard(
+                    title: "Price Alerts",
+                    value:
+                        controller
+                            .supplierOverviewSummary
+                            .value
+                            ?.priceAlertSupplier ??
+                        0,
+                    color: const Color(0xff_CB2020),
+                    iconPath: "assets/icons/alert.svg",
+                  ),
+                ),
               ),
               SizedBox(height: 12.h),
               Row(

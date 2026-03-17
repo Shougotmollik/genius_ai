@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/supplier_controller.dart';
-import 'package:genius_ai/view/bar/supplier/bar_add_supplier_dialog.dart';
 import 'package:genius_ai/view/bar/supplier/bar_comparison_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_details_card.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.dart';
@@ -92,18 +91,38 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
                 ),
               ),
               SizedBox(height: 24.h),
-              InfoHighlighterCard(
-                title: "Active Suppliers",
-                value: 20,
-                color: const Color(0xff_43A047),
-                iconPath: "assets/icons/supplier.svg",
+              Obx(
+                () => Skeletonizer(
+                  enabled: controller.isLoading.value,
+                  child: InfoHighlighterCard(
+                    title: "Active Suppliers",
+                    value:
+                        controller
+                            .supplierOverviewSummary
+                            .value
+                            ?.activeSupplier ??
+                        0,
+                    color: const Color(0xff_43A047),
+                    iconPath: "assets/icons/supplier.svg",
+                  ),
+                ),
               ),
               SizedBox(height: 18.h),
-              InfoHighlighterCard(
-                title: "Price Alerts",
-                value: 20,
-                color: const Color(0xff_CB2020),
-                iconPath: "assets/icons/alert.svg",
+              Obx(
+                () => Skeletonizer(
+                  enabled: controller.isLoading.value,
+                  child: InfoHighlighterCard(
+                    title: "Price Alerts",
+                    value:
+                        controller
+                            .supplierOverviewSummary
+                            .value
+                            ?.priceAlertSupplier ??
+                        0,
+                    color: const Color(0xff_CB2020),
+                    iconPath: "assets/icons/alert.svg",
+                  ),
+                ),
               ),
               SizedBox(height: 12.h),
               Row(

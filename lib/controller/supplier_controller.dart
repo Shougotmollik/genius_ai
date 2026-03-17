@@ -1,4 +1,5 @@
 import 'package:genius_ai/constants/api_constant.dart';
+import 'package:genius_ai/model/suppiler_overview.dart';
 import 'package:genius_ai/model/supplier.dart';
 import 'package:genius_ai/model/supplier_request.dart';
 import 'package:genius_ai/services/custom_http.dart';
@@ -14,6 +15,9 @@ class SupplierController extends GetxController {
   final RxList<Supplier> supplierRequestList = <Supplier>[].obs;
   final Rx<SupplierRequestSummary?> supplierRequestSummary =
       Rx<SupplierRequestSummary?>(null);
+
+  final Rx<SupplierOverviewSummary?> supplierOverviewSummary =
+      Rx<SupplierOverviewSummary?>(null);
   @override
   void onInit() {
     super.onInit();
@@ -24,6 +28,24 @@ class SupplierController extends GetxController {
       time: const Duration(milliseconds: 500),
     );
     fetchSupplierRequests(status: "");
+    supplierOverview();
+  }
+
+  // get supplier overview
+  Future<void> supplierOverview() async {
+    isLoading(true);
+    final String url = ApiConstant.supplierOverview;
+    final response = await CustomHttp.get(endpoint: url, need_auth: true);
+    isLoading(false);
+    if (response.ok) {
+      final data = response.data['summary'];
+      if (data != null) {
+        supplierOverviewSummary.value = SupplierOverviewSummary.fromJson(data);
+      }
+    } else {
+      final message = response.error ?? 'Something went wrong.';
+      AppSnackbar.show(message: message, type: SnackType.error);
+    }
   }
 
   // get supplier

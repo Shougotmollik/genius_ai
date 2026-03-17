@@ -20,5 +20,6 @@ class ApiConstant {
   static const String dishes = "/menus/dishes";
 
   static const String supplier = "/suppliers";
+  static const String supplierOverview = "/suppliers/overview";
   static const String supplierRequest = "/supplier/requests";
 }
