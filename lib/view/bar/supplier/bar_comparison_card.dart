@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
+import 'package:genius_ai/model/price_comparison.dart';
 
 class ComparisonCard extends StatelessWidget {
-  const ComparisonCard({super.key});
+  const ComparisonCard({super.key, required this.priceComparison});
+  final SupplierPriceComparison priceComparison;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -25,53 +27,57 @@ class ComparisonCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Tomato (per kg)',
+          Text(
+            '${priceComparison.productName} (per ${priceComparison.suppliers.isNotEmpty ? priceComparison.suppliers.first.unit : 'unit'})',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A1A),
+              color: const Color(0xFF1A1A1A),
             ),
           ),
           const SizedBox(height: 20),
 
-          // Best Price Card
-          _buildPriceItem(
-            company: 'Ocean Fresh Ltd.',
-            price: '35.00',
-            isBestPrice: true,
-          ),
-
-          const SizedBox(height: 12),
-
-          // Other Price Cards
-          _buildPriceItem(
-            company: 'Coastal Seafood',
-            price: '32.50',
-            trend: Icons.trending_up,
-            trendColor: Colors.red,
-          ),
-
-          const SizedBox(height: 12),
-
-          _buildPriceItem(
-            company: 'Marine Supply Co.',
-            price: '38.00',
-            trend: Icons.trending_down,
-            trendColor: Colors.green,
-          ),
-
-          const SizedBox(height: 12),
-
-          _buildPriceItem(
-            company: 'Marine Supply Co.',
-            price: '38.00',
-            trend: Icons.trending_down,
-            trendColor: Colors.green,
+          Column(
+            children: priceComparison.suppliers.map((supplier) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: _buildPriceItem(
+                  company: supplier.supplierName,
+                  price: supplier.latestPrice,
+                  isBestPrice: supplier.isBestPrice,
+                  trend: _getTrendIcon(supplier.trend),
+                  trendColor: _getTrendColor(supplier.trend),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),
     );
+  }
+
+  // Helper to map API string trends
+  IconData? _getTrendIcon(String? trend) {
+    switch (trend) {
+      case 'increasing':
+        return Icons.trending_up;
+      case 'decreasing':
+        return Icons.trending_down;
+      default:
+        return null;
+    }
+  }
+
+  // Helper to map API string trends to Colors
+  Color? _getTrendColor(String? trend) {
+    switch (trend) {
+      case 'increasing':
+        return Colors.red;
+      case 'decreasing':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildPriceItem({
@@ -85,7 +91,7 @@ class ComparisonCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isBestPrice ? const Color(0xFFE8F5EE) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: isBestPrice
               ? const Color(0xFF4DB67E)
@@ -101,20 +107,20 @@ class ComparisonCard extends StatelessWidget {
             children: [
               Text(
                 company,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: 16.sp,
                   color: AppColors.text,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (trend != null) Icon(trend, color: trendColor, size: 20),
+              if (trend != null) Icon(trend, color: trendColor, size: 20.r),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             '\$$price',
-            style: const TextStyle(
-              fontSize: 28,
+            style: TextStyle(
+              fontSize: 28.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.text,
             ),

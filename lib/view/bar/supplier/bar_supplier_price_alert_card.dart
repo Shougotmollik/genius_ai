@@ -4,7 +4,7 @@ import 'package:genius_ai/config/theme/app_colors.dart';
 
 enum AlertTrend { increase, decrease }
 
-class BarSupplierAlertCard extends StatelessWidget {
+class BarSupplierPriceAlertCard extends StatelessWidget {
   final String title;
   final String supplier;
   final double previousPrice;
@@ -12,7 +12,7 @@ class BarSupplierAlertCard extends StatelessWidget {
   final String percentage;
   final AlertTrend trend;
 
-  const BarSupplierAlertCard({
+  const BarSupplierPriceAlertCard({
     super.key,
     required this.title,
     required this.supplier,
@@ -120,7 +120,7 @@ class BarSupplierAlertCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    '${isIncrease ? '+' : '-'}$percentage%',
+                    '${isIncrease ? '+' : ''}$percentage%',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900,

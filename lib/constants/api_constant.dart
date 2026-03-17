@@ -25,6 +25,8 @@ class ApiConstant {
   static const String supplierAvailableProduct =
       "/suppliers/purchases/product-list";
   static const String supplierPriceComparison = "/suppliers/price-comparison";
+  static const String supplierPriceAlert = "/suppliers/price-alerts";
+  static const String supplierPriceHistory = "/suppliers/price-history";
 
   // Ai Chat bot
   static const String restaurantAiChatBot = "/ai/generate-recipe";

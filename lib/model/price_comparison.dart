@@ -1,18 +1,21 @@
 class SupplierPriceComparison {
   final String productName;
   final String bestPrice;
+  final String supplierName;
   final List<SupplierInfo> suppliers;
 
   SupplierPriceComparison({
     required this.productName,
     required this.bestPrice,
     required this.suppliers,
+    required this.supplierName,
   });
 
   factory SupplierPriceComparison.fromJson(Map<String, dynamic> json) {
     return SupplierPriceComparison(
       productName: json['product_name'] ?? '',
       bestPrice: json['best_price'] ?? '0.00',
+      supplierName: json['supplier_name'] ?? '',
       suppliers: (json['suppliers'] as List)
           .map((i) => SupplierInfo.fromJson(i))
           .toList(),
@@ -28,6 +31,7 @@ class SupplierInfo {
   final String unit;
   final DateTime purchaseDate;
   final bool isBestPrice;
+  final String? trend;
 
   SupplierInfo({
     required this.supplierId,
@@ -37,6 +41,7 @@ class SupplierInfo {
     required this.unit,
     required this.purchaseDate,
     required this.isBestPrice,
+    this.trend,
   });
 
   factory SupplierInfo.fromJson(Map<String, dynamic> json) {
@@ -50,6 +55,7 @@ class SupplierInfo {
         json['purchase_date'] ?? DateTime.now().toString(),
       ),
       isBestPrice: json['is_best_price'] ?? false,
+      trend: json['trend'] ?? '',
     );
   }
 }

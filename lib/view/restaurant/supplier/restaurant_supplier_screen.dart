@@ -8,7 +8,7 @@ import 'package:genius_ai/view/bar/supplier/bar_comparison_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_details_card.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.dart';
 import 'package:genius_ai/view/bar/supplier/suplier_card.dart';
-import 'package:genius_ai/view/bar/supplier/bar_supplier_alert_card.dart';
+import 'package:genius_ai/view/bar/supplier/bar_supplier_price_alert_card.dart';
 import 'package:genius_ai/view/bar/supplier/supplier_history_card.dart';
 import 'package:genius_ai/view/bar/supplier/surface_chart.dart';
 import 'package:genius_ai/view/restaurant/supplier/restaurant_add_supplier_dialog.dart';
@@ -230,7 +230,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
           children: [
             _buildDropdownMenu(),
             SizedBox(height: 16.h),
-            ComparisonCard(),
+            // ComparisonCard(),
           ],
         );
       case 2:
@@ -259,7 +259,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
               ],
             ),
             SizedBox(height: 16.h),
-            SurfaceChart(),
+            // SurfaceChart(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -297,7 +297,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
       case 3:
         return Column(
           children: [
-            BarSupplierAlertCard(
+            BarSupplierPriceAlertCard(
               title: 'Cherry Tomatoes',
               supplier: 'Mediterranean Goods',
               previousPrice: 14.50,
@@ -306,7 +306,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
               trend: AlertTrend.increase,
             ),
             const SizedBox(height: 16),
-            BarSupplierAlertCard(
+            BarSupplierPriceAlertCard(
               title: 'Cherry Tomatoes',
               supplier: 'Mediterranean Goods',
               previousPrice: 14.50,

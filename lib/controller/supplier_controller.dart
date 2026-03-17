@@ -1,8 +1,9 @@
 import 'package:genius_ai/constants/api_constant.dart';
+import 'package:genius_ai/model/price_alert.dart';
 import 'package:genius_ai/model/price_comparison.dart';
+import 'package:genius_ai/model/price_history_response.dart';
 import 'package:genius_ai/model/suppiler_overview.dart';
 import 'package:genius_ai/model/supplier.dart';
-import 'package:genius_ai/model/supplier_avaliable.dart';
 import 'package:genius_ai/model/supplier_request.dart';
 import 'package:genius_ai/services/custom_http.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
@@ -24,6 +25,10 @@ class SupplierController extends GetxController {
   final RxList<SupplierPriceComparison> supplierPriceComparison =
       <SupplierPriceComparison>[].obs;
   final RxList<String> supplierAvailableProduct = <String>[].obs;
+
+  final RxList<PriceAlert> priceAlertList = <PriceAlert>[].obs;
+  final Rx<PriceHistoryResponse?> priceHistoryResponse =
+      Rx<PriceHistoryResponse?>(null);
   @override
   void onInit() {
     super.onInit();
@@ -195,7 +200,7 @@ class SupplierController extends GetxController {
   // Supplier price comparison
   Future<void> getSupplierPriceComparison({String? productName}) async {
     isLoading(true);
-    final name = productName ?? 'Tomatoes';
+    final name = productName ?? '';
     final String url =
         "${ApiConstant.supplierPriceComparison}?product_name=$name";
 
@@ -211,5 +216,40 @@ class SupplierController extends GetxController {
       AppSnackbar.show(message: message, type: SnackType.error);
     }
     isLoading(false);
+  }
+
+  // supplier price alert
+  Future<void> getSupplierPriceAlert() async {
+    isLoading(true);
+    final String url = ApiConstant.supplierPriceAlert;
+    final response = await CustomHttp.get(endpoint: url, need_auth: true);
+    isLoading(false);
+    if (response.ok) {
+      final data = response.data["data"];
+      priceAlertList.assignAll(
+        (data as List).map((e) => PriceAlert.fromJson(e)).toList(),
+      );
+    } else {
+      final message = response.error ?? 'Something went wrong.';
+      AppSnackbar.show(message: message, type: SnackType.error);
+    }
+  }
+
+  // supplier  price history
+  Future<void> getPriceHistory({required String productName}) async {
+    isLoading(true);
+    final String url =
+        "${ApiConstant.supplierPriceHistory}?product_name=$productName";
+
+    final response = await CustomHttp.get(endpoint: url, need_auth: true);
+    isLoading(false);
+
+    if (response.ok) {
+      priceHistoryResponse.value = PriceHistoryResponse.fromJson(response.data);
+    } else {
+      final message = response.error ?? 'Something went wrong.';
+      AppSnackbar.show(message: message, type: SnackType.error);
+      priceHistoryResponse.value = null;
+    }
   }
 }
