@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/supplier_controller.dart';
+import 'package:genius_ai/model/price_comparison.dart';
 import 'package:genius_ai/view/bar/supplier/bar_comparison_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_details_card.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.dart';
@@ -27,17 +28,19 @@ class RestaurantSupplierScreen extends StatefulWidget {
 class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
   bool isSelected = true;
   int selectedIndex = 0;
-  final List<String> _comparisonTypes = [
-    'Tomato',
-    'Cucumber',
-    'Lettuce',
-    'Potato',
-    'Onion',
-    'Carrot',
-  ];
-  String? _selectedComparisonType = 'Tomato';
+  String? _selectedComparisonType;
 
   final SupplierController controller = Get.find<SupplierController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.getSupplierPriceComparison(
+        productName: _selectedComparisonType,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +72,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
               SizedBox(height: 24.h),
               GestureDetector(
                 onTap: () {
-                  Get.to(BarProductSupplierScreen());
+                  Get.toNamed(RouteNames.restaurantProductSupplierScreen);
                 },
                 child: Container(
                   padding: const EdgeInsets.all(12),
@@ -161,6 +164,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
                       setState(() {
                         selectedIndex = 3;
                       });
+                      controller.getSupplierPriceAlert();
                     },
                   ),
                 ],
@@ -230,147 +234,276 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
           children: [
             _buildDropdownMenu(),
             SizedBox(height: 16.h),
-            // ComparisonCard(),
+            Obx(() {
+              if (controller.isLoading.value &&
+                  controller.supplierPriceComparison.isEmpty) {
+                return Skeletonizer(
+                  enabled: true,
+                  child: ComparisonCard(
+                    priceComparison: SupplierPriceComparison(
+                      productName: '',
+                      bestPrice: '',
+                      suppliers: [],
+                      supplierName: '',
+                    ),
+                  ),
+                );
+              }
+              if (controller.supplierPriceComparison.isEmpty) {
+                return const Center(
+                  child: Text("No comparison data available"),
+                );
+              }
+              return Column(
+                children: controller.supplierPriceComparison.map((data) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: ComparisonCard(priceComparison: data),
+                  );
+                }).toList(),
+              );
+            }),
           ],
         );
       case 2:
-        return Column(
-          children: [
-            _buildDropdownMenu(),
-            SizedBox(height: 16.h),
-            Row(
+        return Obx(() {
+          final history = controller.priceHistoryResponse.value;
+
+          if (controller.isLoading.value && history == null) {
+            return Column(
               children: [
-                Text(
-                  "$_selectedComparisonType(Per kg) - Price Trend ",
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.text,
-                  ),
-                ),
-                Text(
-                  "(Last 30 Days)",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.text,
-                  ),
+                _buildDropdownMenu(),
+                SizedBox(height: 50.h),
+                const Center(child: CircularProgressIndicator()),
+              ],
+            );
+          }
+
+          if (history == null) {
+            return Column(
+              children: [
+                _buildDropdownMenu(),
+                SizedBox(height: 50.h),
+                const Center(
+                  child: Text("Select a product to view price trends"),
                 ),
               ],
-            ),
-            SizedBox(height: 16.h),
-            // SurfaceChart(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SpineText(title: 'Ocean Fresh', color: Color(0xff_43A047)),
-                SpineText(title: 'Coastal Seafood', color: Color(0xff_3B82F6)),
-                SpineText(title: 'Marine Supply', color: Color(0xff_8B5CF6)),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            SupplierHistoryCard(
-              title: "Ocean Fresh",
-              subtitle: "Stable (0%)",
-              price: "45.50",
-              color: Color(0xff_004F3B),
-              backgroundColor: Color(0xff_ECFDF5),
-            ),
-            SizedBox(height: 24.h),
-            SupplierHistoryCard(
-              title: "Coastal Seafood",
-              subtitle: "Stable (0%)",
-              price: "45.50",
-              color: Color(0xff_1C398E),
-              backgroundColor: Color(0xff_EFF6FF),
-            ),
-            SizedBox(height: 24.h),
-            SupplierHistoryCard(
-              title: "Coastal Seafood",
-              subtitle: "Stable (0%)",
-              price: "45.50",
-              color: Color(0xff_59168B),
-              backgroundColor: Color(0xff_FAF5FF),
-            ),
-          ],
-        );
+            );
+          }
+
+          final List<Color> supplierColors = [
+            const Color(0xff43A047), // Green
+            const Color(0xff3B82F6), // Blue
+            const Color(0xff8B5CF6), // Purple
+          ];
+
+          return Column(
+            children: [
+              _buildDropdownMenu(),
+              SizedBox(height: 16.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      "${history.productName} (Per ${history.data.isNotEmpty ? history.data[0].unit : 'unit'}) - Price Trend",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "(Last 30 Days)",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+
+              // Chart
+              SurfaceChart(history: history),
+
+              SizedBox(height: 16.h),
+
+              //  SpineText
+              Wrap(
+                spacing: 16.w,
+                runSpacing: 8.h,
+                alignment: WrapAlignment.center,
+                children: history.data.asMap().entries.map((entry) {
+                  return SpineText(
+                    title: entry.value.supplierName,
+                    color: supplierColors[entry.key % supplierColors.length],
+                  );
+                }).toList(),
+              ),
+
+              SizedBox(height: 24.h),
+
+              //  History Cards
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: history.data.length,
+                separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                itemBuilder: (context, index) {
+                  final supplier = history.data[index];
+                  final bool isIncrease = supplier.trend == "increase";
+                  final bool isDecrease = supplier.trend == "decrease";
+
+                  // trend color
+                  Color cardColor = const Color(0xff1C398E);
+                  Color bgColor = const Color(0xffEFF6FF);
+
+                  if (isIncrease) {
+                    cardColor = const Color(0xffCB2020);
+                    bgColor = const Color(0xffFFF1F1);
+                  } else if (isDecrease) {
+                    cardColor = const Color(0xff004F3B);
+                    bgColor = const Color(0xffECFDF5);
+                  }
+
+                  return SupplierHistoryCard(
+                    title: supplier.supplierName,
+                    subtitle:
+                        "${supplier.trend.capitalizeFirst} (${supplier.changePercentage}%)",
+                    price: supplier.latestPrice.toStringAsFixed(2),
+                    color: cardColor,
+                    backgroundColor: bgColor,
+                  );
+                },
+              ),
+            ],
+          );
+        });
       case 3:
-        return Column(
-          children: [
-            BarSupplierPriceAlertCard(
-              title: 'Cherry Tomatoes',
-              supplier: 'Mediterranean Goods',
-              previousPrice: 14.50,
-              currentPrice: 16.50,
-              percentage: '13.8',
-              trend: AlertTrend.increase,
-            ),
-            const SizedBox(height: 16),
-            BarSupplierPriceAlertCard(
-              title: 'Cherry Tomatoes',
-              supplier: 'Mediterranean Goods',
-              previousPrice: 14.50,
-              currentPrice: 16.50,
-              percentage: '13.8',
-              trend: AlertTrend.decrease,
-            ),
-          ],
-        );
+        return Obx(() {
+          if (controller.isLoading.value && controller.priceAlertList.isEmpty) {
+            return Skeletonizer(
+              enabled: true,
+              child: BarSupplierPriceAlertCard(
+                title: "",
+                supplier: "",
+                previousPrice: 0.0,
+                currentPrice: 0.0,
+                percentage: "0",
+                trend: AlertTrend.increase,
+              ),
+            );
+          }
+          if (controller.priceAlertList.isEmpty) {
+            return Padding(
+              padding: EdgeInsets.only(top: 50.h),
+              child: const Center(child: Text("No price alerts found")),
+            );
+          }
+          return Column(
+            children: controller.priceAlertList.map((alert) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 16.h),
+                child: BarSupplierPriceAlertCard(
+                  title: alert.productName,
+                  supplier: alert.supplierName,
+
+                  previousPrice:
+                      double.tryParse(alert.previousPrice.toString()) ?? 0.0,
+                  currentPrice:
+                      double.tryParse(alert.currentPrice.toString()) ?? 0.0,
+                  percentage: alert.changePercentage.toString(),
+
+                  trend:
+                      (double.tryParse(alert.currentPrice.toString()) ?? 0) >=
+                          (double.tryParse(alert.previousPrice.toString()) ?? 0)
+                      ? AlertTrend.increase
+                      : AlertTrend.decrease,
+                ),
+              );
+            }).toList(),
+          );
+        });
       default:
         return SizedBox();
     }
   }
 
   Widget _buildDropdownMenu() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border, width: 1.w),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedComparisonType,
-          dropdownColor: Colors.white,
-          isExpanded: true,
-          hint: const Text(
-            'Select Leave Type',
-            style: TextStyle(color: Colors.grey, fontSize: 14),
-          ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-          items: _comparisonTypes
-              .map(
-                (t) => DropdownMenuItem(
-                  value: t,
-                  child: Row(
-                    spacing: 4.w,
-                    children: [
-                      Text(
-                        t,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.lightText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+    return Obx(() {
+      if (_selectedComparisonType != null &&
+          !controller.supplierAvailableProduct.contains(
+            _selectedComparisonType,
+          )) {
+        _selectedComparisonType = null;
+      }
 
-                      Text(
-                        "(Per kg)",
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.lightText,
-                          fontWeight: FontWeight.w500,
-                        ),
+      return Skeletonizer(
+        enabled: controller.isLoading.value,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border, width: 1.w),
+            borderRadius: BorderRadius.circular(50.r),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value:
+                  (controller.supplierAvailableProduct.contains(
+                    _selectedComparisonType,
+                  ))
+                  ? _selectedComparisonType
+                  : null,
+              dropdownColor: Colors.white,
+              isExpanded: true,
+              hint: const Text(
+                'Select Product',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+              items: controller.supplierAvailableProduct
+                  .map(
+                    (t) => DropdownMenuItem<String>(
+                      value: t,
+                      child: Row(
+                        children: [
+                          Text(
+                            t,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.lightText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            "(Per kg)",
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.lightText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: (val) => setState(() => _selectedComparisonType = val),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (val) {
+                setState(() {
+                  _selectedComparisonType = val;
+                });
+                controller.getSupplierPriceComparison(productName: val);
+                controller.getPriceHistory(productName: val!);
+              },
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget buildTab({
@@ -492,7 +625,7 @@ class _RestaurantSupplierScreenState extends State<RestaurantSupplierScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.toNamed(RouteNames.barSupplierRequestScreen);
+              Get.toNamed(RouteNames.restaurantSupplierRequestScreen);
             },
             child: Container(
               padding: const EdgeInsets.all(12),

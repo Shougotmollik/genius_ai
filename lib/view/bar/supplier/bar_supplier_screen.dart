@@ -8,7 +8,6 @@ import 'package:genius_ai/model/price_comparison.dart';
 import 'package:genius_ai/view/bar/supplier/bar_add_supplier_dialog.dart';
 import 'package:genius_ai/view/bar/supplier/bar_comparison_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_details_card.dart';
-import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.dart';
 import 'package:genius_ai/view/bar/supplier/suplier_card.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_price_alert_card.dart';
 import 'package:genius_ai/view/bar/supplier/supplier_history_card.dart';
@@ -79,7 +78,7 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
               SizedBox(height: 24.h),
               GestureDetector(
                 onTap: () {
-                  Get.to(BarProductSupplierScreen());
+                  Get.toNamed(RouteNames.barProductSupplierScreen);
                 },
                 child: Container(
                   padding: const EdgeInsets.all(12),
@@ -276,7 +275,6 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
         return Obx(() {
           final history = controller.priceHistoryResponse.value;
 
-          // 1. Loading State
           if (controller.isLoading.value && history == null) {
             return Column(
               children: [
@@ -287,7 +285,6 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
             );
           }
 
-          // 2. Empty State
           if (history == null) {
             return Column(
               children: [
@@ -300,7 +297,6 @@ class _BarSupplierScreenState extends State<BarSupplierScreen> {
             );
           }
 
-          // Define colors for the chart and legend
           final List<Color> supplierColors = [
             const Color(0xff43A047), // Green
             const Color(0xff3B82F6), // Blue

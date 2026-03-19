@@ -4,14 +4,16 @@ import 'package:genius_ai/controller/notification_controller.dart';
 import 'package:genius_ai/model/notification_model.dart';
 import 'package:get/get.dart';
 
-class BarNotificationScreen extends StatefulWidget {
-  const BarNotificationScreen({super.key});
+class RestaurantNotificationScreen extends StatefulWidget {
+  const RestaurantNotificationScreen({super.key});
 
   @override
-  State<BarNotificationScreen> createState() => _BarNotificationScreenState();
+  State<RestaurantNotificationScreen> createState() =>
+      _RestaurantNotificationScreenState();
 }
 
-class _BarNotificationScreenState extends State<BarNotificationScreen>
+class _RestaurantNotificationScreenState
+    extends State<RestaurantNotificationScreen>
     with SingleTickerProviderStateMixin {
   final NotificationController controller = Get.find<NotificationController>();
   late TabController _tabController;
@@ -107,7 +109,9 @@ class _BarNotificationScreenState extends State<BarNotificationScreen>
                     children: [
                       _buildNotificationList(controller.notifications),
                       _buildNotificationList(
-                        controller.notifications.where((n) => !n.isRead).toList(),
+                        controller.notifications
+                            .where((n) => !n.isRead)
+                            .toList(),
                       ),
                     ],
                   );

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/home_controller.dart';
 import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/model/home.dart';
-import 'package:genius_ai/view/bar/notification/bar_notification_screen.dart';
 import 'package:genius_ai/view/widgets/info_highlighter_card.dart';
 import 'package:genius_ai/view/bar/home/bar_recipe_card.dart';
 import 'package:get/get.dart';
@@ -214,7 +214,7 @@ class _BarHomeScreenState extends State<BarHomeScreen> {
         Spacer(),
         GestureDetector(
           onTap: () {
-            Get.to(BarNotificationScreen());
+            Get.toNamed(RouteNames.barNotificationScreen);
           },
           child: Container(
             decoration: BoxDecoration(
@@ -254,8 +254,8 @@ class _BarHomeScreenState extends State<BarHomeScreen> {
                       )
                     : SvgPicture.asset(
                         "assets/icons/user.svg",
-                        height: 40.w,
-                        width: 40.w,
+                        height: 24.w,
+                        width: 24.w,
                         fit: BoxFit.cover,
                         colorFilter: const ColorFilter.mode(
                           Colors.grey,

@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:intl/intl.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/model/purchase.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_edit_purchase_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 
-class BarSupplierProductInfoCard extends StatefulWidget {
-  final Purchase purchase;
-
-  const BarSupplierProductInfoCard({super.key, required this.purchase});
+class RestaurantSupplierProductInfoCard extends StatefulWidget {
+  const RestaurantSupplierProductInfoCard({super.key});
 
   @override
-  State<BarSupplierProductInfoCard> createState() =>
-      _BarSupplierProductInfoCardState();
+  State<RestaurantSupplierProductInfoCard> createState() =>
+      _RestaurantSupplierProductInfoCardState();
 }
 
-class _BarSupplierProductInfoCardState
-    extends State<BarSupplierProductInfoCard> {
+class _RestaurantSupplierProductInfoCardState
+    extends State<RestaurantSupplierProductInfoCard> {
   String _selectedStatusType = 'Good';
   final List<String> _leaveTypes = ["Good", "Low", "None"];
 
@@ -59,28 +55,6 @@ class _BarSupplierProductInfoCardState
 
   @override
   Widget build(BuildContext context) {
-    // Helper to format date if available
-    String formattedDate = "N/A";
-    if (widget.purchase.purchaseDate != null) {
-      formattedDate = DateFormat('MM/dd/yy').format(widget.purchase.purchaseDate!);
-    }
-
-    // Format price per unit
-    String priceDisplay = "N/A";
-    if (widget.purchase.price != null && widget.purchase.unit != null) {
-      priceDisplay = "\$${widget.purchase.price}/${widget.purchase.unit}";
-    } else if (widget.purchase.price != null) {
-      priceDisplay = "\$${widget.purchase.price}";
-    }
-
-    // Format quantity
-    String quantityDisplay = "N/A";
-    if (widget.purchase.quantity != null && widget.purchase.unit != null) {
-      quantityDisplay = "${widget.purchase.quantity} ${widget.purchase.unit}";
-    } else if (widget.purchase.quantity != null) {
-      quantityDisplay = "${widget.purchase.quantity}";
-    }
-
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(12.w),
@@ -161,12 +135,22 @@ class _BarSupplierProductInfoCardState
 
           SizedBox(height: 12.h),
 
+          //Mark Missing + Status Dropdown
+          // Row(
+          //   children: [
+          //     Expanded(child: _outlineChip("Mark Missing")),
+          //     SizedBox(width: 80.w),
+          //     Expanded(child: _statusDropdown()),
+          //   ],
+          // ),
+          // SizedBox(height: 12.h),
+
           //Ingredient name & price
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.purchase.productName ?? "No Name",
+                "Sugar Syrup",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -174,7 +158,7 @@ class _BarSupplierProductInfoCardState
                 ),
               ),
               Text(
-                priceDisplay,
+                "\$100/kg",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -189,17 +173,140 @@ class _BarSupplierProductInfoCardState
           //DETAILS
           Column(
             children: [
-              IngredientDetailRow(
-                  title: "Supplier Name",
-                  value: widget.purchase.supplierName ?? "N/A"),
-              IngredientDetailRow(
-                  title: "Category",
-                  value: widget.purchase.categoryName ?? "N/A"),
-              IngredientDetailRow(title: "Quality", value: quantityDisplay),
-              IngredientDetailRow(title: "Purchase Date", value: formattedDate),
-              IngredientDetailRow(title: "Price", value: priceDisplay),
+              IngredientDetailRow(title: "Supplier Name", value: "Fresh Ltd"),
+              IngredientDetailRow(title: "Category", value: "Others"),
+              IngredientDetailRow(title: "Quality", value: "20 kg"),
+              IngredientDetailRow(title: "Purchase Date", value: "12/12/25"),
+
+              // // STATUS ROW WITH BADGE
+              // Padding(
+              //   padding: EdgeInsets.symmetric(vertical: 2.h),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: [
+              //       Text(
+              //         "Status",
+              //         style: TextStyle(
+              //           fontSize: 12.sp,
+              //           fontWeight: FontWeight.w400,
+              //           color: AppColors.text,
+              //         ),
+              //       ),
+              //       _statusBadge(_selectedStatusType),
+              //     ],
+              //   ),
+              // ),
+              IngredientDetailRow(title: "Price", value: "\$100/kg"),
+              // SizedBox(height: 8.h),
+              // Row(
+              //   spacing: 18.w,
+              //   children: [
+              //     Expanded(
+              //       child: Container(
+              //         padding: const EdgeInsets.all(6),
+              //         decoration: BoxDecoration(
+              //           color: AppColors.surface,
+              //           border: Border.all(color: AppColors.border, width: 1.w),
+              //           borderRadius: BorderRadius.circular(50.r),
+              //         ),
+              //         child: Center(
+              //           child: Row(
+              //             spacing: 5.w,
+              //             mainAxisAlignment: MainAxisAlignment.center,
+              //             children: [
+              //               SvgPicture.asset(
+              //                 "assets/icons/export.svg",
+              //                 height: 24.w,
+              //                 width: 24.w,
+              //                 fit: BoxFit.cover,
+              //               ),
+              //               Text(
+              //                 "Export",
+              //                 style: TextStyle(
+              //                   fontSize: 14.sp,
+              //                   fontWeight: FontWeight.w500,
+              //                   color: AppColors.lightText,
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //     Expanded(
+              //       child: Container(
+              //         padding: const EdgeInsets.all(6),
+              //         decoration: BoxDecoration(
+              //           color: AppColors.primary.withValues(alpha: 0.15),
+              //           borderRadius: BorderRadius.circular(50.r),
+              //         ),
+              //         child: Center(
+              //           child: Row(
+              //             spacing: 5.w,
+              //             mainAxisAlignment: MainAxisAlignment.center,
+              //             children: [
+              //               SvgPicture.asset(
+              //                 "assets/icons/download.svg",
+              //                 height: 24.w,
+              //                 width: 24.w,
+              //                 fit: BoxFit.cover,
+              //               ),
+              //               Text(
+              //                 "Import",
+              //                 style: TextStyle(
+              //                   fontSize: 14.sp,
+              //                   fontWeight: FontWeight.w500,
+              //                   color: AppColors.primary,
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
+
+          // SizedBox(height: 18.h),
+
+          // // ! Add to Purchase
+          // if (_selectedStatusType == 'None') ...[
+          //   GestureDetector(
+          //     onTap: () {
+          //       showDialog(
+          //         context: context,
+          //         barrierDismissible: false,
+          //         builder: (context) => const BarAddIngredientPurchaseDialog(),
+          //       );
+          //     },
+          //     child: Container(
+          //       padding: const EdgeInsets.all(6),
+          //       decoration: BoxDecoration(
+          //         color: AppColors.primary.withValues(alpha: 0.15),
+          //         borderRadius: BorderRadius.circular(50.r),
+          //       ),
+          //       child: Center(
+          //         child: Row(
+          //           spacing: 5.w,
+          //           mainAxisAlignment: MainAxisAlignment.center,
+          //           children: [
+          //             Icon(Icons.add, color: AppColors.primary, size: 24.w),
+          //             Text(
+          //               "Add to Purchase",
+          //               style: TextStyle(
+          //                 fontSize: 14.sp,
+          //                 fontWeight: FontWeight.w500,
+          //                 color: AppColors.primary,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ],
         ],
       ),
     );

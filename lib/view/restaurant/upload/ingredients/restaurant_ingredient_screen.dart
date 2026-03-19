@@ -5,7 +5,6 @@ import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/ingredient_controller.dart';
 import 'package:genius_ai/model/ingredient.dart';
-import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_dialog.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_add_ingredient_dialog.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_info_card.dart';
 import 'package:get/get.dart';
@@ -23,7 +22,6 @@ class _RestaurantIngredientScreenState
     extends State<RestaurantIngredientScreen> {
   int selectedIndex = 0;
 
-  // Initialize your controller
   final IngredientController controller = Get.find<IngredientController>();
 
   @override

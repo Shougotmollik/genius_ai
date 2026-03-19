@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:genius_ai/config/route/route_names.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/controller/home_controller.dart';
 import 'package:genius_ai/controller/user_controller.dart';
@@ -211,10 +212,15 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
           ],
         ),
         Spacer(),
-        SvgPicture.asset(
-          "assets/icons/notification.svg",
-          height: 36.w,
-          width: 36.h,
+        GestureDetector(
+          onTap: () {
+            Get.toNamed(RouteNames.restaurantNotificationScreen);
+          },
+          child: SvgPicture.asset(
+            "assets/icons/notification.svg",
+            height: 36.w,
+            width: 36.h,
+          ),
         ),
         SizedBox(width: 10.w),
         Obx(
@@ -233,8 +239,8 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
                       )
                     : SvgPicture.asset(
                         "assets/icons/user.svg",
-                        height: 40.w,
-                        width: 40.w,
+                        height: 24.w,
+                        width: 24.w,
                         fit: BoxFit.cover,
                         colorFilter: const ColorFilter.mode(
                           Colors.grey,

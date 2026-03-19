@@ -6,6 +6,7 @@ import 'package:genius_ai/controller/ingredient_controller.dart';
 import 'package:genius_ai/controller/user_controller.dart';
 import 'package:genius_ai/model/ingredient.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_add_ingredient_purechase_dialog.dart';
+import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_add_ingredient_dialog.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_edit_ingredient_dialog.dart';
 import 'package:genius_ai/view/widgets/delete_dialog_widget.dart';
 import 'package:get/get.dart';
@@ -214,6 +215,7 @@ class _RestaurantIngredientsInfoCardState
                       title: "Export",
                       icon: "assets/icons/export.svg",
                       isPrimary: false,
+                      onTap: () {},
                     ),
                   ),
                   Expanded(
@@ -221,6 +223,14 @@ class _RestaurantIngredientsInfoCardState
                       title: "Import",
                       icon: "assets/icons/download.svg",
                       isPrimary: true,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              const RestaurantAddIngredientDialog(),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -275,33 +285,37 @@ class _RestaurantIngredientsInfoCardState
     required String title,
     required String icon,
     required bool isPrimary,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: isPrimary
-            ? AppColors.primary.withValues(alpha: 0.15)
-            : AppColors.surface,
-        border: isPrimary
-            ? null
-            : Border.all(color: AppColors.border, width: 1.w),
-        borderRadius: BorderRadius.circular(50.r),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(icon, height: 20.w, width: 20.w),
-            SizedBox(width: 5.w),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: isPrimary ? AppColors.primary : AppColors.lightText,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isPrimary
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : AppColors.surface,
+          border: isPrimary
+              ? null
+              : Border.all(color: AppColors.border, width: 1.w),
+          borderRadius: BorderRadius.circular(50.r),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(icon, height: 20.w, width: 20.w),
+              SizedBox(width: 5.w),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isPrimary ? AppColors.primary : AppColors.lightText,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

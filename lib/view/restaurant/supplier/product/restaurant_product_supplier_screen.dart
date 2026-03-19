@@ -2,103 +2,97 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
-import 'package:genius_ai/controller/purchase_controller.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_add_purchase_dialog.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_product_request_screen.dart';
 import 'package:genius_ai/view/bar/supplier/product/bar_supplier_product_info_card.dart';
+import 'package:genius_ai/model/purchase.dart';
 import 'package:get/get.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
-class BarProductSupplierScreen extends StatefulWidget {
-  const BarProductSupplierScreen({super.key});
+class RestaurantProductSupplierScreen extends StatefulWidget {
+  const RestaurantProductSupplierScreen({super.key});
 
   @override
-  State<BarProductSupplierScreen> createState() =>
-      _BarProductSupplierScreenState();
+  State<RestaurantProductSupplierScreen> createState() =>
+      _RestaurantProductSupplierScreenState();
 }
 
-class _BarProductSupplierScreenState extends State<BarProductSupplierScreen> {
+class _RestaurantProductSupplierScreenState
+    extends State<RestaurantProductSupplierScreen> {
   bool isSelected = true;
   int selectedIndex = 0;
-  final PurchaseController controller = Get.put(PurchaseController());
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top bar with back button
-                GestureDetector(
-                  onTap: () => Navigator.maybePop(context),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      size: 18,
-                      color: Colors.black87,
-                    ),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top bar with back button
+              GestureDetector(
+                onTap: () => Navigator.maybePop(context),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    size: 18,
+                    color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 24.h),
-                Text(
-                  "All Products",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.text,
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                "All Products",
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.text,
+                ),
+              ),
+              Text(
+                "Here is the list of all purchased product",
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.lightText,
+                ),
+              ),
+              SizedBox(height: 24.h),
+              _buildSearchBar(),
+              SizedBox(height: 12.h),
+              _buildActionButtonSection(),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  buildTab(
+                    title: "All",
+                    isSelected: selectedIndex == 0,
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = 0;
+                      });
+                    },
                   ),
-                ),
-                Text(
-                  "Here is the list of all purchased product",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.lightText,
+                  buildTab(
+                    title: "Others",
+                    isSelected: selectedIndex == 1,
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = 1;
+                      });
+                    },
                   ),
-                ),
-                SizedBox(height: 24.h),
-                _buildSearchBar(),
-                SizedBox(height: 12.h),
-                _buildActionButtonSection(),
-                SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    buildTab(
-                      title: "All",
-                      isSelected: selectedIndex == 0,
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = 0;
-                        });
-                        controller.isSpecialTab.value = false;
-                      },
-                    ),
-                    buildTab(
-                      title: "Others",
-                      isSelected: selectedIndex == 1,
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = 1;
-                        });
-                        controller.isSpecialTab.value = true;
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 18.h),
-                buildTabContent(),
-              ],
-            ),
+                ],
+              ),
+              SizedBox(height: 18.h),
+              buildTabContent(),
+            ],
           ),
         ),
       ),
@@ -106,40 +100,18 @@ class _BarProductSupplierScreenState extends State<BarProductSupplierScreen> {
   }
 
   Widget buildTabContent() {
-    return Obx(() {
-      // Show loading skeleton while fetching
-      if (controller.isLoading.value && controller.purchases.isEmpty) {
+    switch (selectedIndex) {
+      case 0:
         return Column(
-          children: List.generate(
-            3,
-            (index) => const Skeletonizer(
-              enabled: true,
-              child: Card(child: ListTile(title: Text("Loading..."))),
-            ),
-          ),
+          children: List.generate(3, (index) => BarSupplierProductInfoCard(purchase: Purchase())),
         );
-      }
-
-      // Show empty state if no data
-      if (controller.purchases.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.only(top: 40.h),
-            child: Text(
-              "No products found.",
-              style: TextStyle(color: AppColors.lightText),
-            ),
-          ),
+      case 1:
+        return Column(
+          children: List.generate(1, (index) => BarSupplierProductInfoCard(purchase: Purchase())),
         );
-      }
-
-      // Show actual cards
-      return Column(
-        children: controller.purchases
-            .map((purchase) => BarSupplierProductInfoCard(purchase: purchase))
-            .toList(),
-      );
-    });
+      default:
+        return SizedBox();
+    }
   }
 
   Widget buildTab({
@@ -197,7 +169,6 @@ class _BarProductSupplierScreenState extends State<BarProductSupplierScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
-              onChanged: (value) => controller.searchQuery.value = value,
               decoration: InputDecoration(
                 hintText: "Search Products",
                 hintStyle: TextStyle(
@@ -209,16 +180,6 @@ class _BarProductSupplierScreenState extends State<BarProductSupplierScreen> {
               ),
               style: TextStyle(fontSize: 14.sp, color: AppColors.text),
             ),
-          ),
-          Obx(
-            () => controller.searchQuery.value.isNotEmpty
-                ? GestureDetector(
-                    onTap: () {
-                      controller.searchQuery.value = '';
-                    },
-                    child: const Icon(Icons.close),
-                  )
-                : const SizedBox(),
           ),
         ],
       ),
@@ -268,7 +229,7 @@ class _BarProductSupplierScreenState extends State<BarProductSupplierScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(const BarProductRequestScreen());
+              Get.to(BarProductRequestScreen());
             },
             child: Container(
               padding: const EdgeInsets.all(12),

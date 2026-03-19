@@ -8,12 +8,15 @@ import 'package:genius_ai/view/bar/auth/bar_signin_screen.dart';
 import 'package:genius_ai/view/bar/auth/bar_signup_screen.dart';
 import 'package:genius_ai/view/bar/auth/bar_singup_otp_verification_screen.dart';
 import 'package:genius_ai/view/bar/bar_main_nav_bar_screen.dart';
+import 'package:genius_ai/view/bar/notification/bar_notification_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_account_setting_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_edit_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_language_selection_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_history_screen.dart';
 import 'package:genius_ai/view/bar/profile/bar_leave_request_screen.dart';
 import 'package:genius_ai/view/bar/supplier/bar_supplier_request_screen.dart';
+import 'package:genius_ai/view/bar/supplier/product/bar_product_request_screen.dart';
+import 'package:genius_ai/view/bar/supplier/product/bar_product_supplier_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/bar/upload/ingredients/bar_ingredient_screen.dart';
 import 'package:genius_ai/view/bar/upload/menu/bar_menu_request_screen.dart';
@@ -28,12 +31,16 @@ import 'package:genius_ai/view/restaurant/auth/restaurant_new_password_success_s
 import 'package:genius_ai/view/restaurant/auth/restaurant_otp_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_signin_screen.dart';
 import 'package:genius_ai/view/restaurant/auth/restaurant_signup_screen.dart';
+import 'package:genius_ai/view/restaurant/notification/restaurant_notification_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_account_setting_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_edit_leave_request_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_language_selection_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_leave_history_screen.dart';
 import 'package:genius_ai/view/restaurant/profile/restaurant_leave_request_screen.dart';
 import 'package:genius_ai/view/restaurant/restaurant_main_nav_bar_screen.dart';
+import 'package:genius_ai/view/restaurant/supplier/product/restaurant_product_request_screen.dart';
+import 'package:genius_ai/view/restaurant/supplier/product/restaurant_product_supplier_screen.dart';
+import 'package:genius_ai/view/restaurant/supplier/restaurant_supplier_request_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_my_request_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/ingredients/restaurant_ingredient_screen.dart';
 import 'package:genius_ai/view/restaurant/upload/menu/restaurant_menu_request_screen.dart';
@@ -86,6 +93,12 @@ class AppRoute {
     GetPage(
       name: RouteNames.barMainNavBarScreen,
       page: () => BarMainNavBarScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
+      name: RouteNames.barNotificationScreen,
+      page: () => BarNotificationScreen(),
       binding: ControllerBinding(),
     ),
 
@@ -155,6 +168,16 @@ class AppRoute {
       page: () => BarEditLeaveRequestScreen(),
       binding: ControllerBinding(),
     ),
+    GetPage(
+      name: RouteNames.barProductSupplierScreen,
+      page: () => BarProductSupplierScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.barProductRequestScreen,
+      page: () => BarProductRequestScreen(),
+      binding: ControllerBinding(),
+    ),
     //! Restaurant
     GetPage(
       name: RouteNames.restaurantSignIn,
@@ -217,6 +240,12 @@ class AppRoute {
     ),
 
     GetPage(
+      name: RouteNames.restaurantNotificationScreen,
+      page: () => RestaurantNotificationScreen(),
+      binding: ControllerBinding(),
+    ),
+
+    GetPage(
       name: RouteNames.restaurantMenuScreen,
       page: () => RestaurantMenuScreen(),
       binding: ControllerBinding(),
@@ -249,6 +278,21 @@ class AppRoute {
     GetPage(
       name: RouteNames.restaurantEditLeaveRequest,
       page: () => RestaurantEditLeaveRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantSupplierRequestScreen,
+      page: () => RestaurantSupplierRequestScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantProductSupplierScreen,
+      page: () => RestaurantProductSupplierScreen(),
+      binding: ControllerBinding(),
+    ),
+    GetPage(
+      name: RouteNames.restaurantProductRequestScreen,
+      page: () => RestaurantProductRequestScreen(),
       binding: ControllerBinding(),
     ),
   ];

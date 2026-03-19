@@ -9,14 +9,16 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genius_ai/config/theme/app_colors.dart';
 import 'package:genius_ai/utils/app_snackbar.dart';
 
-class BarAddPurchaseDialog extends StatefulWidget {
-  const BarAddPurchaseDialog({super.key});
+class RestaurantAddPurchaseDialog extends StatefulWidget {
+  const RestaurantAddPurchaseDialog({super.key});
 
   @override
-  State<BarAddPurchaseDialog> createState() => _BarAddPurchaseDialogState();
+  State<RestaurantAddPurchaseDialog> createState() =>
+      _RestaurantAddPurchaseDialogState();
 }
 
-class _BarAddPurchaseDialogState extends State<BarAddPurchaseDialog> {
+class _RestaurantAddPurchaseDialogState
+    extends State<RestaurantAddPurchaseDialog> {
   // Batch Purchases
   List<Map<String, dynamic>> _batchPurchases = [];
 

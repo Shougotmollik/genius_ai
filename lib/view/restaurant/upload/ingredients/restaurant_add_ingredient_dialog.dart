@@ -270,7 +270,9 @@ class _RestaurantAddIngredientDialogState
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Click here to upload ingredient',
+                            _batchIngredients.isNotEmpty
+                                ? 'You have uploaded ${_batchIngredients.length} ingredients'
+                                : 'Click here to upload ingredient',
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w500,

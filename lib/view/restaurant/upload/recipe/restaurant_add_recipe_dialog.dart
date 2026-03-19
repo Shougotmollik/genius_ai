@@ -279,10 +279,11 @@ class _RestaurantAddRecipeDialogState extends State<RestaurantAddRecipeDialog> {
               ),
               const Divider(),
 
-              ListView.builder(
+              ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _ingredients.length,
+                separatorBuilder: (context, index) => SizedBox(height: 12.h),
                 itemBuilder: (context, index) {
                   final item = _ingredients[index];
                   return Row(

@@ -83,7 +83,7 @@ class _RestaurantAiChatbotScreenState extends State<RestaurantAiChatbotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AI Chatbot"),
+        title: const Text("Recipe Chatbot"),
         backgroundColor: AppColors.surface,
         automaticallyImplyLeading: false,
       ),
@@ -92,13 +92,15 @@ class _RestaurantAiChatbotScreenState extends State<RestaurantAiChatbotScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: ListView.builder(
-                reverse: true,
-                padding: const EdgeInsets.all(16),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) =>
-                    ChatBubble(message: _messages[index]),
-              ),
+              child: _messages.isEmpty
+                  ? _buildRestaurantPlaceholder()
+                  : ListView.builder(
+                      reverse: true,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) =>
+                          ChatBubble(message: _messages[index]),
+                    ),
             ),
 
             // File Preview Area (Visible only when a file is selected)
@@ -110,6 +112,126 @@ class _RestaurantAiChatbotScreenState extends State<RestaurantAiChatbotScreen> {
     );
   }
 
+  Widget _buildRestaurantPlaceholder() {
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 1. Decorative Culinary Icon with Glow
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primary.withOpacity(0.05),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.1),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.restaurant_menu_rounded, // Specific Restaurant icon
+                  size: 64.sp,
+                  color: AppColors.primary,
+                ),
+              ),
+              SizedBox(height: 24.h),
+
+              // 2. Branding Title
+              Text(
+                "SAGE Culinary Strategist",
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.text,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              SizedBox(height: 12.h),
+
+              // 3. Subtitle (Tailored to Kitchen Operations)
+              Text(
+                "Optimizing your kitchen's creativity and efficiency. What's on the prep list for today?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: AppColors.lightText,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 32.h),
+
+              // 4. Section Label
+              Text(
+                "GET INSPIRED BY:",
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary.withOpacity(0.7),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              SizedBox(height: 16.h),
+
+              _buildRestaurantAction("🌿 Veganize My Top Sellers"),
+              _buildRestaurantAction("♻️ Zero-Waste Soup Ideas"),
+              _buildRestaurantAction("📋 Pair Wine with Seafood"),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Reusable Helper for Restaurant Quick Actions
+  Widget _buildRestaurantAction(String label) {
+    return GestureDetector(
+      onTap: () {
+        _controller.text = label;
+        _sendMessage(); // This will trigger the AI call automatically
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.text,
+              ),
+            ),
+            Icon(
+              Icons.auto_fix_high_rounded, // "Magic" icon for AI suggestions
+              size: 16.sp,
+              color: AppColors.primary.withOpacity(0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   // Widget _buildFilePreview() {
   //   return Container(
   //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
