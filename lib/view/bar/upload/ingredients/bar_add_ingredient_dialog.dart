@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:excel/excel.dart' hide Border;
 import 'package:file_picker/file_picker.dart';
@@ -24,7 +26,72 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
   // Batch Ingredients logic
   List<Map<String, dynamic>> _batchIngredients = [];
 
+  Future<void> _downloadSampleExcel() async {
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Template'];
+      excel.delete('Sheet1'); // Remove default sheet
+
+      // Add Headers matching React Template
+      sheetObject.appendRow([
+        TextCellValue("ID"),
+        TextCellValue("Ingredient Name"),
+        TextCellValue("Price / Unit"),
+        TextCellValue("Unit"),
+        TextCellValue("Category"),
+        TextCellValue("Outlet Type"),
+        TextCellValue("Current Stock"),
+        TextCellValue("Minimum Stock"),
+        TextCellValue("Is Special (true/false)")
+      ]);
+
+      // Use first available category or "Meats"
+      String sampleCategory =
+          controller.categoryList.isNotEmpty
+              ? controller.categoryList.first.name
+              : "Meats";
+
+      // Add Sample Data
+      sheetObject.appendRow([
+        TextCellValue(""), // ID
+        TextCellValue("Sample Chicken"),
+        TextCellValue("15.00"),
+        TextCellValue("KG"),
+        TextCellValue(sampleCategory),
+        TextCellValue("Bar"),
+        TextCellValue("100"),
+        TextCellValue("20"),
+        TextCellValue("false")
+      ]);
+
+      var fileBytes = excel.encode();
+      if (fileBytes != null) {
+        String? outputFile = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save Sample Template',
+          fileName: 'ingredient_template.xlsx',
+          type: FileType.custom,
+          allowedExtensions: ['xlsx'],
+          bytes: Uint8List.fromList(fileBytes),
+        );
+
+        if (outputFile != null) {
+          AppSnackbar.show(
+            message: "Template saved successfully!",
+            type: SnackType.success,
+          );
+        }
+      }
+    } catch (e) {
+      AppSnackbar.show(
+        message: "Failed to download template: $e",
+        type: SnackType.error,
+      );
+    }
+  }
+
+
   Future<void> _pickExcelFile() async {
+
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx', 'xls'],
@@ -43,24 +110,33 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
         for (int i = 1; i < rows.length; i++) {
           var row = rows[i];
 
-          String catName = row[3]?.value.toString().trim() ?? "";
-          String rawUnit = row[2]?.value.toString().trim() ?? "";
-          String normalizedUnit = rawUnit.toLowerCase() == "kg"
-              ? "kg"
-              : rawUnit;
-          var rawPrice = row[1]?.value.toString().trim() ?? "0";
+          // Updated Indices for 9-column structure
+          String catName = row[4]?.value.toString().trim() ?? "";
+          String rawUnit = row[3]?.value.toString().trim() ?? "";
+          String rawPrice = row[2]?.value.toString().trim() ?? "0";
+          String name = row[1]?.value.toString().trim() ?? "";
+          int currentStock =
+              int.tryParse(row[6]?.value.toString() ?? "0") ?? 0;
+          int minStock = int.tryParse(row[7]?.value.toString() ?? "0") ?? 0;
+          bool isSpecial =
+              row[8]?.value.toString().toLowerCase() == "true";
+
+          // Normalize Unit
+          String normalizedUnit =
+              rawUnit.toLowerCase() == "kg" ? "kg" : rawUnit;
 
           _batchIngredients.add({
-            "name": row[0]?.value.toString().trim() ?? "",
+            "name": name,
             "category": catName,
             "outlet_type": "bar", // Set to bar
             "unit": normalizedUnit,
             "price_per_unit": rawPrice,
-            "current_stock": int.tryParse(row[4]?.value.toString() ?? "0") ?? 0,
-            "minimum_stock": int.tryParse(row[5]?.value.toString() ?? "0") ?? 0,
-            "is_special": row[6]?.value.toString().toLowerCase() == "true",
+            "current_stock": currentStock,
+            "minimum_stock": minStock,
+            "is_special": isSpecial,
           });
         }
+
 
         // Sync first item to UI fields
         if (_batchIngredients.isNotEmpty) {
@@ -217,7 +293,30 @@ class _BarAddIngredientDialogState extends State<BarAddIngredientDialog> {
                 ],
               ),
 
+              GestureDetector(
+                onTap: _downloadSampleExcel,
+                child: Container(
+                  width: double.infinity.w,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Download sample file to import data",
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.text,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
               SizedBox(height: 12.h),
+
               Align(
                 alignment: Alignment.center,
                 child: Text(
